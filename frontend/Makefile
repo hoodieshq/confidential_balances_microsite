@@ -3,6 +3,10 @@
 # Include other Makefiles
 include Makefiles/storybook.mk
 
+lint:
+	@pnpm format --write
+	@pnpm lint --fix
+
 # Default help command
 help:
 	@echo "Application:"
