@@ -1,22 +1,11 @@
 # Main Makefile for the frontend project
 
 # Include other Makefiles
-include Makefiles/docker.mk
-include Makefiles/App.mk
+include Makefiles/App.mka
 include Makefiles/storybook.mk
-
-# Build target (for convenient access to docker-build)
-build: docker-build
 
 # Default help command
 help:
-	@echo "Docker Commands:"
-	@echo "  make build        - Build Docker image"
-	@echo "  make docker-up    - Start the application in the background"
-	@echo "  make docker-down  - Stop the application"
-	@echo "  make docker-logs  - Show application logs"
-	@echo "  make docker-clean - Stop the application and remove images"
-	@echo ""
 	@echo "Application Commands:"
 	@echo "  make app-up       - Start application container"
 	@echo "  make app-shell    - Open shell in the application container"
@@ -38,4 +27,4 @@ help:
 	@echo "  make help         - Show this help message"
 
 # Set default target
-.DEFAULT_GOAL := help 
+.DEFAULT_GOAL := help
