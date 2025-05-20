@@ -3,6 +3,7 @@ import { ClusterProvider } from '@/components/cluster/cluster-data-access'
 import { SolanaProvider } from '@/components/solana/solana-provider'
 import { UiLayout } from '@/components/ui/ui-layout'
 import { ReactQueryProvider } from './react-query-provider'
+import { Badge } from "@solana/ms-tools-ui"
 
 export const metadata = {
   title: 'Frontend',
@@ -11,6 +12,9 @@ export const metadata = {
 
 const links: { label: string; path: string }[] = [
   { label: 'Account', path: '/account' },
+  { label: 'Auditor', path: '/auditor' },
+  { label: 'GitHub', path: 'https://github.com/solana-developers/confidential_balances_microsite' },
+  { label: 'Docs', path: 'https://www.solana-program.com/docs/confidential-balances' },
   { label: 'Clusters', path: '/clusters' },
 ]
 
