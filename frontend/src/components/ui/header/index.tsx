@@ -1,21 +1,38 @@
-import { useState } from 'react'
-import { Dialog, DialogPanel } from '@headlessui/react'
-import * as Icons from 'lucide-react'
-import { Logo } from './logo'
+import { ComponentElement, useMemo, useState } from "react";
+import { Dialog, DialogPanel } from "@headlessui/react";
+import * as Icons from "lucide-react";
+import { Logo } from "./logo";
+import { WalletButton } from "@/components/solana/solana-provider";
+import { IconMapPinExclamation } from "@tabler/icons-react";
+import { cva } from "class-variance-authority";
+import { cn } from "../utils";
 
-const navigation = [
-  { name: 'Product', href: '#' },
-  { name: 'Features', href: '#' },
-  { name: 'Marketplace', href: '#' },
-  { name: 'Company', href: '#' },
-]
+type Link = { label: string; path: string; blank?: boolean };
 
-export function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+const themeVariants = cva("text-white font-(family-name:--font-family-inter)", {
+  variants: {
+    theme: {
+      dark: "bg-[var(--background)]",
+      light: "",
+    },
+  },
+  defaultVariants: {
+    theme: "dark",
+  },
+});
+
+export function Header({ navigation }: { navigation: Link[] }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const themeCls = useMemo(() => themeVariants({ theme: "dark" }), []);
 
   return (
-    <header className="bg-white">
-      <nav aria-label="Global" className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
+    <header className={themeCls}>
+      {/* fix height for header to make logo at the mobile sidebar match the position of default logo */}
+      <nav
+        aria-label="Global"
+        className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 h-[3.75rem]"
+      >
         <Logo />
         <div className="flex lg:hidden">
           <button
@@ -27,20 +44,24 @@ export function Header() {
             <Icons.Menu aria-hidden="true" className="size-6" />
           </button>
         </div>
-        <div className="hidden lg:flex lg:gap-x-12">
-          {navigation.map((item) => (
-            <a key={item.name} href={item.href} className="text-sm/6 font-semibold text-gray-900">
-              {item.name}
-            </a>
-          ))}
-          <a href="#" className="text-sm/6 font-semibold text-gray-900">
-            Log in <span aria-hidden="true">&rarr;</span>
-          </a>
-        </div>
+        <MainMenu
+          className="hidden lg:flex lg:gap-x-2"
+          navigation={navigation}
+        />
       </nav>
-      <Dialog open={mobileMenuOpen} onClose={setMobileMenuOpen} className="lg:hidden">
+      <Dialog
+        open={mobileMenuOpen}
+        onClose={setMobileMenuOpen}
+        className="lg:hidden"
+      >
         <div className="fixed inset-0 z-10" />
-        <DialogPanel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+        {/* set specific pt- for dialog panel to match the default logo*/}
+        <DialogPanel
+          className={cn(
+            "fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-inherit px-5 py-5 pt-[1.125rem] sm:max-w-sm sm:ring-1 sm:ring-gray-900/10",
+            themeCls,
+          )}
+        >
           <div className="flex items-center justify-between">
             <Logo />
             <button
@@ -53,30 +74,59 @@ export function Header() {
             </button>
           </div>
           <div className="mt-6 flow-root">
-            <div className="-my-6 divide-y divide-gray-500/10">
-              <div className="space-y-2 py-6">
-                {navigation.map((item) => (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
-                  >
-                    {item.name}
-                  </a>
-                ))}
-              </div>
-              <div className="py-6">
-                <a
-                  href="#"
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
-                >
-                  Log in
-                </a>
-              </div>
-            </div>
+            <DialogMenu navigation={navigation} />
           </div>
         </DialogPanel>
       </Dialog>
     </header>
-  )
+  );
+}
+
+function MainMenu({
+  className,
+  navigation,
+}: React.HTMLAttributes<HTMLDivElement> & { navigation: Link[] }) {
+  return (
+    <div className={cn("items-center", className)}>
+      {navigation.map((item) => (
+        <a
+          key={item.label}
+          href={item.path}
+          target={item.blank ? "_blank" : "_self"}
+          className="text-sm px-4 py-2 items-center"
+        >
+          {item.label}
+        </a>
+      ))}
+    </div>
+  );
+}
+
+function DialogMenu({ navigation }: { navigation: Link[] }) {
+  return (
+    <div className="-my-6 divide-y divide-gray-500/10">
+      <div className="space-y-2 py-6">
+        {navigation.map((item) => (
+          <a
+            key={item.label}
+            href={item.path}
+            target={item.blank ? "_blank" : "_self"}
+            rel={item.blank ? "noopener noreferrer" : undefined}
+            className="-mx-3 block rounded-lg px-3 py-2 text-base/7 hover:bg-accent"
+          >
+            {item.label}{" "}
+            {item.blank ? (
+              <Icons.ExternalLink
+                className="inline translate-x-[2px] translate-y-[-2px]"
+                size="14"
+              />
+            ) : (
+              ""
+            )}
+          </a>
+        ))}
+      </div>
+      {/* here might be other elements that will be separated with a gray line */}
+    </div>
+  );
 }
