@@ -29,7 +29,6 @@ const RootLayout: FC<PropsWithChildren> = ({ children }) => (
   <html lang="en" className={`${rubikFont.className} ${interFont.variable}`}>
     <body className="dark">
       <App>
-        111
         <BaseLayout links={navigation}>{children}</BaseLayout>
       </App>
     </body>
