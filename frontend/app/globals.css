@@ -1,8 +1,3 @@
-/* @tailwind base;
-@tailwind components;
-@tailwind utilities; */
-/* TODO: Start implementing UI with new UI-kit */
-
 @import "@hoodieshq/ms-tools-ui/styles.css";
 @import "tailwindcss";
 
