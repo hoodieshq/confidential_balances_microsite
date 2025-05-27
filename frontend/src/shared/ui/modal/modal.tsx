@@ -1,15 +1,15 @@
-"use client";
+'use client'
 
-import { FC, PropsWithChildren, useEffect, useRef } from "react";
+import { FC, PropsWithChildren, useEffect, useRef } from 'react'
 
 type ModalProps = PropsWithChildren<{
-  title: string;
-  hide: () => void;
-  show: boolean;
-  submit?: () => void;
-  submitDisabled?: boolean;
-  submitLabel?: string;
-}>;
+  title: string
+  hide: () => void
+  show: boolean
+  submit?: () => void
+  submitDisabled?: boolean
+  submitLabel?: string
+}>
 
 export const Modal: FC<ModalProps> = ({
   children,
@@ -20,21 +20,21 @@ export const Modal: FC<ModalProps> = ({
   submitDisabled,
   submitLabel,
 }) => {
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const dialogRef = useRef<HTMLDialogElement | null>(null)
 
   useEffect(() => {
-    if (!dialogRef.current) return;
+    if (!dialogRef.current) return
     if (show) {
-      dialogRef.current.showModal();
+      dialogRef.current.showModal()
     } else {
-      dialogRef.current.close();
+      dialogRef.current.close()
     }
-  }, [show, dialogRef]);
+  }, [show, dialogRef])
 
   return (
     <dialog className="modal" ref={dialogRef}>
       <div className="modal-box space-y-5">
-        <h3 className="font-bold text-lg">{title}</h3>
+        <h3 className="text-lg font-bold">{title}</h3>
         {children}
         <div className="modal-action">
           <div className="join space-x-2">
@@ -44,7 +44,7 @@ export const Modal: FC<ModalProps> = ({
                 onClick={submit}
                 disabled={submitDisabled}
               >
-                {submitLabel || "Save"}
+                {submitLabel || 'Save'}
               </button>
             ) : null}
             <button onClick={hide} className="btn">
@@ -54,5 +54,5 @@ export const Modal: FC<ModalProps> = ({
         </div>
       </div>
     </dialog>
-  );
-};
+  )
+}

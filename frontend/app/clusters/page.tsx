@@ -1,5 +1,5 @@
-"use client";
+'use client'
 
-import { Clusters } from "@/pages/clusters";
+import { Clusters } from '@/pages/clusters'
 
-export default Clusters;
+export default Clusters

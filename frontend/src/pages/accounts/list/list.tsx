@@ -1,5 +1,5 @@
-import { WalletButton } from "@/app/solana-provider";
-import { FC } from "react";
+import { FC } from 'react'
+import { WalletButton } from '@/app/solana-provider'
 
 export const List: FC = () => (
   <div className="hero py-[64px]">
@@ -7,4 +7,4 @@ export const List: FC = () => (
       <WalletButton />
     </div>
   </div>
-);
+)

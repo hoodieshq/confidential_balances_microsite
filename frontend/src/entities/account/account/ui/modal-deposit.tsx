@@ -1,104 +1,90 @@
-import { PublicKey } from "@solana/web3.js";
-import { FC, useEffect, useMemo, useState } from "react";
-import { useDepositCb } from "../model/use-deposit-cb";
-import { useGetMintInfo } from "../model/use-get-mint-info";
-import { useGetSingleTokenAccount } from "../model/use-get-single-token-account";
-import toast from "react-hot-toast";
-import { Modal } from "@/shared/ui/modal";
+import { FC, useEffect, useMemo, useState } from 'react'
+import { PublicKey } from '@solana/web3.js'
+import toast from 'react-hot-toast'
+import { Modal } from '@/shared/ui/modal'
+import { useDepositCb } from '../model/use-deposit-cb'
+import { useGetMintInfo } from '../model/use-get-mint-info'
+import { useGetSingleTokenAccount } from '../model/use-get-single-token-account'
 
 type ModalDepositProps = {
-  show: boolean;
-  hide: () => void;
-  tokenAccountPubkey: PublicKey;
-};
+  show: boolean
+  hide: () => void
+  tokenAccountPubkey: PublicKey
+}
 
-export const ModalDeposit: FC<ModalDepositProps> = ({
-  show,
-  hide,
-  tokenAccountPubkey,
-}) => {
-  const [amount, setAmount] = useState("");
-  const depositMutation = useDepositCb({ tokenAccountPubkey });
-  const [decimals, setDecimals] = useState(9); // Default to 9 decimals until we load the actual value
+export const ModalDeposit: FC<ModalDepositProps> = ({ show, hide, tokenAccountPubkey }) => {
+  const [amount, setAmount] = useState('')
+  const depositMutation = useDepositCb({ tokenAccountPubkey })
+  const [decimals, setDecimals] = useState(9) // Default to 9 decimals until we load the actual value
 
   // Get token account info to extract the mint
-  const { data: tokenAccountInfo, isLoading: isTokenAccountLoading } =
-    useGetSingleTokenAccount({ address: tokenAccountPubkey });
+  const { data: tokenAccountInfo, isLoading: isTokenAccountLoading } = useGetSingleTokenAccount({
+    address: tokenAccountPubkey,
+  })
 
   // Use the mint from the token account to get mint info
   const mintInfoQuery = useGetMintInfo({
-    mintAddress: tokenAccountInfo?.tokenAccount?.mint?.toBase58() || "",
+    mintAddress: tokenAccountInfo?.tokenAccount?.mint?.toBase58() || '',
     enabled: !!tokenAccountInfo?.tokenAccount?.mint,
-  });
+  })
 
   // Update decimals when mint info is available
   useEffect(() => {
     if (mintInfoQuery.data) {
-      setDecimals(mintInfoQuery.data.decimals);
+      setDecimals(mintInfoQuery.data.decimals)
     }
-  }, [mintInfoQuery.data]);
+  }, [mintInfoQuery.data])
 
   const handleSubmit = async () => {
     if (!amount || parseFloat(amount) <= 0) {
-      toast.error("Please enter a valid amount");
-      return;
+      toast.error('Please enter a valid amount')
+      return
     }
 
     if (!tokenAccountInfo?.tokenAccount?.mint) {
-      toast.error("Token mint information not available");
-      return;
+      toast.error('Token mint information not available')
+      return
     }
 
     try {
       // Convert to token units based on mint decimals
-      const factor = Math.pow(10, decimals);
-      const tokenAmount = (parseFloat(amount) * factor).toString();
+      const factor = Math.pow(10, decimals)
+      const tokenAmount = (parseFloat(amount) * factor).toString()
 
       await depositMutation.mutateAsync({
         lamportAmount: tokenAmount,
-      });
-      hide();
-      setAmount("");
-      toast.success("Deposit submitted successfully");
+      })
+      hide()
+      setAmount('')
+      toast.success('Deposit submitted successfully')
     } catch (error) {
-      console.error("Deposit failed:", error);
-      toast.error(
-        `Deposit failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+      console.error('Deposit failed:', error)
+      toast.error(`Deposit failed: ${error instanceof Error ? error.message : String(error)}`)
     }
-  };
+  }
 
   // Calculate the token units based on the input amount
   const tokenUnits = useMemo(() => {
-    if (!amount) return "";
-    const factor = Math.pow(10, decimals);
-    return `${parseFloat(amount) * factor} token units`;
-  }, [amount, decimals]);
+    if (!amount) return ''
+    const factor = Math.pow(10, decimals)
+    return `${parseFloat(amount) * factor} token units`
+  }, [amount, decimals])
 
   // Get the token type from the mint info
   const tokenType = useMemo(() => {
-    if (!mintInfoQuery.data) return "Unknown";
-    return mintInfoQuery.data.isToken2022 ? "Token-2022" : "Standard Token";
-  }, [mintInfoQuery.data]);
+    if (!mintInfoQuery.data) return 'Unknown'
+    return mintInfoQuery.data.isToken2022 ? 'Token-2022' : 'Standard Token'
+  }, [mintInfoQuery.data])
 
-  const isLoading = isTokenAccountLoading || mintInfoQuery.isLoading;
+  const isLoading = isTokenAccountLoading || mintInfoQuery.isLoading
 
   return (
     <Modal
       hide={hide}
       show={show}
       title="Deposit to Confidential Balance"
-      submitDisabled={
-        !amount ||
-        parseFloat(amount) <= 0 ||
-        depositMutation.isPending ||
-        isLoading
-      }
-      submitLabel={
-        depositMutation.isPending ? "Processing..." : "Confirm Deposit"
-      }
+      submitDisabled={!amount || parseFloat(amount) <= 0 || depositMutation.isPending || isLoading}
+      submitLabel={depositMutation.isPending ? 'Processing...' : 'Confirm Deposit'}
       submit={handleSubmit}
     >
       {isLoading ? (
@@ -111,9 +97,7 @@ export const ModalDeposit: FC<ModalDepositProps> = ({
           <div className="alert alert-error">
             <p>Error loading token information:</p>
             <p className="text-sm break-all">
-              {mintInfoQuery.error instanceof Error
-                ? mintInfoQuery.error.message
-                : "Unknown error"}
+              {mintInfoQuery.error instanceof Error ? mintInfoQuery.error.message : 'Unknown error'}
             </p>
           </div>
         </div>
@@ -121,7 +105,7 @@ export const ModalDeposit: FC<ModalDepositProps> = ({
         <div className="form-control">
           <div className="mb-2 text-sm">
             <span className="badge badge-info">{tokenType}</span>
-            <span className="ml-2 badge badge-ghost">{decimals} decimals</span>
+            <span className="badge badge-ghost ml-2">{decimals} decimals</span>
           </div>
           <label className="label">
             <span className="label-text">Amount (Tokens)</span>
@@ -143,5 +127,5 @@ export const ModalDeposit: FC<ModalDepositProps> = ({
         </div>
       )}
     </Modal>
-  );
-};
+  )
+}

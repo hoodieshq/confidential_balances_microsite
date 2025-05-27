@@ -1,18 +1,18 @@
-"use client";
+'use client'
 
-import { List } from "@/pages/accounts/list";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { type NextPage } from "next";
-import { redirect } from "next/navigation";
+import { type NextPage } from 'next'
+import { redirect } from 'next/navigation'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { List } from '@/pages/accounts/list'
 
 const Page: NextPage = ({}) => {
-  const { publicKey } = useWallet();
+  const { publicKey } = useWallet()
 
   if (publicKey) {
-    return redirect(`/account/${publicKey.toString()}`);
+    return redirect(`/account/${publicKey.toString()}`)
   }
 
-  return <List />;
-};
+  return <List />
+}
 
-export default Page;
+export default Page

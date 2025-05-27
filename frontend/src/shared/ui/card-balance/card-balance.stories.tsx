@@ -1,24 +1,24 @@
-import { ComponentProps } from "react";
-import type { Meta, StoryObj } from "@storybook/react";
-import { CardBalance } from "./card-balance";
+import { ComponentProps } from 'react'
+import type { Meta, StoryObj } from '@storybook/react'
+import { CardBalance } from './card-balance'
 
-type Props = ComponentProps<typeof CardBalance>;
+type Props = ComponentProps<typeof CardBalance>
 
 export default {
-  title: "Card/Balance",
+  title: 'Card/Balance',
   component: CardBalance,
   argTypes: {
-    title: { control: "text" },
-    balance: { control: "text" },
+    title: { control: 'text' },
+    balance: { control: 'text' },
   },
   args: {
-    title: "Wallet balance",
-    balance: "20 SOL",
+    title: 'Wallet balance',
+    balance: '20 SOL',
   },
-} satisfies Meta<Props>;
+} satisfies Meta<Props>
 
-type Story = StoryObj<Props>;
+type Story = StoryObj<Props>
 
 export const Default: Story = {
-  name: "Balance",
-};
+  name: 'Balance',
+}

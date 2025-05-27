@@ -1,29 +1,30 @@
-import "./globals.css";
-import { Rubik, Inter } from "next/font/google";
-import { FC, PropsWithChildren } from "react";
-import { App, Layout as BaseLayout } from "@/app";
-import { navigation } from "@/shared/navigation";
+import './globals.css'
+
+import { FC, PropsWithChildren } from 'react'
+import { Inter, Rubik } from 'next/font/google'
+import { App, Layout as BaseLayout } from '@/app'
+import { navigation } from '@/shared/navigation'
 
 const interFont = Inter({
-  display: "swap",
+  display: 'swap',
   preload: true,
-  subsets: ["latin"],
-  variable: "--font-family-inter",
-  weight: ["400"],
-});
+  subsets: ['latin'],
+  variable: '--font-family-inter',
+  weight: ['400'],
+})
 
 const rubikFont = Rubik({
-  display: "swap",
+  display: 'swap',
   preload: true,
-  subsets: ["latin"],
-  variable: "--default-font-family",
-  weight: ["300", "400", "500", "700"],
-});
+  subsets: ['latin'],
+  variable: '--default-font-family',
+  weight: ['300', '400', '500', '700'],
+})
 
 export const metadata = {
-  title: "Solana Confidential Balances",
-  description: "",
-};
+  title: 'Solana Confidential Balances',
+  description: '',
+}
 
 const RootLayout: FC<PropsWithChildren> = ({ children }) => (
   <html lang="en" className={`${rubikFont.className} ${interFont.variable}`}>
@@ -33,6 +34,6 @@ const RootLayout: FC<PropsWithChildren> = ({ children }) => (
       </App>
     </body>
   </html>
-);
+)
 
-export default RootLayout;
+export default RootLayout

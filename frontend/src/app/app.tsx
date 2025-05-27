@@ -1,9 +1,9 @@
-"use client";
+'use client'
 
-import { FC, type PropsWithChildren } from "react";
-import { JotaiProvider, ReactQueryProvider } from "./state-providers";
-import { SolanaProvider } from "./solana-provider";
-import { ClusterProvider } from "./cluster-provider";
+import { FC, type PropsWithChildren } from 'react'
+import { ClusterProvider } from './cluster-provider'
+import { SolanaProvider } from './solana-provider'
+import { JotaiProvider, ReactQueryProvider } from './state-providers'
 
 export const App: FC<PropsWithChildren> = ({ children }) => (
   <JotaiProvider>
@@ -13,4 +13,4 @@ export const App: FC<PropsWithChildren> = ({ children }) => (
       </ClusterProvider>
     </ReactQueryProvider>
   </JotaiProvider>
-);
+)

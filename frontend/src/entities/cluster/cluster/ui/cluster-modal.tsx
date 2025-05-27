@@ -1,36 +1,37 @@
-"use client";
-import { ClusterNetwork, useCluster } from "@/shared/solana";
-import { Modal } from "@/shared/ui/modal";
-import { Connection } from "@solana/web3.js";
-import { FC, useState } from "react";
+'use client'
+
+import { FC, useState } from 'react'
+import { Connection } from '@solana/web3.js'
+import { ClusterNetwork, useCluster } from '@/shared/solana'
+import { Modal } from '@/shared/ui/modal'
 
 type ClusterModalProps = {
-  hideModal: () => void;
-  show: boolean;
-};
+  hideModal: () => void
+  show: boolean
+}
 
 export const ClusterModal: FC<ClusterModalProps> = ({ hideModal, show }) => {
-  const { addCluster } = useCluster();
-  const [name, setName] = useState<string>("");
-  const [network, setNetwork] = useState<ClusterNetwork | undefined>();
-  const [endpoint, setEndpoint] = useState("");
+  const { addCluster } = useCluster()
+  const [name, setName] = useState<string>('')
+  const [network, setNetwork] = useState<ClusterNetwork | undefined>()
+  const [endpoint, setEndpoint] = useState('')
 
   return (
     <Modal
-      title={"Add Cluster"}
+      title={'Add Cluster'}
       hide={hideModal}
       show={show}
       submit={() => {
         try {
-          new Connection(endpoint);
+          new Connection(endpoint)
           if (name) {
-            addCluster({ name, network, endpoint });
-            hideModal();
+            addCluster({ name, network, endpoint })
+            hideModal()
           } else {
-            console.log("Invalid cluster name");
+            console.log('Invalid cluster name')
           }
         } catch {
-          console.log("Invalid cluster endpoint");
+          console.log('Invalid cluster endpoint')
         }
       }}
       submitLabel="Save"
@@ -60,5 +61,5 @@ export const ClusterModal: FC<ClusterModalProps> = ({ hideModal, show }) => {
         <option value={ClusterNetwork.Mainnet}>Mainnet</option>
       </select>
     </Modal>
-  );
-};
+  )
+}

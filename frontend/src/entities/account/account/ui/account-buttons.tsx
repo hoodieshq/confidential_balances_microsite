@@ -1,16 +1,16 @@
-import { PublicKey } from "@solana/web3.js";
-import { FC, useState } from "react";
-import { useCreateAssociatedTokenAccountCB } from "../model/use-create-associated-token-account-cb";
-import { ModalInitATA } from "./modal-init-ata";
+import { FC, useState } from 'react'
+import { PublicKey } from '@solana/web3.js'
+import { useCreateAssociatedTokenAccountCB } from '../model/use-create-associated-token-account-cb'
+import { ModalInitATA } from './modal-init-ata'
 
 type AccountButtonsProps = {
-  address: PublicKey;
-};
+  address: PublicKey
+}
 
 export const AccountButtons: FC<AccountButtonsProps> = ({ address }) => {
-  const [showInitializeModal, setShowInitializeModal] = useState(false);
+  const [showInitializeModal, setShowInitializeModal] = useState(false)
   const { mutate: initializeAccount, isPending: isInitializing } =
-    useCreateAssociatedTokenAccountCB({ walletAddressPubkey: address });
+    useCreateAssociatedTokenAccountCB({ walletAddressPubkey: address })
 
   return (
     <div>
@@ -31,10 +31,10 @@ export const AccountButtons: FC<AccountButtonsProps> = ({ address }) => {
           {isInitializing ? (
             <span className="loading loading-spinner loading-xs"></span>
           ) : (
-            "Create & Initialize Confidential Balance ATA"
+            'Create & Initialize Confidential Balance ATA'
           )}
         </button>
       </div>
     </div>
-  );
-};
+  )
+}

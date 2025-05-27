@@ -1,2 +1,2 @@
-export { jotai } from "./jotai";
-export { queryClient } from "./query";
+export { jotai } from './jotai'
+export { queryClient } from './query'

@@ -1,32 +1,31 @@
-import { PublicKey } from "@solana/web3.js";
-import { FC, useEffect, useState } from "react";
-import { useApplyCB } from "../model/use-apply-cb";
-import { useHasPendingBalance } from "../model/use-has-pending-balance";
-import { ModalDeposit } from "./modal-deposit";
-import { ModalTransfer } from "./modal-transfer";
-import { ModalWithdraw } from "./modal-withdraw";
+import { FC, useEffect, useState } from 'react'
+import { PublicKey } from '@solana/web3.js'
+import { useApplyCB } from '../model/use-apply-cb'
+import { useHasPendingBalance } from '../model/use-has-pending-balance'
+import { ModalDeposit } from './modal-deposit'
+import { ModalTransfer } from './modal-transfer'
+import { ModalWithdraw } from './modal-withdraw'
 
 type TokenAccountButtonsProps = {
-  address: PublicKey;
-};
+  address: PublicKey
+}
 
-export const TokenAccountButtons: FC<TokenAccountButtonsProps> = ({
-  address,
-}) => {
-  const [showDepositModal, setShowDepositModal] = useState(false);
-  const [showTransferModal, setShowTransferModal] = useState(false);
-  const [showWithdraw, setShowWithdraw] = useState(false);
+export const TokenAccountButtons: FC<TokenAccountButtonsProps> = ({ address }) => {
+  const [showDepositModal, setShowDepositModal] = useState(false)
+  const [showTransferModal, setShowTransferModal] = useState(false)
+  const [showWithdraw, setShowWithdraw] = useState(false)
 
   const { mutate: applyPendingBalance, isPending: isApplying } = useApplyCB({
     address,
-  });
-  const { data: hasPending, isLoading: isPendingLoading } =
-    useHasPendingBalance({ tokenAccountPubkey: address });
+  })
+  const { data: hasPending, isLoading: isPendingLoading } = useHasPendingBalance({
+    tokenAccountPubkey: address,
+  })
 
   // Log whenever hasPending changes
   useEffect(() => {
-    console.log("TokenAccountButtons: hasPending value changed:", hasPending);
-  }, [hasPending]);
+    console.log('TokenAccountButtons: hasPending value changed:', hasPending)
+  }, [hasPending])
 
   return (
     <div>
@@ -57,8 +56,8 @@ export const TokenAccountButtons: FC<TokenAccountButtonsProps> = ({
           {hasPending && !isApplying && (
             <div className="absolute -top-3 -right-2">
               <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-sky-500"></span>
               </span>
             </div>
           )}
@@ -67,24 +66,15 @@ export const TokenAccountButtons: FC<TokenAccountButtonsProps> = ({
             onClick={() => applyPendingBalance()}
             disabled={isApplying}
           >
-            {isApplying ? (
-              <span className="loading loading-spinner loading-xs"></span>
-            ) : (
-              "Apply"
-            )}
+            {isApplying ? <span className="loading loading-spinner loading-xs"></span> : 'Apply'}
           </button>
           {hasPending && !isApplying && (
-            <div className="absolute -bottom-5 left-0 right-0 text-center">
-              <span className="text-xs font-semibold text-sky-500">
-                Pending
-              </span>
+            <div className="absolute right-0 -bottom-5 left-0 text-center">
+              <span className="text-xs font-semibold text-sky-500">Pending</span>
             </div>
           )}
         </div>
-        <button
-          className="btn btn-xs lg:btn-md btn-outline"
-          onClick={() => setShowWithdraw(true)}
-        >
+        <button className="btn btn-xs lg:btn-md btn-outline" onClick={() => setShowWithdraw(true)}>
           Withdraw
         </button>
         <button
@@ -95,5 +85,5 @@ export const TokenAccountButtons: FC<TokenAccountButtonsProps> = ({
         </button>
       </div>
     </div>
-  );
-};
+  )
+}

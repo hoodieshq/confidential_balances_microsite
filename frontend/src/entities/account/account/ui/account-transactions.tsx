@@ -1,25 +1,22 @@
-import { FC, useMemo } from "react";
-import { useState } from "react";
-import { useGetSignatures } from "../model/use-get-signatures";
-import { PublicKey } from "@solana/web3.js";
-import { IconRefresh } from "@tabler/icons-react";
-import { ellipsify } from "@/shared/utils";
-import { ExplorerLink } from "@/entities/cluster/cluster";
+import { FC, useMemo, useState } from 'react'
+import { PublicKey } from '@solana/web3.js'
+import { IconRefresh } from '@tabler/icons-react'
+import { ExplorerLink } from '@/entities/cluster/cluster'
+import { ellipsify } from '@/shared/utils'
+import { useGetSignatures } from '../model/use-get-signatures'
 
 type AccountTransactionsProps = {
-  address: PublicKey;
-};
+  address: PublicKey
+}
 
-export const AccountTransactions: FC<AccountTransactionsProps> = ({
-  address,
-}) => {
-  const query = useGetSignatures({ address });
-  const [showAll, setShowAll] = useState(false);
+export const AccountTransactions: FC<AccountTransactionsProps> = ({ address }) => {
+  const query = useGetSignatures({ address })
+  const [showAll, setShowAll] = useState(false)
 
   const items = useMemo(() => {
-    if (showAll) return query.data;
-    return query.data?.slice(0, 5);
-  }, [query.data, showAll]);
+    if (showAll) return query.data
+    return query.data?.slice(0, 5)
+  }, [query.data, showAll])
 
   return (
     <div className="space-y-2">
@@ -29,26 +26,21 @@ export const AccountTransactions: FC<AccountTransactionsProps> = ({
           {query.isLoading ? (
             <span className="loading loading-spinner"></span>
           ) : (
-            <button
-              className="btn btn-sm btn-outline"
-              onClick={() => query.refetch()}
-            >
+            <button className="btn btn-sm btn-outline" onClick={() => query.refetch()}>
               <IconRefresh size={16} />
             </button>
           )}
         </div>
       </div>
       {query.isError && (
-        <pre className="alert alert-error">
-          Error: {query.error?.message.toString()}
-        </pre>
+        <pre className="alert alert-error">Error: {query.error?.message.toString()}</pre>
       )}
       {query.isSuccess && (
         <div>
           {query.data.length === 0 ? (
             <div>No transactions found.</div>
           ) : (
-            <table className="table border-4 rounded-lg border-separate border-base-300">
+            <table className="border-base-300 table border-separate rounded-lg border-4">
               <thead>
                 <tr>
                   <th>Signature</th>
@@ -66,21 +58,13 @@ export const AccountTransactions: FC<AccountTransactionsProps> = ({
                         label={ellipsify(item.signature, 8)}
                       />
                     </th>
-                    <td className="font-mono text-right">
-                      <ExplorerLink
-                        path={`block/${item.slot}`}
-                        label={item.slot.toString()}
-                      />
+                    <td className="text-right font-mono">
+                      <ExplorerLink path={`block/${item.slot}`} label={item.slot.toString()} />
                     </td>
-                    <td>
-                      {new Date((item.blockTime ?? 0) * 1000).toISOString()}
-                    </td>
+                    <td>{new Date((item.blockTime ?? 0) * 1000).toISOString()}</td>
                     <td className="text-right">
                       {item.err ? (
-                        <div
-                          className="badge badge-error"
-                          title={JSON.stringify(item.err)}
-                        >
+                        <div className="badge badge-error" title={JSON.stringify(item.err)}>
                           Failed
                         </div>
                       ) : (
@@ -96,7 +80,7 @@ export const AccountTransactions: FC<AccountTransactionsProps> = ({
                         className="btn btn-xs btn-outline"
                         onClick={() => setShowAll(!showAll)}
                       >
-                        {showAll ? "Show Less" : "Show All"}
+                        {showAll ? 'Show Less' : 'Show All'}
                       </button>
                     </td>
                   </tr>
@@ -107,5 +91,5 @@ export const AccountTransactions: FC<AccountTransactionsProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}

@@ -1,5 +1,5 @@
-"use client";
+'use client'
 
-import { Dashboard } from "@/pages/dashboard";
+import { Dashboard } from '@/pages/dashboard'
 
-export default Dashboard;
+export default Dashboard

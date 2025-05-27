@@ -1,22 +1,17 @@
-import { useState } from "react";
-import { PublicKey } from "@solana/web3.js";
-import { FC } from "react";
-import { useRequestAirdrop } from "../model/use-request-airdrop";
-import { Modal } from "@/shared/ui/modal";
+import { FC, useState } from 'react'
+import { PublicKey } from '@solana/web3.js'
+import { Modal } from '@/shared/ui/modal'
+import { useRequestAirdrop } from '../model/use-request-airdrop'
 
 type ModalAirdropProps = {
-  hide: () => void;
-  show: boolean;
-  address: PublicKey;
-};
+  hide: () => void
+  show: boolean
+  address: PublicKey
+}
 
-export const ModalAirdrop: FC<ModalAirdropProps> = ({
-  hide,
-  show,
-  address,
-}) => {
-  const mutation = useRequestAirdrop({ address });
-  const [amount, setAmount] = useState("2");
+export const ModalAirdrop: FC<ModalAirdropProps> = ({ hide, show, address }) => {
+  const mutation = useRequestAirdrop({ address })
+  const [amount, setAmount] = useState('2')
 
   return (
     <Modal
@@ -38,5 +33,5 @@ export const ModalAirdrop: FC<ModalAirdropProps> = ({
         onChange={(e) => setAmount(e.target.value)}
       />
     </Modal>
-  );
-};
+  )
+}

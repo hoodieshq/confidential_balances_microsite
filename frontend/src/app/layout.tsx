@@ -1,19 +1,20 @@
-"use client";
-import { AccountChecker } from "@/entities/account/account";
-import { ClusterChecker } from "@/entities/cluster/cluster";
-import { Header } from "@/shared/ui/header";
-import { ComponentProps, FC, PropsWithChildren, Suspense } from "react";
-import { Toaster } from "react-hot-toast";
+'use client'
+
+import { ComponentProps, FC, PropsWithChildren, Suspense } from 'react'
+import { Toaster } from 'react-hot-toast'
+import { AccountChecker } from '@/entities/account/account'
+import { ClusterChecker } from '@/entities/cluster/cluster'
+import { Header } from '@/shared/ui/header'
 
 type LayoutProps = PropsWithChildren<{
-  links: ComponentProps<typeof Header>["navigation"];
-}>;
+  links: ComponentProps<typeof Header>['navigation']
+}>
 
 export const Layout: FC<LayoutProps> = ({ children, links }) => {
   //   const pathname = usePathname();
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex h-full flex-col">
       <Header navigation={links} />
       {/* <div className="navbar bg-base-300 dark:text-neutral-content flex-col md:flex-row space-y-2 md:space-y-0">
           <div className="flex-1">
@@ -41,10 +42,10 @@ export const Layout: FC<LayoutProps> = ({ children, links }) => {
       <ClusterChecker>
         <AccountChecker />
       </ClusterChecker>
-      <div className="flex-grow mx-4 lg:mx-auto">
+      <div className="mx-4 flex-grow lg:mx-auto">
         <Suspense
           fallback={
-            <div className="text-center my-32">
+            <div className="my-32 text-center">
               <span className="loading loading-spinner loading-lg"></span>
             </div>
           }
@@ -53,11 +54,11 @@ export const Layout: FC<LayoutProps> = ({ children, links }) => {
         </Suspense>
         <Toaster position="bottom-right" />
       </div>
-      <footer className="footer footer-center p-4 bg-base-300 text-base-content">
+      <footer className="footer footer-center bg-base-300 text-base-content p-4">
         <aside>
           <p>For demonstration purposes only. Do not use in production.</p>
         </aside>
       </footer>
     </div>
-  );
-};
+  )
+}

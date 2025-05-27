@@ -1,17 +1,13 @@
-"use client";
+'use client'
 
-import { Details } from "@/pages/accounts/details";
-import { type NextPage } from "next";
-import { useParams } from "next/navigation";
+import { type NextPage } from 'next'
+import { useParams } from 'next/navigation'
+import { Details } from '@/pages/accounts/details'
 
 const Page: NextPage = () => {
-  const params = useParams();
+  const params = useParams()
 
-  return (
-    <Details
-      address={typeof params?.address === "string" ? params.address : undefined}
-    />
-  );
-};
+  return <Details address={typeof params?.address === 'string' ? params.address : undefined} />
+}
 
-export default Page;
+export default Page

@@ -1,8 +1,8 @@
-import { useCluster } from "@/shared/solana";
-import { FC } from "react";
+import { FC } from 'react'
+import { useCluster } from '@/shared/solana'
 
 export const ClusterSelect: FC = () => {
-  const { clusters, setCluster, cluster } = useCluster();
+  const { clusters, setCluster, cluster } = useCluster()
 
   return (
     <div className="dropdown dropdown-end">
@@ -11,14 +11,12 @@ export const ClusterSelect: FC = () => {
       </label>
       <ul
         tabIndex={0}
-        className="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52 mt-4"
+        className="menu dropdown-content bg-base-100 rounded-box z-[1] mt-4 w-52 p-2 shadow"
       >
         {clusters.map((item) => (
           <li key={item.name}>
             <button
-              className={`btn btn-sm ${
-                item.active ? "btn-primary" : "btn-ghost"
-              }`}
+              className={`btn btn-sm ${item.active ? 'btn-primary' : 'btn-ghost'}`}
               onClick={() => setCluster(item)}
             >
               {item.name}
@@ -27,5 +25,5 @@ export const ClusterSelect: FC = () => {
         ))}
       </ul>
     </div>
-  );
-};
+  )
+}

@@ -1,4 +1,7 @@
-"use client";
+'use client'
+
+import { FC, useMemo } from 'react'
+import { PublicKey } from '@solana/web3.js'
 import {
   AccountBalance,
   AccountButtons,
@@ -8,42 +11,40 @@ import {
   TokenBalance,
   TokenConfidentialBalanceDisplay,
   useGetSingleTokenAccount,
-} from "@/entities/account/account";
-import { ExplorerLink } from "@/entities/cluster/cluster";
-import { Hero } from "@/shared/ui/hero";
-import { ellipsify } from "@/shared/utils";
-import { PublicKey } from "@solana/web3.js";
-import { FC, useMemo } from "react";
+} from '@/entities/account/account'
+import { ExplorerLink } from '@/entities/cluster/cluster'
+import { Hero } from '@/shared/ui/hero'
+import { ellipsify } from '@/shared/utils'
 
 type DetailsProps = {
-  address?: string;
-};
+  address?: string
+}
 
 export const Details: FC<DetailsProps> = ({ address: param }) => {
   const address = useMemo(() => {
     if (!param) {
-      return;
+      return
     }
     try {
-      return new PublicKey(param);
+      return new PublicKey(param)
     } catch (e) {
-      console.warn(`Invalid public key`, e);
+      console.warn(`Invalid public key`, e)
     }
-  }, [param]);
+  }, [param])
 
   // Frontend builds fail if calling the hook within a conditional `if` statement.
   // The workaround is to call the hook with a dummy/default PublicKey when there's no address.
   const tokenAccountQuery = useGetSingleTokenAccount(
     address ? { address } : { address: PublicKey.default }
-  );
-  const { data: accountDescription, isLoading } = tokenAccountQuery;
+  )
+  const { data: accountDescription, isLoading } = tokenAccountQuery
 
   if (!address) {
-    return <div>Error loading account</div>;
+    return <div>Error loading account</div>
   }
 
   if (isLoading) {
-    return <div>Loading account data...</div>;
+    return <div>Loading account data...</div>
   }
 
   return (
@@ -54,11 +55,8 @@ export const Details: FC<DetailsProps> = ({ address: param }) => {
             title={<TokenBalance tokenAccountPubkey={address} />}
             subtitle={
               <div className="my-4">
-                Explorer:{" "}
-                <ExplorerLink
-                  path={`account/${address}`}
-                  label={ellipsify(address.toString())}
-                />
+                Explorer:{' '}
+                <ExplorerLink path={`account/${address}`} label={ellipsify(address.toString())} />
               </div>
             }
           >
@@ -78,11 +76,8 @@ export const Details: FC<DetailsProps> = ({ address: param }) => {
             title={<AccountBalance address={address} />}
             subtitle={
               <div className="my-4">
-                Explorer:{" "}
-                <ExplorerLink
-                  path={`account/${address}`}
-                  label={ellipsify(address.toString())}
-                />
+                Explorer:{' '}
+                <ExplorerLink path={`account/${address}`} label={ellipsify(address.toString())} />
               </div>
             }
           >
@@ -97,5 +92,5 @@ export const Details: FC<DetailsProps> = ({ address: param }) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}

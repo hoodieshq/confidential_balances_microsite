@@ -1,13 +1,13 @@
-import { useCluster } from "@/shared/solana";
-import { IconTrash } from "@tabler/icons-react";
-import { FC } from "react";
+import { FC } from 'react'
+import { IconTrash } from '@tabler/icons-react'
+import { useCluster } from '@/shared/solana'
 
 export const ClusterTable: FC = () => {
-  const { clusters, setCluster, deleteCluster } = useCluster();
+  const { clusters, setCluster, deleteCluster } = useCluster()
 
   return (
     <div className="overflow-x-auto">
-      <table className="table border-4 border-separate border-base-300">
+      <table className="border-base-300 table border-separate border-4">
         <thead>
           <tr>
             <th>Name/ Network / Endpoint</th>
@@ -16,9 +16,9 @@ export const ClusterTable: FC = () => {
         </thead>
         <tbody>
           {clusters.map((item) => (
-            <tr key={item.name} className={item?.active ? "bg-base-200" : ""}>
+            <tr key={item.name} className={item?.active ? 'bg-base-200' : ''}>
               <td className="space-y-2">
-                <div className="whitespace-nowrap space-x-2">
+                <div className="space-x-2 whitespace-nowrap">
                   <span className="text-xl">
                     {item?.active ? (
                       item.name
@@ -33,20 +33,16 @@ export const ClusterTable: FC = () => {
                     )}
                   </span>
                 </div>
-                <span className="text-xs">
-                  Network: {item.network ?? "custom"}
-                </span>
-                <div className="whitespace-nowrap text-gray-500 text-xs">
-                  {item.endpoint}
-                </div>
+                <span className="text-xs">Network: {item.network ?? 'custom'}</span>
+                <div className="text-xs whitespace-nowrap text-gray-500">{item.endpoint}</div>
               </td>
-              <td className="space-x-2 whitespace-nowrap text-center">
+              <td className="space-x-2 text-center whitespace-nowrap">
                 <button
                   disabled={item?.active}
                   className="btn btn-xs btn-default btn-outline"
                   onClick={() => {
-                    if (!window.confirm("Are you sure?")) return;
-                    deleteCluster(item);
+                    if (!window.confirm('Are you sure?')) return
+                    deleteCluster(item)
                   }}
                 >
                   <IconTrash size={16} />
@@ -57,5 +53,5 @@ export const ClusterTable: FC = () => {
         </tbody>
       </table>
     </div>
-  );
-};
+  )
+}

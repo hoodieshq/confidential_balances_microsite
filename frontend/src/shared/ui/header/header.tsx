@@ -1,35 +1,35 @@
-import { useMemo, useState } from "react";
-import { Dialog, DialogPanel } from "@headlessui/react";
-import * as Icons from "lucide-react";
-import { Logo } from "./logo";
-import { cva } from "class-variance-authority";
-import { cn } from "@/shared/utils";
+import { useMemo, useState } from 'react'
+import { Dialog, DialogPanel } from '@headlessui/react'
+import { cva } from 'class-variance-authority'
+import * as Icons from 'lucide-react'
+import { cn } from '@/shared/utils'
+import { Logo } from './logo'
 
-type Link = { label: string; path: string; blank?: boolean };
+type Link = { label: string; path: string; blank?: boolean }
 
-const themeVariants = cva("text-white font-(family-name:--font-family-inter)", {
+const themeVariants = cva('text-white font-(family-name:--font-family-inter)', {
   variants: {
     theme: {
-      dark: "bg-[var(--background)]",
-      light: "",
+      dark: 'bg-[var(--background)]',
+      light: '',
     },
   },
   defaultVariants: {
-    theme: "dark",
+    theme: 'dark',
   },
-});
+})
 
 export function Header({ navigation }: { navigation: Link[] }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const themeCls = useMemo(() => themeVariants({ theme: "dark" }), []);
+  const themeCls = useMemo(() => themeVariants({ theme: 'dark' }), [])
 
   return (
     <header className={themeCls}>
       {/* fix height for header to make logo at the mobile sidebar match the position of default logo */}
       <nav
         aria-label="Global"
-        className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 h-[3.75rem]"
+        className="mx-auto flex h-[3.75rem] max-w-7xl items-center justify-between px-5 py-3"
       >
         <Logo />
         <div className="flex lg:hidden">
@@ -42,21 +42,14 @@ export function Header({ navigation }: { navigation: Link[] }) {
             <Icons.Menu aria-hidden="true" className="size-6" />
           </button>
         </div>
-        <MainMenu
-          className="hidden lg:flex lg:gap-x-2"
-          navigation={navigation}
-        />
+        <MainMenu className="hidden lg:flex lg:gap-x-2" navigation={navigation} />
       </nav>
-      <Dialog
-        open={mobileMenuOpen}
-        onClose={setMobileMenuOpen}
-        className="lg:hidden"
-      >
+      <Dialog open={mobileMenuOpen} onClose={setMobileMenuOpen} className="lg:hidden">
         <div className="fixed inset-0 z-10" />
         {/* set specific pt- for dialog panel to match the default logo*/}
         <DialogPanel
           className={cn(
-            "fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-inherit px-5 py-5 pt-[1.125rem] sm:max-w-sm sm:ring-1 sm:ring-gray-900/10",
+            'fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-inherit px-5 py-5 pt-[1.125rem] sm:max-w-sm sm:ring-1 sm:ring-gray-900/10',
             themeCls
           )}
         >
@@ -77,7 +70,7 @@ export function Header({ navigation }: { navigation: Link[] }) {
         </DialogPanel>
       </Dialog>
     </header>
-  );
+  )
 }
 
 function MainMenu({
@@ -85,19 +78,19 @@ function MainMenu({
   navigation,
 }: React.HTMLAttributes<HTMLDivElement> & { navigation: Link[] }) {
   return (
-    <div className={cn("items-center", className)}>
+    <div className={cn('items-center', className)}>
       {navigation.map((item) => (
         <a
           key={item.label}
           href={item.path}
-          target={item.blank ? "_blank" : "_self"}
-          className="text-sm px-4 py-2 items-center"
+          target={item.blank ? '_blank' : '_self'}
+          className="items-center px-4 py-2 text-sm"
         >
           {item.label}
         </a>
       ))}
     </div>
-  );
+  )
 }
 
 function DialogMenu({ navigation }: { navigation: Link[] }) {
@@ -108,23 +101,23 @@ function DialogMenu({ navigation }: { navigation: Link[] }) {
           <a
             key={item.label}
             href={item.path}
-            target={item.blank ? "_blank" : "_self"}
-            rel={item.blank ? "noopener noreferrer" : undefined}
-            className="-mx-3 block rounded-lg px-3 py-2 text-base/7 hover:bg-accent"
+            target={item.blank ? '_blank' : '_self'}
+            rel={item.blank ? 'noopener noreferrer' : undefined}
+            className="hover:bg-accent -mx-3 block rounded-lg px-3 py-2 text-base/7"
           >
-            {item.label}{" "}
+            {item.label}{' '}
             {item.blank ? (
               <Icons.ExternalLink
                 className="inline translate-x-[2px] translate-y-[-2px]"
                 size="14"
               />
             ) : (
-              ""
+              ''
             )}
           </a>
         ))}
       </div>
       {/* here might be other elements that will be separated with a gray line */}
     </div>
-  );
+  )
 }

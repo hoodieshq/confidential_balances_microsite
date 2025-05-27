@@ -5,7 +5,7 @@ import {
   SystemProgram,
   TransactionMessage,
   VersionedTransaction,
-} from "@solana/web3.js";
+} from '@solana/web3.js'
 
 export const createTransaction = async ({
   publicKey,
@@ -13,16 +13,16 @@ export const createTransaction = async ({
   amount,
   connection,
 }: {
-  publicKey: PublicKey;
-  destination: PublicKey;
-  amount: number;
-  connection: Connection;
+  publicKey: PublicKey
+  destination: PublicKey
+  amount: number
+  connection: Connection
 }): Promise<{
-  transaction: VersionedTransaction;
-  latestBlockhash: { blockhash: string; lastValidBlockHeight: number };
+  transaction: VersionedTransaction
+  latestBlockhash: { blockhash: string; lastValidBlockHeight: number }
 }> => {
   // Get the latest blockhash to use in our transaction
-  const latestBlockhash = await connection.getLatestBlockhash();
+  const latestBlockhash = await connection.getLatestBlockhash()
 
   // Create instructions to send, in this case a simple transfer
   const instructions = [
@@ -31,20 +31,20 @@ export const createTransaction = async ({
       toPubkey: destination,
       lamports: amount * LAMPORTS_PER_SOL,
     }),
-  ];
+  ]
 
   // Create a new TransactionMessage with version and compile it to legacy
   const messageLegacy = new TransactionMessage({
     payerKey: publicKey,
     recentBlockhash: latestBlockhash.blockhash,
     instructions,
-  }).compileToLegacyMessage();
+  }).compileToLegacyMessage()
 
   // Create a new VersionedTransaction which supports legacy and v0
-  const transaction = new VersionedTransaction(messageLegacy);
+  const transaction = new VersionedTransaction(messageLegacy)
 
   return {
     transaction,
     latestBlockhash,
-  };
-};
+  }
+}

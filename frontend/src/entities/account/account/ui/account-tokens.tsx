@@ -1,25 +1,24 @@
-import { FC, useMemo } from "react";
-import { useState } from "react";
-import { useGetTokenAccounts } from "../model/use-get-token-accounts";
-import { useQueryClient } from "@tanstack/react-query";
-import { PublicKey } from "@solana/web3.js";
-import { IconRefresh } from "@tabler/icons-react";
-import { ellipsify } from "@/shared/utils";
-import { ExplorerLink } from "@/entities/cluster/cluster";
-import { AppLink } from "./app-link";
+import { FC, useMemo, useState } from 'react'
+import { PublicKey } from '@solana/web3.js'
+import { IconRefresh } from '@tabler/icons-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { ExplorerLink } from '@/entities/cluster/cluster'
+import { ellipsify } from '@/shared/utils'
+import { useGetTokenAccounts } from '../model/use-get-token-accounts'
+import { AppLink } from './app-link'
 
 type AccountTokensProps = {
-  address: PublicKey;
-};
+  address: PublicKey
+}
 
 export const AccountTokens: FC<AccountTokensProps> = ({ address }) => {
-  const [showAll, setShowAll] = useState(false);
-  const query = useGetTokenAccounts({ address });
-  const client = useQueryClient();
+  const [showAll, setShowAll] = useState(false)
+  const query = useGetTokenAccounts({ address })
+  const client = useQueryClient()
   const items = useMemo(() => {
-    if (showAll) return query.data;
-    return query.data?.slice(0, 5);
-  }, [query.data, showAll]);
+    if (showAll) return query.data
+    return query.data?.slice(0, 5)
+  }, [query.data, showAll])
 
   return (
     <div className="space-y-2">
@@ -33,10 +32,10 @@ export const AccountTokens: FC<AccountTokensProps> = ({ address }) => {
               <button
                 className="btn btn-sm btn-outline"
                 onClick={async () => {
-                  await query.refetch();
+                  await query.refetch()
                   await client.invalidateQueries({
-                    queryKey: ["getTokenAccountBalance"],
-                  });
+                    queryKey: ['getTokenAccountBalance'],
+                  })
                 }}
               >
                 <IconRefresh size={16} />
@@ -46,16 +45,14 @@ export const AccountTokens: FC<AccountTokensProps> = ({ address }) => {
         </div>
       </div>
       {query.isError && (
-        <pre className="alert alert-error">
-          Error: {query.error?.message.toString()}
-        </pre>
+        <pre className="alert alert-error">Error: {query.error?.message.toString()}</pre>
       )}
       {query.isSuccess && (
         <div>
           {query.data.length === 0 ? (
             <div>No token accounts found.</div>
           ) : (
-            <table className="table border-4 rounded-lg border-separate border-base-300">
+            <table className="border-base-300 table border-separate rounded-lg border-4">
               <thead>
                 <tr>
                   <th>Public Key</th>
@@ -101,7 +98,7 @@ export const AccountTokens: FC<AccountTokensProps> = ({ address }) => {
                         className="btn btn-xs btn-outline"
                         onClick={() => setShowAll(!showAll)}
                       >
-                        {showAll ? "Show Less" : "Show All"}
+                        {showAll ? 'Show Less' : 'Show All'}
                       </button>
                     </td>
                   </tr>
@@ -112,5 +109,5 @@ export const AccountTokens: FC<AccountTokensProps> = ({ address }) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}

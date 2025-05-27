@@ -1,23 +1,23 @@
-import { useWallet } from "@solana/wallet-adapter-react";
-import { FC, useState } from "react";
-import { useTransferSol } from "../model/use-transfer-sol";
-import { PublicKey } from "@solana/web3.js";
-import { Modal } from "@/shared/ui/modal";
+import { FC, useState } from 'react'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { PublicKey } from '@solana/web3.js'
+import { Modal } from '@/shared/ui/modal'
+import { useTransferSol } from '../model/use-transfer-sol'
 
 type ModalSendProps = {
-  hide: () => void;
-  show: boolean;
-  address: PublicKey;
-};
+  hide: () => void
+  show: boolean
+  address: PublicKey
+}
 
 export const ModalSend: FC<ModalSendProps> = ({ hide, show, address }) => {
-  const wallet = useWallet();
-  const mutation = useTransferSol({ address });
-  const [destination, setDestination] = useState("");
-  const [amount, setAmount] = useState("1");
+  const wallet = useWallet()
+  const mutation = useTransferSol({ address })
+  const [destination, setDestination] = useState('')
+  const [amount, setAmount] = useState('1')
 
   if (!address || !wallet.sendTransaction) {
-    return <div>Wallet not connected</div>;
+    return <div>Wallet not connected</div>
   }
 
   return (
@@ -33,7 +33,7 @@ export const ModalSend: FC<ModalSendProps> = ({ hide, show, address }) => {
             destination: new PublicKey(destination),
             amount: parseFloat(amount),
           })
-          .then(() => hide());
+          .then(() => hide())
       }}
     >
       <input
@@ -55,5 +55,5 @@ export const ModalSend: FC<ModalSendProps> = ({ hide, show, address }) => {
         onChange={(e) => setAmount(e.target.value)}
       />
     </Modal>
-  );
-};
+  )
+}

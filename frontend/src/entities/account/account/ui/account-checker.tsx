@@ -1,10 +1,10 @@
-import { useWallet } from "@solana/wallet-adapter-react";
-import { AccountBalanceCheck } from "./account-balance-check";
+import { useWallet } from '@solana/wallet-adapter-react'
+import { AccountBalanceCheck } from './account-balance-check'
 
 export const AccountChecker = () => {
-  const { publicKey } = useWallet();
+  const { publicKey } = useWallet()
   if (!publicKey) {
-    return null;
+    return null
   }
-  return <AccountBalanceCheck address={publicKey} />;
-};
+  return <AccountBalanceCheck address={publicKey} />
+}

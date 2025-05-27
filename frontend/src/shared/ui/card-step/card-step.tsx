@@ -1,17 +1,17 @@
+import { FC } from 'react'
 import {
   Card,
   CardAsideCounter,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-} from "@hoodieshq/ms-tools-ui";
-import { FC } from "react";
+} from '@hoodieshq/ms-tools-ui'
 
 type CardStepProps = {
-  title: string;
-  description: string;
-  step: number;
-};
+  title: string
+  description: string
+  step: number
+}
 
 export const CardStep: FC<CardStepProps> = ({ title, description, step }) => (
   <Card aside={<CardAsideCounter>{step}</CardAsideCounter>}>
@@ -20,4 +20,4 @@ export const CardStep: FC<CardStepProps> = ({ title, description, step }) => (
       <CardDescription>{description}</CardDescription>
     </CardHeader>
   </Card>
-);
+)

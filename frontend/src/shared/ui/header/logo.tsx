@@ -2,7 +2,7 @@ export function Logo() {
   return (
     <a href="/" className="-m-1.5 p-1.5">
       <span className="sr-only">Confidential Balances Demo</span>
-      <span className="flex gap-[12px] items-start">
+      <span className="flex items-start gap-[12px]">
         {/* eslint-disable @next/next/no-img-element */}
         <img
           alt="Solana"
@@ -21,5 +21,5 @@ export function Logo() {
         {/* eslint-enable @next/next/no-img-element */}
       </span>
     </a>
-  );
+  )
 }

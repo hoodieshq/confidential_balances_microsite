@@ -1,8 +1,5 @@
-import { Cluster } from "@/shared/solana";
-import { atomWithStorage } from "jotai/utils";
-import { defaultClusters } from "./default-clusters";
+import { atomWithStorage } from 'jotai/utils'
+import { Cluster } from '@/shared/solana'
+import { defaultClusters } from './default-clusters'
 
-export const clusterAtom = atomWithStorage<Cluster>(
-  "solana-cluster",
-  defaultClusters[0]
-);
+export const clusterAtom = atomWithStorage<Cluster>('solana-cluster', defaultClusters[0])
