@@ -1,0 +1,23 @@
+import { PublicKey } from "@solana/web3.js";
+import { useGetTokenBalance } from "../model/use-get-token-balance";
+import { FC } from "react";
+
+type TokenBalanceProps = {
+  tokenAccountPubkey: PublicKey;
+};
+
+export const TokenBalance: FC<TokenBalanceProps> = ({ tokenAccountPubkey }) => {
+  const tokenBalanceQuery = useGetTokenBalance({ tokenAccountPubkey });
+
+  return (
+    <div>
+      <h1 className="text-5xl font-bold">
+        {tokenBalanceQuery.isLoading
+          ? "..."
+          : tokenBalanceQuery.isError
+          ? "Error"
+          : `${tokenBalanceQuery.data} Tokens`}
+      </h1>
+    </div>
+  );
+};
