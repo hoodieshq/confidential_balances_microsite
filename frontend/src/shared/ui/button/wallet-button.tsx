@@ -1,13 +1,17 @@
 import { ComponentProps, FC } from 'react'
 import * as Icons from 'lucide-react'
+import { ellipsify } from '@/shared/utils'
 import { Button } from './button'
 
-type ConnectWalletButtonProps = Pick<
+type WalletButtonProps = Pick<
   ComponentProps<typeof Button>,
   'loading' | 'disabled' | 'href' | 'onClick'
->
+> & {
+  address?: string
+}
 
-export const ConnectWalletButton: FC<ConnectWalletButtonProps> = ({
+export const WalletButton: FC<WalletButtonProps> = ({
+  address,
   loading,
   disabled,
   href,
@@ -21,6 +25,6 @@ export const ConnectWalletButton: FC<ConnectWalletButtonProps> = ({
     href={href}
     onClick={onClick}
   >
-    Connect wallet
+    {address ? ellipsify(address) : 'Connect wallet'}
   </Button>
 )

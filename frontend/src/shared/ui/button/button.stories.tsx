@@ -3,11 +3,12 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from '@storybook/test'
 import * as Icons from 'lucide-react'
 import { Button } from './button'
-import { ConnectWalletButton } from './connect-wallet-button'
 import { DevModeButton } from './dev-mode-button'
+import { WalletButton } from './wallet-button'
 
 type Props = ComponentProps<typeof Button> & {
   hasIcon: boolean
+  wallet: string
 }
 
 export default {
@@ -24,6 +25,7 @@ export default {
     size: { control: 'select', options: ['default', 'sm'], table: { category: 'variant' } },
     loading: { control: 'boolean', table: { category: 'state' } },
     disabled: { control: 'boolean', table: { category: 'state' } },
+    wallet: { control: 'text', table: { disable: true } },
     onClick: { table: { disable: true } },
   },
   args: {
@@ -44,12 +46,18 @@ export const Default: Story = {
   render: ({ hasIcon, ...args }) => <Button {...args} icon={hasIcon ? Icons.Network : undefined} />,
 }
 
-export const ConnectWallet: Story = {
+export const Wallet: Story = {
   parameters: {
-    controls: { include: ['loading', 'disabled'] },
+    controls: { include: ['wallet', 'loading', 'disabled'] },
   },
-  render: ({ loading, disabled, onClick }) => (
-    <ConnectWalletButton loading={loading} disabled={disabled} onClick={onClick} />
+  args: {
+    wallet: 'B5fc4JaSjC27kz7KsDaoi1Mo211v6bQwZWJj93jgtrnt',
+  },
+  argTypes: {
+    wallet: { table: { disable: false } },
+  },
+  render: ({ wallet, loading, disabled, onClick }) => (
+    <WalletButton address={wallet} loading={loading} disabled={disabled} onClick={onClick} />
   ),
 }
 

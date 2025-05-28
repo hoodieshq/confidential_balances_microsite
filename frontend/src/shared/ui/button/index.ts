@@ -1,3 +1,3 @@
 export { Button } from './button'
-export { ConnectWalletButton } from './connect-wallet-button'
+export { WalletButton } from './wallet-button'
 export { DevModeButton } from './dev-mode-button'
