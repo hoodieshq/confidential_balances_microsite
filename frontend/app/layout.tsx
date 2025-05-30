@@ -39,7 +39,10 @@ const RootLayout: FC<PropsWithChildren> = ({ children }) => (
     lang="en"
     className={`${rubikFont.className} ${interFont.variable} ${geistMonoFont.variable}`}
   >
-    <body className="dark">
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    </head>
+    <body className="dark min-w-[320px]">
       <App>
         <BaseLayout links={navigation}>{children}</BaseLayout>
       </App>
