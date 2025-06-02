@@ -17,7 +17,6 @@ type LayoutProps = PropsWithChildren<{
 export const Layout: FC<LayoutProps> = ({ children, links }) => {
   //   const pathname = usePathname();
   const devModeOpen = useAtomValue(devModeOpenAtom)
-  // const devModeOpen = true
 
   return (
     <div className="flex h-full flex-col gap-12">
