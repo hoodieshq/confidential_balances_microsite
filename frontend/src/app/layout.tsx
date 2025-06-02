@@ -1,12 +1,13 @@
 'use client'
 
-import { ComponentProps, FC, PropsWithChildren, Suspense } from 'react'
+import { ComponentProps, FC, PropsWithChildren, Suspense, useState } from 'react'
 import { cn, Skeleton } from '@hoodieshq/ms-tools-ui'
 import { useAtomValue } from 'jotai'
 import { Toaster } from 'react-hot-toast'
 import { AccountChecker } from '@/entities/account/account'
 import { ClusterChecker } from '@/entities/cluster/cluster'
 import { devModeOpenAtom, DevModePanel } from '@/entities/dev-mode'
+import { OperationLogButton, OperationLogDrawer } from '@/entities/operation-log'
 import { Header } from '@/shared/ui/header'
 import { StickyPanel } from '@/shared/ui/sticky-panel'
 
@@ -45,6 +46,8 @@ export const Layout: FC<LayoutProps> = ({ children, links }) => {
           </div>
         )}
       </div>
+      <OperationLogButton />
+      <OperationLogDrawer />
       <Toaster position="bottom-right" />
     </div>
   )
