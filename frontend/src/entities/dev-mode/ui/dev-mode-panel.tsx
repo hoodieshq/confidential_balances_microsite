@@ -22,12 +22,10 @@ export const DevModePanel: FC = () => {
         command="spl-token --program-2022 create-token --enable-confidential-transfers-auto"
         done={true}
       >
-        <LogItem title="Deposit Operation - COMPLETE" success={true}>
-          <LogItemResult success={true}>{`Txn1 [SUCCESS]`}</LogItemResult>
-          <LogItemResult
-            success={true}
-          >{`  ConfidentialTransferInstruction::Deposit`}</LogItemResult>
-          <LogItemResult success={true}>{`    Note: Deposited 12 tokens`}</LogItemResult>
+        <LogItem title="Deposit Operation - COMPLETE" variant="success">
+          <LogItemResult variant="success">{`Txn1 [SUCCESS]`}</LogItemResult>
+          <LogItemResult variant="success">{`  ConfidentialTransferInstruction::Deposit`}</LogItemResult>
+          <LogItemResult variant="success">{`    Note: Deposited 12 tokens`}</LogItemResult>
         </LogItem>
       </Step>
       <Step
@@ -37,12 +35,10 @@ export const DevModePanel: FC = () => {
         command="spl-token create-account sndjk839njanJKASNd"
         done={true}
       >
-        <LogItem title="Deposit Operation - COMPLETE" success={true}>
-          <LogItemResult success={true}>{`Txn1 [SUCCESS]`}</LogItemResult>
-          <LogItemResult
-            success={true}
-          >{`  ConfidentialTransferInstruction::Deposit`}</LogItemResult>
-          <LogItemResult success={true}>{`    Note: Deposited 12 tokens`}</LogItemResult>
+        <LogItem title="Deposit Operation - COMPLETE" variant="success">
+          <LogItemResult variant="success">{`Txn1 [SUCCESS]`}</LogItemResult>
+          <LogItemResult variant="success">{`  ConfidentialTransferInstruction::Deposit`}</LogItemResult>
+          <LogItemResult variant="success">{`    Note: Deposited 12 tokens`}</LogItemResult>
         </LogItem>
       </Step>
       <Step
@@ -52,12 +48,10 @@ export const DevModePanel: FC = () => {
         command="spl-token mint sndjk839njanJKASNd 1000"
         done={true}
       >
-        <LogItem title="Deposit Operation - COMPLETE" success={false}>
-          <LogItemResult success={false}>{`Txn1 [SUCCESS]`}</LogItemResult>
-          <LogItemResult
-            success={true}
-          >{`  ConfidentialTransferInstruction::Deposit`}</LogItemResult>
-          <LogItemResult success={false}>{`    Note: Deposited 12 tokens`}</LogItemResult>
+        <LogItem title="Deposit Operation - COMPLETE" variant="error">
+          <LogItemResult variant="error">{`Txn1 [SUCCESS]`}</LogItemResult>
+          <LogItemResult variant="error">{`  ConfidentialTransferInstruction::Deposit`}</LogItemResult>
+          <LogItemResult variant="error">{`    Note: Deposited 12 tokens`}</LogItemResult>
         </LogItem>
       </Step>
       <Step
