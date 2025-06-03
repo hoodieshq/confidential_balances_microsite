@@ -83,7 +83,11 @@ export const OperationLogDrawer: FC<OperationLogDrawerProps> = ({ open, items, o
             ref={setScrollableRef}
             className={cn(
               'flex-1 snap-y overflow-x-hidden overflow-y-auto scroll-smooth p-0',
-              snap === 1 ? 'max-h-[calc(100vh-50px)]' : 'max-h-[342px]',
+              snap === 1
+                ? 'max-h-[calc(100vh-50px)]'
+                : snap === 0.7
+                  ? 'max-h-[calc(70vh-50px)]'
+                  : 'max-h-[342px]',
               styles.content
             )}
             onWheel={() => setIsFollowing(false)}
