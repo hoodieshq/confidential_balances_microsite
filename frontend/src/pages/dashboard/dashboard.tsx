@@ -70,7 +70,7 @@ export const Dashboard: FC = () => {
         <Button
           variant="outline"
           onClick={() => {
-            set(1, devModeItems[Math.floor(Math.random() * operations.length)])
+            set(1, devModeItems[Math.floor(Math.random() * devModeItems.length)])
           }}
         >
           Mark step 1
