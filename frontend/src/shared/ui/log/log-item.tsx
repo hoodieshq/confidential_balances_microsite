@@ -19,11 +19,12 @@ const logItemVariants = cva('', {
 })
 
 type LogItemProps = PropsWithChildren<{
+  className?: string
   title?: string
 }> &
   VariantProps<typeof logItemVariants>
 
-export const LogItem: FC<LogItemProps> = ({ title, children, variant }) => {
+export const LogItem: FC<LogItemProps> = ({ title, children, variant, className }) => {
   const toast = useToast()
 
   return (
@@ -32,7 +33,8 @@ export const LogItem: FC<LogItemProps> = ({ title, children, variant }) => {
         'grid grid-cols-[auto_1fr] gap-2 px-6 py-4 select-none',
         !!title || !!children
           ? 'cursor-pointer hover:bg-[var(--border)]/20 active:bg-[var(--border)]/30'
-          : ''
+          : '',
+        className
       )}
       onClick={() => {
         if (title) {
