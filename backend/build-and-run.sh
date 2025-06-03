@@ -32,7 +32,7 @@ docker build $PLATFORM_FLAG -t $IMAGE_TAG . || {
 }
 
 echo "Running container locally on port 3003..."
-docker run $PLATFORM_FLAG -p 3003:3003 -e PORT=3003 $IMAGE_TAG -i
+docker run $PLATFORM_FLAG -p 3003:3003 -e PORT=3003 $IMAGE_TAG
 
 # If this is a production build, output the command to push to Cloud Run
 if [[ "$1" == "--prod" || "$1" == "-p" ]]; then
