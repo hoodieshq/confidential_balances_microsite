@@ -4,6 +4,7 @@ import { Keypair, PublicKey, VersionedTransaction } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { useTransactionToast } from '../ui/transaction-toast'
+import { getCacheKey as getTokenAccountsCacheKey } from './use-get-token-accounts'
 
 async function serverRequest({ account, mint }: { account: PublicKey; mint: PublicKey }) {
   // Now proceed with the transaction
@@ -111,16 +112,19 @@ export const useCreateTestTokenCB = ({
       // Invalidate relevant queries to refresh data
       return Promise.all([
         client.invalidateQueries({
-          queryKey: ['get-balance', { endpoint: connection.rpcEndpoint, walletAddressPubkey }],
-        }),
-        client.invalidateQueries({
-          queryKey: ['get-signatures', { endpoint: connection.rpcEndpoint, walletAddressPubkey }],
+          queryKey: [
+            'get-balance',
+            { endpoint: connection.rpcEndpoint, address: walletAddressPubkey },
+          ],
         }),
         client.invalidateQueries({
           queryKey: [
-            'get-token-accounts',
-            { endpoint: connection.rpcEndpoint, walletAddressPubkey },
+            'get-signatures',
+            { endpoint: connection.rpcEndpoint, address: walletAddressPubkey },
           ],
+        }),
+        client.invalidateQueries({
+          queryKey: getTokenAccountsCacheKey(connection.rpcEndpoint, walletAddressPubkey),
         }),
       ])
     },

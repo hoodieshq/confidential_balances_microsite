@@ -61,8 +61,6 @@ export const useCreateAssociatedTokenAccountCB = ({
 
         const data = await response.json()
 
-        console.log({ data })
-
         // Deserialize the transaction from the response
         const serializedTransaction = Buffer.from(data.transaction, 'base64')
         const transaction = VersionedTransaction.deserialize(serializedTransaction)
