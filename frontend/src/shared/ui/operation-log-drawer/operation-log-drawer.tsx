@@ -18,10 +18,16 @@ type OperationLogDrawerProps = {
     content: string
     variant: 'success' | 'error' | 'muted'
   }[]
-  onClose: () => void
+  onClose?: () => void
+  onClear?: () => void
 }
 
-export const OperationLogDrawer: FC<OperationLogDrawerProps> = ({ open, items, onClose }) => {
+export const OperationLogDrawer: FC<OperationLogDrawerProps> = ({
+  open,
+  items,
+  onClose,
+  onClear,
+}) => {
   const [scrollableRef, setScrollableRef] = useState<HTMLDivElement | null>(null)
   const [snap, setSnap] = useState<number | string | null>(snapPoints[0])
 
@@ -65,7 +71,7 @@ export const OperationLogDrawer: FC<OperationLogDrawerProps> = ({ open, items, o
                     Follow
                   </Button>
                 )}
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={onClear}>
                   <Icons.Eraser />
                   Clear log
                 </Button>
