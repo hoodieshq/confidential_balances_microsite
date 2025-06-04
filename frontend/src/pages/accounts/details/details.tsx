@@ -55,6 +55,8 @@ export const Details: FC<DetailsProps> = ({ address: param }) => {
     return <div>Loading account data...</div>
   }
 
+  console.log({ accountDescription }, PublicKey.default.toString())
+
   return (
     <div>
       {/* TODO: replace with UI::Breadcrumbs */}
@@ -79,15 +81,7 @@ export const Details: FC<DetailsProps> = ({ address: param }) => {
 
       {accountDescription.tokenAccount ? (
         <div>
-          <Hero
-            title={<TokenBalance tokenAccountPubkey={address} />}
-            subtitle={
-              <div className="my-4">
-                Explorer:{' '}
-                <ExplorerLink path={`account/${address}`} label={ellipsify(address.toString())} />
-              </div>
-            }
-          >
+          <Hero title="" subtitle="">
             <div className="my-4">
               <TokenAccountButtons address={address} />
               <div className="my-4" />
