@@ -107,8 +107,6 @@ function ConnectedWalletTokenAccounts({
     return list
   }, [onCreateCTA, onCreateTestToken, showAll, client, query, limit])
 
-  console.log({ createTestToken, oth })
-
   return (
     <>
       <ModalInitATA
