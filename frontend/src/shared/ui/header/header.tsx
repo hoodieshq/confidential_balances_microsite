@@ -1,14 +1,14 @@
 import { useCallback, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Dialog, DialogPanel } from '@headlessui/react'
-import { Alert, AlertDescription, AlertTitle, Button } from '@solana-foundation/ms-tools-ui'
+import { Alert, AlertDescription, AlertTitle } from '@solana-foundation/ms-tools-ui'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'
 import { cva } from 'class-variance-authority'
 import * as Icons from 'lucide-react'
-import { WalletButton } from '@/app/solana-provider'
 import { ClusterSelect } from '@/entities/cluster/cluster'
 import { DevModeButton } from '@/entities/dev-mode'
+import { WalletButton } from '@/features/solana-provider'
 import { cn } from '@/shared/utils'
 import { Logo } from './logo'
 
@@ -115,10 +115,7 @@ function MainMenu({
           </a>
         ))}
         <DevModeButton />
-        <Button variant="secondary">
-          <Icons.NetworkIcon />
-          Devnet
-        </Button>
+        <ClusterSelect />
         <div className="min-w-[118px]">
           <WalletButton />
         </div>
@@ -151,8 +148,11 @@ function DialogMenu({ navigation }: { navigation: Link[] }) {
           </a>
         ))}
 
+        {/* NOTE: I've limited width for ClusterSelector to match DevMode, but we have to tweak dropdown size for clusters as Badge does not fit */}
         <DevModeButton />
-        <ClusterSelect />
+        <div className="w-[125px]">
+          <ClusterSelect />
+        </div>
       </div>
       {/* here might be other elements that will be separated with a gray line */}
     </div>

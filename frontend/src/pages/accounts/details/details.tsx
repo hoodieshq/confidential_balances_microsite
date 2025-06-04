@@ -3,6 +3,7 @@
 import { FC, useMemo } from 'react'
 import Link from 'next/link'
 import { PublicKey } from '@solana/web3.js'
+import { TokenAccountHeader } from '@/entities/account-header'
 import {
   AccountBalance,
   AccountButtons,
@@ -14,7 +15,11 @@ import {
   useGetSingleTokenAccount,
 } from '@/entities/account/account'
 import { ExplorerLink } from '@/entities/cluster/cluster'
-import { OmniAccountHeader } from '@/features/omni-account-header'
+import {
+  ConfidentialBalances,
+  PendingOperations,
+  TransactionHistory,
+} from '@/features/token-account'
 import { BackwardControl } from '@/shared/ui/backward-control'
 import { Hero } from '@/shared/ui/hero'
 import { ellipsify } from '@/shared/utils'
@@ -50,6 +55,8 @@ export const Details: FC<DetailsProps> = ({ address: param }) => {
     return <div>Loading account data...</div>
   }
 
+  console.log({ accountDescription }, PublicKey.default.toString())
+
   return (
     <div>
       {/* TODO: replace with UI::Breadcrumbs */}
@@ -57,18 +64,24 @@ export const Details: FC<DetailsProps> = ({ address: param }) => {
         <Link href={'/'}>Go back to wallet page</Link>
       </BackwardControl>
       {/* Use random token account. whould be one that is handled through pathname */}
-      <OmniAccountHeader address={new PublicKey('F5C4y8awLtvU98tkqBFV4zMmknEwqfdKte7428ooDhUy')} />
+      {!param ? (
+        <div>Loading..</div>
+      ) : (
+        <TokenAccountHeader
+          label="Token account"
+          address={address}
+          secondaryLabel="Account balance"
+        />
+      )}
+      <div className="flex flex-col gap-5">
+        <ConfidentialBalances />
+        <PendingOperations />
+        <TransactionHistory />
+      </div>
+
       {accountDescription.tokenAccount ? (
         <div>
-          <Hero
-            title={<TokenBalance tokenAccountPubkey={address} />}
-            subtitle={
-              <div className="my-4">
-                Explorer:{' '}
-                <ExplorerLink path={`account/${address}`} label={ellipsify(address.toString())} />
-              </div>
-            }
-          >
+          <Hero title="" subtitle="">
             <div className="my-4">
               <TokenAccountButtons address={address} />
               <div className="my-4" />

@@ -1,4 +1,4 @@
-import { ComponentProps, MouseEvent, useId } from 'react'
+import { ComponentProps, MouseEvent, ReactNode, useId } from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import {
   Button,
@@ -18,17 +18,17 @@ type Action = {
   action: string
   title: string
   onClick?: (a: Action['action'], b: MouseEvent<HTMLButtonElement>) => void
-  icon?: LucideIcon
+  icon?: LucideIcon | ReactNode
 }
 
 type Props = {
   actions?: Action[]
   actionProps?: {}
-  headers?: (string | JSX.Element)[]
-  labels?: {
-    empty: string | JSX.Element
+  headers?: ReactNode[]
+  labels?: { empty: Required<ReactNode> } & {
+    [key: string]: ReactNode
   }
-  rows?: (string | JSX.Element)[][]
+  rows?: ReactNode[][]
   title?: string
   asChild?: boolean
 } & ComponentProps<'table'> &
