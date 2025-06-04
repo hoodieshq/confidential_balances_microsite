@@ -15,6 +15,11 @@ import {
   useGetSingleTokenAccount,
 } from '@/entities/account/account'
 import { ExplorerLink } from '@/entities/cluster/cluster'
+import {
+  ConfidentialBalances,
+  PendingOperations,
+  TransactionHistory,
+} from '@/features/token-account'
 import { BackwardControl } from '@/shared/ui/backward-control'
 import { Hero } from '@/shared/ui/hero'
 import { ellipsify } from '@/shared/utils'
@@ -66,6 +71,11 @@ export const Details: FC<DetailsProps> = ({ address: param }) => {
           secondaryLabel="Account balance"
         />
       )}
+      <div className="flex flex-col gap-5">
+        <ConfidentialBalances />
+        <PendingOperations />
+        <TransactionHistory />
+      </div>
 
       {accountDescription.tokenAccount ? (
         <div>

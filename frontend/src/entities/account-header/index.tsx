@@ -6,7 +6,8 @@ import { useNativeAndTokenBalance } from '@/entities/account/account/model/use-n
 import { WalletTitle } from '@/entities/account/account/ui/wallet-title'
 import { CardBalance } from '@/shared/ui/card-balance'
 import { Text } from '@/shared/ui/text'
-import { cn } from '@/shared/utils'
+import { cn, ellipsify } from '@/shared/utils'
+import { ExplorerLink } from '../cluster/cluster'
 
 type AccountHeaderParams = {
   address: PublicKey
@@ -85,7 +86,12 @@ export const AccountHeaderView: FC<
             <div className="flex flex-col">
               <span className="text-xs">
                 <Address address={address?.toBase58()} asChild>
-                  <span className="text-(color:--accent)">{address?.toBase58()}</span>
+                  <span className="text-(color:--accent)">
+                    <ExplorerLink
+                      label={address?.toString()}
+                      path={`account/${address?.toString()}`}
+                    />
+                  </span>
                 </Address>
               </span>
             </div>
