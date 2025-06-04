@@ -1,10 +1,10 @@
 import { FC } from 'react'
 import { Button } from '@hoodieshq/ms-tools-ui'
 import { NATIVE_MINT } from '@solana/spl-token'
+import { WalletAccountHeader } from '@/entities/account-header'
 import { TokenAccounts } from '@/entities/account/token-accounts'
 import { useDevMode } from '@/entities/dev-mode/model/dev-mode-items'
 import { useOperationLog } from '@/entities/operation-log'
-import { WalletAccountHeader } from '@/features/omni-account-header'
 import { CardStep } from '@/shared/ui/card-step'
 import { Text } from '@/shared/ui/text'
 

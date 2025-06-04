@@ -3,6 +3,7 @@
 import { FC, useMemo } from 'react'
 import Link from 'next/link'
 import { PublicKey } from '@solana/web3.js'
+import { TokenAccountHeader } from '@/entities/account-header'
 import {
   AccountBalance,
   AccountButtons,
@@ -14,7 +15,6 @@ import {
   useGetSingleTokenAccount,
 } from '@/entities/account/account'
 import { ExplorerLink } from '@/entities/cluster/cluster'
-import { TokenAccountHeader } from '@/features/omni-account-header'
 import { BackwardControl } from '@/shared/ui/backward-control'
 import { Hero } from '@/shared/ui/hero'
 import { ellipsify } from '@/shared/utils'
@@ -60,7 +60,11 @@ export const Details: FC<DetailsProps> = ({ address: param }) => {
       {!param ? (
         <div>Loading..</div>
       ) : (
-        <TokenAccountHeader label="Token account" address={address} />
+        <TokenAccountHeader
+          label="Token account"
+          address={address}
+          secondaryLabel="Account balance"
+        />
       )}
 
       {accountDescription.tokenAccount ? (

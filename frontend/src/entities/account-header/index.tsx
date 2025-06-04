@@ -19,12 +19,14 @@ type AccountHeaderParams = {
   label?: string
   loading?: boolean
   isWallet?: boolean
+  secondaryLabel?: string
 }
 
 export function WalletAccountHeader({
   address,
   className,
   label,
+  secondaryLabel,
 }: AccountHeaderParams & ComponentProps<'div'>) {
   const { balance, loading } = useNativeAndTokenBalance(address)
 
@@ -35,6 +37,7 @@ export function WalletAccountHeader({
       label={label}
       balance={balance}
       loading={loading}
+      secondaryLabel={secondaryLabel}
       symbol="SOL"
       isWallet
     />
@@ -45,6 +48,7 @@ export function TokenAccountHeader({
   address,
   className,
   label,
+  secondaryLabel,
 }: AccountHeaderParams & ComponentProps<'div'>) {
   const { data: balance, isLoading } = useGetTokenBalance({ tokenAccountPubkey: address })
 
@@ -61,13 +65,14 @@ export function TokenAccountHeader({
       }}
       symbol="Token"
       loading={isLoading}
+      secondaryLabel={secondaryLabel}
     />
   )
 }
 
 export const AccountHeaderView: FC<
   AccountHeaderParams & { isWallet?: boolean; symbol: string } & ComponentProps<'div'>
-> = ({ address, className, label, balance, loading, symbol, isWallet = false }) => {
+> = ({ address, className, label, balance, loading, secondaryLabel, symbol, isWallet = false }) => {
   return (
     <div className={cn(className, 'mb-5')}>
       <div className="flex flex-col items-baseline justify-between gap-4 sm:!flex-row sm:items-center">
@@ -88,7 +93,7 @@ export const AccountHeaderView: FC<
         </div>
         <CardBalance
           className="min-w-40"
-          title="Wallet balance"
+          title={secondaryLabel ?? 'Wallet balance'}
           balance={loading ? '...' : balance?.uiAmount}
           symbol={loading ? '' : symbol}
         />
