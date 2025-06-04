@@ -32,7 +32,7 @@ function ConnectedWalletTokenAccounts({ address }: Required<{ address: PublicKey
   const [showInitializeModal, setShowInitializeModal] = useState(false)
   const { mutate: initializeAccount, isPending: isInitializing } =
     useCreateAssociatedTokenAccountCB({ walletAddressPubkey: address })
-  const { mutate: createTestToken, ...oth } = useCreateTestTokenCB({ walletAddressPubkey: address })
+  const { mutate: createTestToken } = useCreateTestTokenCB({ walletAddressPubkey: address })
 
   const onCreateCTA = useCallback(() => {
     setShowInitializeModal(true)
@@ -45,8 +45,6 @@ function ConnectedWalletTokenAccounts({ address }: Required<{ address: PublicKey
   const emptyLabel = useMemo(() => {
     return 'No token accounts found. Create new account to proceed'
   }, [])
-
-  console.log({ createTestToken, oth })
 
   return (
     <>
