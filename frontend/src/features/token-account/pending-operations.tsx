@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo, useState } from 'react'
+import { ComponentProps, FC, useCallback, useMemo, useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
@@ -42,6 +42,8 @@ const mockOperations = [
     variant: 'muted' as const,
   },
 ]
+
+type DataTableAction = NonNullable<ComponentProps<typeof DataTable>['actions']>[0]
 
 export function PendingOperations() {
   const { connected, publicKey } = useWallet()
@@ -93,11 +95,11 @@ function ConnectedWalletPendingOperations({
       })
     }
 
-    let list = [
+    let list: DataTableAction[] = [
       {
         action: 'refetch',
         title: '',
-        icon: RefreshCw,
+        icon: <RefreshCw />,
         onClick: onRefresh,
       },
     ]
