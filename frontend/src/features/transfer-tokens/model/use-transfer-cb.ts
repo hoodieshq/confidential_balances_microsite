@@ -1,23 +1,35 @@
-import { getAccount, TOKEN_2022_PROGRAM_ID, unpackAccount } from '@solana/spl-token'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import toast from 'react-hot-toast'
-import { useTransactionToast } from '../ui/transaction-toast'
-import { AES_SEED_MESSAGE } from './aes-seed-message'
-import { ELGAMAL_SEED_MESSAGE } from './elgamal-seed-message'
-import { generateSeedSignature } from './generate-seed-signature'
-import { processMultiTransaction } from './process-multi-transaction'
+import {
+  AES_SEED_MESSAGE,
+  ELGAMAL_SEED_MESSAGE,
+  generateSeedSignature,
+  processMultiTransaction,
+} from '@/entities/account/account'
+import { useToast } from '@/shared/ui/toast'
 
-export const useWithdrawCB = ({ tokenAccountPubkey }: { tokenAccountPubkey: PublicKey }) => {
+export const useTransferCB = ({
+  senderTokenAccountPubkey,
+}: {
+  senderTokenAccountPubkey: PublicKey
+}) => {
   const { connection } = useConnection()
   const client = useQueryClient()
-  const transactionToast = useTransactionToast()
+  const toast = useToast()
   const wallet = useWallet()
 
   return useMutation({
-    mutationKey: ['withdraw-cb', { endpoint: connection.rpcEndpoint, tokenAccountPubkey }],
-    mutationFn: async ({ amount }: { amount: number }) => {
+    mutationKey: ['transfer-cb', { endpoint: connection.rpcEndpoint, senderTokenAccountPubkey }],
+    mutationFn: async ({
+      amount,
+      recipientAddress,
+      mintAddress,
+    }: {
+      amount: number
+      recipientAddress: string
+      mintAddress: string
+    }) => {
       try {
         if (!wallet.publicKey) {
           throw new Error('Wallet not connected')
@@ -38,27 +50,34 @@ export const useWithdrawCB = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publ
         const aesSignatureBase64 = Buffer.from(aesSignature).toString('base64')
         console.log('AES base64 signature:', aesSignatureBase64)
 
-        // Get the token account data
-        const tokenAccountInfo = await connection.getAccountInfo(tokenAccountPubkey)
-        if (!tokenAccountInfo) {
-          throw new Error('Token account not found')
-        }
+        // Get the token account data for sender
+        const senderATAInfo = await (async () => {
+          const acctInfo = await connection.getAccountInfo(senderTokenAccountPubkey)
+          if (!acctInfo) {
+            throw new Error('Sender token account not found')
+          }
+          return acctInfo
+        })()
 
-        // Parse the token account data to get the mint
-        const tokenAccount = unpackAccount(
-          tokenAccountPubkey,
-          tokenAccountInfo,
-          TOKEN_2022_PROGRAM_ID
-        )
-        if (!tokenAccount) {
-          throw new Error('Failed to parse token account data')
-        }
+        // Get the token account data for recipient
+        const recipientATAInfo = await (async () => {
+          const recipientTokenAccountPubkey = new PublicKey(recipientAddress)
+          const acctInfo = await connection.getAccountInfo(recipientTokenAccountPubkey)
+          if (!acctInfo) {
+            throw new Error('Recipient token account not found')
+          }
+          return acctInfo
+        })()
 
         // Get the mint account data
-        const mintAccountInfo = await connection.getAccountInfo(tokenAccount.mint)
-        if (!mintAccountInfo) {
-          throw new Error('Mint account not found')
-        }
+        const mintAccountInfo = await (async () => {
+          const mintAccountPubkey = new PublicKey(mintAddress)
+          const acctInfo = await connection.getAccountInfo(mintAccountPubkey)
+          if (!acctInfo) {
+            throw new Error('Mint account not found')
+          }
+          return acctInfo
+        })()
 
         // Get the latest blockhash
         const latestBlockhash = await connection.getLatestBlockhash()
@@ -66,7 +85,7 @@ export const useWithdrawCB = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publ
         // Step 1: Get the space requirements for each proof account
         console.log('Fetching proof space requirements...')
         const spaceResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/withdraw-cb`,
+          `${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/transfer-cb`,
           {
             method: 'GET',
           }
@@ -84,21 +103,22 @@ export const useWithdrawCB = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publ
         const equalityProofRent = await connection.getMinimumBalanceForRentExemption(
           spaceData.equality_proof_space
         )
+        const ciphertextValidityProofRent = await connection.getMinimumBalanceForRentExemption(
+          spaceData.ciphertext_validity_proof_space
+        )
         const rangeProofRent = await connection.getMinimumBalanceForRentExemption(
           spaceData.range_proof_space
         )
 
         console.log('Rent requirements:')
         console.log('- Equality proof rent:', equalityProofRent, 'lamports')
+        console.log('- Ciphertext validity proof rent:', ciphertextValidityProofRent, 'lamports')
         console.log('- Range proof rent:', rangeProofRent, 'lamports')
 
-        // Add logging to debug
-        console.log('Submitting withdraw request with amount:', amount)
-
-        // Step 3: Call the withdraw-cb endpoint with rent information
-        console.log('Submitting withdraw request...')
+        // Step 3: Call the transfer-cb endpoint with rent information
+        console.log('Submitting transfer request...')
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/withdraw-cb`,
+          `${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/transfer-cb`,
           {
             method: 'POST',
             headers: {
@@ -107,11 +127,14 @@ export const useWithdrawCB = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publ
             body: JSON.stringify({
               elgamal_signature: elGamalSignatureBase64,
               aes_signature: aesSignatureBase64,
-              recipient_token_account: Buffer.from(tokenAccountInfo.data).toString('base64'),
-              mint_account_info: Buffer.from(mintAccountInfo.data).toString('base64'),
-              withdraw_amount_lamports: amount.toString(),
+              sender_token_account: Buffer.from(senderATAInfo.data).toString('base64'),
+              recipient_token_account: Buffer.from(recipientATAInfo.data).toString('base64'),
+              mint_token_account: Buffer.from(mintAccountInfo.data).toString('base64'),
+              amount: amount.toString(), // Convert to string to avoid precision issues with large numbers
+              priority_fee: '100000000', // Add 0.1 SOL (10,000,000 lamports) priority fee as string
               latest_blockhash: latestBlockhash.blockhash,
               equality_proof_rent: equalityProofRent.toString(),
+              ciphertext_validity_proof_rent: ciphertextValidityProofRent.toString(),
               range_proof_rent: rangeProofRent.toString(),
             }),
           }
@@ -128,7 +151,7 @@ export const useWithdrawCB = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publ
           wallet,
           connection,
           latestBlockhash,
-          'Withdraw'
+          'Transfer'
         )
 
         return {
@@ -144,41 +167,35 @@ export const useWithdrawCB = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publ
       if (data.signatures && data.signatures.length > 0) {
         // Display toast for each signature
         data.signatures.forEach((signature: string) => {
-          transactionToast(signature)
+          toast.transaction(signature)
         })
-        toast.success('Withdraw transaction successful')
+        toast.success('Transfer transaction successful')
       }
 
       // Hide confidential balance using query cache
-      client.setQueryData(['confidential-visibility', tokenAccountPubkey.toString()], false)
+      client.setQueryData(['confidential-visibility', senderTokenAccountPubkey.toString()], false)
 
       // Invalidate relevant queries to refresh data
       return Promise.all([
         client.invalidateQueries({
-          queryKey: ['get-balance', { endpoint: connection.rpcEndpoint, tokenAccountPubkey }],
-        }),
-        client.invalidateQueries({
-          queryKey: ['get-signatures', { endpoint: connection.rpcEndpoint, tokenAccountPubkey }],
+          queryKey: ['get-balance', { endpoint: connection.rpcEndpoint, senderTokenAccountPubkey }],
         }),
         client.invalidateQueries({
           queryKey: [
-            'get-token-accounts',
-            { endpoint: connection.rpcEndpoint, tokenAccountPubkey },
+            'get-signatures',
+            { endpoint: connection.rpcEndpoint, senderTokenAccountPubkey },
           ],
         }),
         client.invalidateQueries({
           queryKey: [
-            'get-token-balance',
-            {
-              endpoint: connection.rpcEndpoint,
-              tokenAccountPubkey: tokenAccountPubkey.toString(),
-            },
+            'get-token-accounts',
+            { endpoint: connection.rpcEndpoint, senderTokenAccountPubkey },
           ],
         }),
       ])
     },
     onError: (error) => {
-      toast.error(`Withdraw failed! ${error}`)
+      toast.error(`Transfer failed! ${error}`)
     },
   })
 }

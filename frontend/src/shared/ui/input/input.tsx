@@ -2,6 +2,7 @@ import { ComponentProps, FC } from 'react'
 import { Input as UIInput } from '@solana-foundation/ms-tools-ui'
 import { cva } from 'class-variance-authority'
 import { cn } from '@/shared/utils'
+import styles from './input.module.css'
 
 const inputVariants = cva(
   cn(
@@ -20,7 +21,7 @@ const inputVariants = cva(
         narrow: 'leading-[100%] box-content',
       },
       size: {
-        lg: 'h-9 text-[2.25rem] md:text-[2.25rem] w-auto !pr-[56px]',
+        lg: 'h-9 text-[2.25rem] md:text-[2.25rem] w-auto',
       },
     },
     defaultVariants: {
@@ -30,10 +31,27 @@ const inputVariants = cva(
   }
 )
 
-export const Input: FC<ComponentProps<'input'>> = ({ children, className, ...props }) => {
-  return (
-    <UIInput className={cn(inputVariants(), className)} {...props}>
-      {children}
-    </UIInput>
-  )
-}
+export const Input: FC<ComponentProps<'input'> & { icon?: React.ReactNode }> = ({
+  className,
+  icon,
+  ...props
+}) => (
+  <div className="relative flex flex-col">
+    {icon && (
+      <div className="absolute top-1/2 left-2 -translate-y-1/2 text-[var(--foreground)]/50">
+        {icon}
+      </div>
+    )}
+    <UIInput
+      className={cn(
+        inputVariants(),
+        styles.input,
+        {
+          '!pl-10': !!icon,
+        },
+        className
+      )}
+      {...props}
+    />
+  </div>
+)
