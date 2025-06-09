@@ -213,12 +213,15 @@ pub async fn create_test_token(
         signatures.push(solana_sdk::signature::Signature::default());
     }
 
+    /*
     println!("📝 Creating versioned transaction with placeholder signatures");
     let versioned_transaction = VersionedTransaction {
-        signatures,
+        signatures: vec![],
         message: versioned_message,
     };
+    */
 
+    /*
     // Serialize the transaction to base64
     println!("🔄 Serializing transaction to base64");
     let serialized_transaction = match bincode::serialize(&versioned_transaction) {
@@ -230,9 +233,22 @@ pub async fn create_test_token(
         "✅ Transaction serialized successfully, size: {} bytes",
         serialized_transaction.len()
     );
+    */
+
+    // Serialize the transaction to base64
+    println!("🔄 Serializing transaction to base64");
+    let serialized_transaction = match bincode::serialize(&versioned_message) {
+        Ok(bytes) => BASE64_STANDARD.encode(bytes),
+        Err(_) => return Err(AppError::SerializationError),
+    };
+
+    println!(
+        "✅ Transaction serialized successfully, size: {} bytes",
+        serialized_transaction.len()
+    );
 
     // Create a structured message with mint info and keypair
-    let response_message = format!(
+    let _response_message = format!(
         "Token-2022 mint transaction created with 1000 token initial supply: ata={}, rent={}",
         "null", //authority_token_account.to_string(),
         mint_rent,
@@ -240,7 +256,8 @@ pub async fn create_test_token(
 
     println!("🎉 Transaction creation completed successfully");
     Ok(Json(TransactionResponse {
-        transaction: serialized_transaction,
-        message: response_message,
+        transaction: String::from('T'), //serialized_transaction,
+        message: serialized_transaction,
+        // message: response_message,
     }))
 }

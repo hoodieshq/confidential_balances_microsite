@@ -8,13 +8,20 @@ import {
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import {
   Keypair,
+  MessageV0,
   PublicKey,
   Transaction,
   TransactionInstruction,
+  TransactionMessage,
+  VersionedMessage,
   VersionedTransaction,
 } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
 import { useToast } from '@/shared/ui/toast'
+// !!
+// import { useTransactionToast } from '../ui/transaction-toast'
+import { processMultiTransaction } from './process-multi-transaction'
 import { getCacheKey as getTokenAccountsCacheKey } from './use-get-token-accounts'
 
 async function serverRequest({ account, mint }: { account: PublicKey; mint: PublicKey }) {
@@ -82,11 +89,17 @@ export const useCreateTestTokenCB = ({
         // Get the latest blockhash
         const latestBlockhash = await connection.getLatestBlockhash()
 
-        // Deserialize the transaction from the response
-        const serializedTransaction = Buffer.from(data.transaction, 'base64')
-        const transaction = VersionedTransaction.deserialize(serializedTransaction)
+        // Deserialize the VersionedMessage from the server response
+        const serializedMessage = Buffer.from(data.message, 'base64')
+        console.log('Deserializing message from server...')
 
-        // Update the transaction's blockhash
+        let message = VersionedMessage.deserialize(serializedMessage)
+        console.log('Message deserialized successfully')
+
+        // Create a new VersionedTransaction from the message
+        const transaction = new VersionedTransaction(message)
+
+        // Update the transaction's blockhash to the latest one
         if (transaction.message.version === 0) {
           // For VersionedMessage V0
           transaction.message.recentBlockhash = latestBlockhash.blockhash
@@ -95,17 +108,25 @@ export const useCreateTestTokenCB = ({
           ;(transaction.message as any).recentBlockhash = latestBlockhash.blockhash
         }
 
-        // transaction.signatures = []
-        console.log('T', transaction.signatures)
-        // Sign with mint's keypair to allow creating new mint
-        transaction.sign([mintKeypair])
+        // Clear existing signatures to prepare for fresh signing
+        transaction.signatures = new Array(transaction.message.header.numRequiredSignatures).fill(
+          new Uint8Array(64).fill(0)
+        )
 
-        // Sign and send the transaction
-        const signature = await wallet.sendTransaction(transaction, connection)
+        // Sign the transaction with the mint keypair first
+        // The mint keypair must sign because it's creating a new mint account
+        transaction.sign([mintKeypair])
+        console.log('Transaction signed with mint keypair')
+
+        // Send the transaction with the wallet (this will prompt user to sign)
+        const signature = await wallet.sendTransaction(transaction, connection, {
+          skipPreflight: false,
+          preflightCommitment: 'confirmed',
+        })
 
         // Confirm the transaction
         await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
-        console.log('Transaction signature:', signature)
+        console.log('Transaction confirmed with signature:', signature)
 
         return {
           signature,
@@ -205,7 +226,10 @@ export const useMintTestTokenCB = ({
           }
           console.log('ATA exists, proceeding with mint')
         } catch (error) {
-          if (error instanceof Error && error.message.includes('Associated token account does not exist')) {
+          if (
+            error instanceof Error &&
+            error.message.includes('Associated token account does not exist')
+          ) {
             throw error
           }
           throw new Error(
