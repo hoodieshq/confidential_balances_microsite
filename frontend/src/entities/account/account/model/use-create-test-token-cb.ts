@@ -8,19 +8,13 @@ import {
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import {
   Keypair,
-  MessageV0,
   PublicKey,
   Transaction,
-  TransactionInstruction,
-  TransactionMessage,
   VersionedMessage,
   VersionedTransaction,
 } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import toast from 'react-hot-toast'
 import { useToast } from '@/shared/ui/toast'
-// !!
-// import { useTransactionToast } from '../ui/transaction-toast'
 import { processMultiTransaction } from './process-multi-transaction'
 import { getCacheKey as getTokenAccountsCacheKey } from './use-get-token-accounts'
 
@@ -177,7 +171,7 @@ export const useMintTestTokenCB = ({
 }) => {
   const { connection } = useConnection()
   const client = useQueryClient()
-  const transactionToast = useTransactionToast()
+  const toast = useToast()
   const wallet = useWallet()
 
   return useMutation({
@@ -279,7 +273,7 @@ export const useMintTestTokenCB = ({
     },
     onSuccess: (data) => {
       if (data.signature) {
-        transactionToast(data.signature)
+        toast.transaction(data.signature)
         toast.success(`Token-2022 minted! Address: ${data.mintAddress}, amount=${data.amount}`)
       }
 
