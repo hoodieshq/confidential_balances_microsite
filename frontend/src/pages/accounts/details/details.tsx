@@ -62,7 +62,7 @@ export const Details: FC<DetailsProps> = ({ address: param, account: ataParam })
       )}
       <div className="flex flex-col gap-5">
         <ConfidentialBalances account={account} />
-        <PendingOperations />
+        <PendingOperations account={account} />
         <TransactionHistory />
       </div>
       LEGACY ACCOUNT MARKUP DOWN THERE

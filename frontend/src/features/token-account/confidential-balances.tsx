@@ -47,7 +47,6 @@ const DisconnectedWalletConfidentialBalances: FC = () => (
 )
 
 function ConnectedWalletConfidentialBalances({
-  address,
   account,
 }: Required<{ address: PublicKey; account: PublicKey }>) {
   const [showDepositModal, setShowDepositModal] = useState(false)
@@ -56,7 +55,7 @@ function ConnectedWalletConfidentialBalances({
   const [selectedTokenAccount, setSelectedTokenAccount] = useState<PublicKey | null>(null)
   const toast = useToast()
 
-  const { isVisible, showBalance, hideBalance } = useConfidentialVisibility(address)
+  const { isVisible, showBalance, hideBalance } = useConfidentialVisibility(account)
   const {
     error: decryptError,
     decryptBalance,
@@ -75,21 +74,18 @@ function ConnectedWalletConfidentialBalances({
     hideBalance()
   }, [hideBalance])
 
-  const openDepositModal = useCallback((tokenAccount?: PublicKey) => {
-    // if (tokenAccount) setSelectedTokenAccount(tokenAccount)
-    // else if (query.data?.[0]?.pubkey) setSelectedTokenAccount(query.data[0].pubkey)
+  const openDepositModal = useCallback((tokenAccount: PublicKey) => {
+    setSelectedTokenAccount(tokenAccount)
     setShowDepositModal(true)
   }, [])
 
-  const openWithdrawModal = useCallback((tokenAccount?: PublicKey) => {
-    // if (tokenAccount) setSelectedTokenAccount(tokenAccount)
-    // else if (query.data?.[0]?.pubkey) setSelectedTokenAccount(query.data[0].pubkey)
+  const openWithdrawModal = useCallback((tokenAccount: PublicKey) => {
+    setSelectedTokenAccount(tokenAccount)
     setShowWithdrawModal(true)
   }, [])
 
-  const openTransferModal = useCallback((tokenAccount?: PublicKey) => {
-    // if (tokenAccount) setSelectedTokenAccount(tokenAccount)
-    // else if (query.data?.[0]?.pubkey) setSelectedTokenAccount(query.data[0].pubkey)
+  const openTransferModal = useCallback((tokenAccount: PublicKey) => {
+    setSelectedTokenAccount(tokenAccount)
     setShowTransferModal(true)
   }, [])
 
@@ -99,19 +95,19 @@ function ConnectedWalletConfidentialBalances({
         action: 'deposit',
         title: 'Deposit',
         icon: <ArrowDown />,
-        onClick: () => openDepositModal(address),
+        onClick: () => openDepositModal(account),
       },
       {
         action: 'withdraw',
         title: 'Withdraw',
         icon: <ArrowUp />,
-        onClick: () => openWithdrawModal(address),
+        onClick: () => openWithdrawModal(account),
       },
       {
         action: 'transfer',
         title: 'Transfer',
         icon: <Send />,
-        onClick: () => openTransferModal(address),
+        onClick: () => openTransferModal(account),
       },
     ]
 
@@ -127,7 +123,7 @@ function ConnectedWalletConfidentialBalances({
 
     return list
   }, [
-    address,
+    account,
     confidentialBalance,
     isVisible,
     onHideBalance,
