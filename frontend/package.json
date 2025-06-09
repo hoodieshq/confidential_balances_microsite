@@ -83,8 +83,7 @@
   "pnpm": {
     "overrides": {
       "image-size@>=1.1.0 <1.2.1": ">=1.2.1",
-      "@solana/wallet-adapter-react-base@<0.9.26": ">=0.9.26",
-      "@solana-foundation/ms-tools": "link:../../../../../Library/pnpm/global/5/node_modules/@solana-foundation/ms-tools"
+      "@solana/wallet-adapter-react-base@<0.9.26": ">=0.9.26"
     },
     "onlyBuiltDependencies": [
       "@tailwindcss/oxide",
