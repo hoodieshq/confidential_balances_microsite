@@ -12,6 +12,7 @@ import {
 } from '@/entities/account/account/model/use-create-test-token-cb'
 import { useGetTokenAccounts } from '@/entities/account/account/model/use-get-token-accounts'
 import { ModalInitATA } from '@/entities/account/account/ui/modal-init-ata'
+import { ModalMintToken } from '@/entities/account/account/ui/modal-mint-token'
 import { ExplorerLink } from '@/entities/cluster/cluster'
 import { DataTable } from '@/shared/ui/data-table'
 
@@ -140,12 +141,11 @@ function ConnectedWalletTokenAccounts({
         initializeAccount={initializeAccount}
         isInitializing={isInitializing}
       />
-      <ModalInitATA
+      <ModalMintToken
         key="mintTestToken"
         show={showMintModal}
         hide={() => setShowMintModal(false)}
         initializeAccount={(a) => {
-          console.log({ ADDRE: a })
           mintTestToken({ mintAddressPubkey: new PublicKey(a.mintAddress) })
         }}
         isInitializing={isMinting}
