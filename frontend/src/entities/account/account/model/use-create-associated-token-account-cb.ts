@@ -5,6 +5,8 @@ import { useToast } from '@/shared/ui/toast'
 import { AES_SEED_MESSAGE } from './aes-seed-message'
 import { ELGAMAL_SEED_MESSAGE } from './elgamal-seed-message'
 import { generateSeedSignature } from './generate-seed-signature'
+import { queryKey as getSignaturesQK } from './use-get-signatures'
+// !!!
 import { getCacheKey as getTokenAccountsCacheKey } from './use-get-token-accounts'
 
 export const useCreateAssociatedTokenAccountCB = ({
@@ -112,10 +114,7 @@ export const useCreateAssociatedTokenAccountCB = ({
           ],
         }),
         client.invalidateQueries({
-          queryKey: [
-            'get-signatures',
-            { endpoint: connection.rpcEndpoint, address: walletAddressPubkey },
-          ],
+          queryKey: getSignaturesQK(connection.rpcEndpoint, walletAddressPubkey),
         }),
         client.invalidateQueries({
           queryKey: getTokenAccountsCacheKey(connection.rpcEndpoint, walletAddressPubkey),

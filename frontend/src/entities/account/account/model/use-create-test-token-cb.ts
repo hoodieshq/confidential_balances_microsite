@@ -16,6 +16,7 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/shared/ui/toast'
 import { processMultiTransaction } from './process-multi-transaction'
+import { queryKey as getSignaturesQK } from './use-get-signatures'
 import { getCacheKey as getTokenAccountsCacheKey } from './use-get-token-accounts'
 
 async function serverRequest({ account, mint }: { account: PublicKey; mint: PublicKey }) {
@@ -146,10 +147,7 @@ export const useCreateTestTokenCB = ({
           ],
         }),
         client.invalidateQueries({
-          queryKey: [
-            'get-signatures',
-            { endpoint: connection.rpcEndpoint, address: walletAddressPubkey },
-          ],
+          queryKey: getSignaturesQK(connection.rpcEndpoint, walletAddressPubkey),
         }),
         client.invalidateQueries({
           queryKey: getTokenAccountsCacheKey(connection.rpcEndpoint, walletAddressPubkey),
@@ -286,10 +284,7 @@ export const useMintTestTokenCB = ({
           ],
         }),
         client.invalidateQueries({
-          queryKey: [
-            'get-signatures',
-            { endpoint: connection.rpcEndpoint, address: walletAddressPubkey },
-          ],
+          queryKey: getSignaturesQK(connection.rpcEndpoint, walletAddressPubkey),
         }),
         client.invalidateQueries({
           queryKey: getTokenAccountsCacheKey(connection.rpcEndpoint, walletAddressPubkey),

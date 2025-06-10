@@ -42,8 +42,6 @@ export const Details: FC<DetailsProps> = ({ address: param, account: ataParam })
     return <div>Loading account data...</div>
   }
 
-  console.log({ accountDescription }, PublicKey.default.toString())
-
   return (
     <div>
       {/* TODO: replace with UI::Breadcrumbs */}
@@ -65,7 +63,7 @@ export const Details: FC<DetailsProps> = ({ address: param, account: ataParam })
         <PendingOperations account={account} />
         <TransactionHistory />
       </div>
-      LEGACY ACCOUNT MARKUP DOWN THERE
+      {/* LEGACY ACCOUNT MARKUP DOWN THERE
       <div>
         <Hero title="" subtitle="">
           <div className="my-4">
@@ -77,7 +75,7 @@ export const Details: FC<DetailsProps> = ({ address: param, account: ataParam })
         <div className="space-y-8">
           <AccountTransactions address={address} />
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }

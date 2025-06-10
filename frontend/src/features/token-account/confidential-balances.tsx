@@ -14,6 +14,7 @@ import {
   Send,
   Unlock,
 } from 'lucide-react'
+import pluralize from 'pluralize'
 import { useConfidentialVisibility } from '@/entities/account/account/model/use-confidential-visibility'
 import { useDecryptConfidentialBalance } from '@/entities/account/account/model/use-decrypt-confidential-balance'
 import { useGetTokenAccounts } from '@/entities/account/account/model/use-get-token-accounts'
@@ -175,7 +176,13 @@ function ConnectedWalletConfidentialBalances({
         actions={actions}
         rows={
           confidentialBalance && isVisible
-            ? [[<div key="confidential-balance">{confidentialBalance} Token</div>]]
+            ? [
+                [
+                  <div key="confidential-balance">
+                    {confidentialBalance} {pluralize('Token', Number(confidentialBalance))}
+                  </div>,
+                ],
+              ]
             : undefined
         }
       />

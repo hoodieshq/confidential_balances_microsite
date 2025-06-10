@@ -2,6 +2,7 @@ import { getAccount, getMint, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey, VersionedTransaction } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { queryKey as getSignaturesQK } from '@/entities/account/account/model/use-get-signatures'
 import { useToast } from '@/shared/ui/toast'
 
 export const useDepositCb = ({ tokenAccountPubkey }: { tokenAccountPubkey: PublicKey }) => {
@@ -112,7 +113,7 @@ export const useDepositCb = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publi
           queryKey: ['get-balance', { endpoint: connection.rpcEndpoint, tokenAccountPubkey }],
         }),
         client.invalidateQueries({
-          queryKey: ['get-signatures', { endpoint: connection.rpcEndpoint, tokenAccountPubkey }],
+          queryKey: getSignaturesQK(connection.rpcEndpoint, tokenAccountPubkey),
         }),
         client.invalidateQueries({
           queryKey: [

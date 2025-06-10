@@ -9,6 +9,7 @@ import {
   processMultiTransaction,
 } from '@/entities/account/account'
 import { queryKey as confidentialVisibilityQK } from '@/entities/account/account/model/use-confidential-visibility'
+import { queryKey as getSignaturesQK } from '@/entities/account/account/model/use-get-signatures'
 import { useToast } from '@/shared/ui/toast'
 
 export const queryKey = (endpoint: string, address: PublicKey) => [
@@ -171,7 +172,7 @@ export const useWithdrawCB = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publ
           queryKey: ['get-balance', { endpoint: connection.rpcEndpoint, tokenAccountPubkey }],
         }),
         client.invalidateQueries({
-          queryKey: ['get-signatures', { endpoint: connection.rpcEndpoint, tokenAccountPubkey }],
+          queryKey: getSignaturesQK(connection.rpcEndpoint, tokenAccountPubkey),
         }),
         client.invalidateQueries({
           queryKey: [
