@@ -2,7 +2,10 @@ import { getAccount, getMint, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey, VersionedTransaction } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { queryKey as getBalanceQK } from '@/entities/account/account/model/use-get-balance'
 import { queryKey as getSignaturesQK } from '@/entities/account/account/model/use-get-signatures'
+import { queryKey as getTokenAccountsQK } from '@/entities/account/account/model/use-get-token-accounts'
+import { queryKey as getTokenBalanceQK } from '@/entities/account/account/model/use-get-token-balance'
 import { useToast } from '@/shared/ui/toast'
 
 export const useDepositCb = ({ tokenAccountPubkey }: { tokenAccountPubkey: PublicKey }) => {
@@ -98,6 +101,7 @@ export const useDepositCb = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publi
         throw error
       }
     },
+    // !!!
     onSuccess: (data) => {
       if (data.signature) {
         toast.transaction(data.signature)
@@ -110,25 +114,16 @@ export const useDepositCb = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publi
       // Invalidate relevant queries to refresh data
       return Promise.all([
         client.invalidateQueries({
-          queryKey: ['get-balance', { endpoint: connection.rpcEndpoint, tokenAccountPubkey }],
+          queryKey: getBalanceQK(connection.rpcEndpoint, tokenAccountPubkey),
         }),
         client.invalidateQueries({
           queryKey: getSignaturesQK(connection.rpcEndpoint, tokenAccountPubkey),
         }),
         client.invalidateQueries({
-          queryKey: [
-            'get-token-accounts',
-            { endpoint: connection.rpcEndpoint, tokenAccountPubkey },
-          ],
+          queryKey: getTokenAccountsQK(connection.rpcEndpoint, tokenAccountPubkey),
         }),
         client.invalidateQueries({
-          queryKey: [
-            'get-token-balance',
-            {
-              endpoint: connection.rpcEndpoint,
-              tokenAccountPubkey: tokenAccountPubkey.toString(),
-            },
-          ],
+          queryKey: getTokenBalanceQK(connection.rpcEndpoint, tokenAccountPubkey),
         }),
         client
           .invalidateQueries({

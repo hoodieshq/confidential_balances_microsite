@@ -1,6 +1,7 @@
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey, TransactionSignature } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { queryKey as getBalanceQK } from '@/entities/account/account/model/use-get-balance'
 import { queryKey as getSignaturesQK } from '@/entities/account/account/model/use-get-signatures'
 import { useToast } from '@/shared/ui/toast'
 import { createTransaction } from './create-transaction'
@@ -43,7 +44,7 @@ export const useTransferSol = ({ address }: { address: PublicKey }) => {
       }
       return Promise.all([
         client.invalidateQueries({
-          queryKey: ['get-balance', { endpoint: connection.rpcEndpoint, address }],
+          queryKey: getBalanceQK(connection.rpcEndpoint, address),
         }),
         client.invalidateQueries({
           queryKey: getSignaturesQK(connection.rpcEndpoint, address),
