@@ -1,23 +1,11 @@
 import { ComponentProps, FC, useCallback, useLayoutEffect, useMemo, useState } from 'react'
-import Link from 'next/link'
-import { Address, Button } from '@solana-foundation/ms-tools-ui'
+import { Button } from '@solana-foundation/ms-tools-ui'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
-import {
-  ArrowDown,
-  ArrowDownToLine,
-  ArrowRightLeft,
-  ArrowUp,
-  ArrowUpFromLine,
-  Loader,
-  Lock,
-  Send,
-  Unlock,
-} from 'lucide-react'
+import { ArrowDown, ArrowUp, Loader, Lock, Send, Unlock } from 'lucide-react'
 import pluralize from 'pluralize'
 import { useConfidentialVisibility } from '@/entities/account/account/model/use-confidential-visibility'
 import { useDecryptConfidentialBalance } from '@/entities/account/account/model/use-decrypt-confidential-balance'
-import { useGetTokenAccounts } from '@/entities/account/account/model/use-get-token-accounts'
 import { ModalDeposit } from '@/features/deposit-tokens'
 import { ModalTransfer } from '@/features/transfer-tokens'
 import { ModalWithdraw } from '@/features/withdraw-tokens'
@@ -55,6 +43,8 @@ function ConnectedWalletConfidentialBalances({
   const [showTransferModal, setShowTransferModal] = useState(false)
   const [selectedTokenAccount, setSelectedTokenAccount] = useState<PublicKey | null>(null)
   const toast = useToast()
+
+  console.log({ account })
 
   const { isVisible, showBalance, hideBalance } = useConfidentialVisibility(account)
   const {

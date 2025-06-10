@@ -47,8 +47,6 @@ export const useDepositCb = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publi
           return mint.decimals
         })()
 
-        console.log({ ataAccountInfo })
-
         // Call the deposit-cb endpoint
         const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/deposit-cb`, {
           method: 'POST',
@@ -101,7 +99,6 @@ export const useDepositCb = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publi
         throw error
       }
     },
-    // !!!
     onSuccess: (data) => {
       if (data.signature) {
         toast.transaction(data.signature)
