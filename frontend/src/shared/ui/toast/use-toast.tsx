@@ -22,6 +22,7 @@ export const useToast = () =>
               button={
                 <button
                   className="shrink-0 cursor-pointer text-xs"
+                  aria-label="Copy Address"
                   onClick={() => {
                     copy(address)
                     toast.success('Copied to clipboard')
