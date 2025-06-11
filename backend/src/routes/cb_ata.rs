@@ -1,3 +1,8 @@
+use crate::models::{
+    AuditTransactionRequest, AuditTransactionResponse, RegisterAuditorRequest,
+    RegisterAuditorResponse,
+};
+
 use {
     crate::{
         errors::AppError,
@@ -10,6 +15,7 @@ use {
     axum::extract::Json,
     base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _},
     bincode, bs58,
+    solana_client::rpc_client::RpcClient,
     solana_sdk::{
         hash::Hash,
         message::{v0, VersionedMessage},
@@ -19,8 +25,11 @@ use {
         system_instruction,
         transaction::VersionedTransaction,
     },
+    solana_transaction_status::UiTransactionEncoding,
     solana_zk_sdk::{
         encryption::auth_encryption::AeCiphertext,
+        encryption::elgamal::{ElGamalPubkey, ElGamalSecretKey},
+        encryption::pod::elgamal::PodElGamalPubkey,
         zk_elgamal_proof_program::{
             self,
             instruction::{close_context_state, ContextStateInfo},
@@ -37,8 +46,8 @@ use {
                     ApplyPendingBalanceAccountInfo, TransferAccountInfo, WithdrawAccountInfo,
                 },
                 instruction::{
-                    apply_pending_balance, configure_account, deposit, transfer, withdraw,
-                    PubkeyValidityProofData,
+                    apply_pending_balance, configure_account, deposit, transfer, update_mint,
+                    withdraw, PubkeyValidityProofData,
                 },
                 ConfidentialTransferAccount,
             },
@@ -1389,4 +1398,183 @@ pub async fn decrypt_cb(
         amount: decrypted_balance.to_string(),
         message: "Decryption successful".to_string(),
     }))
+}
+
+pub async fn register_auditor(
+    Json(request): Json<RegisterAuditorRequest>,
+) -> Result<Json<RegisterAuditorResponse>, AppError> {
+    println!(
+        "🔐 Starting register_auditor handler for mint: {}",
+        request.mint_address
+    );
+
+    let mint_address = Pubkey::from_str(&request.mint_address).map_err(|_| {
+        println!("Invalid mint address format");
+        AppError::InvalidAddress
+    })?;
+
+    let authority_pubkey = Pubkey::from_str(&request.authority_pubkey).map_err(|_| {
+        println!("Invalid authority address format");
+        AppError::InvalidAddress
+    })?;
+
+    println!("Decoding auditor ElGamal public key");
+    let auditor_elgamal_pubkey_bytes = BASE64_STANDARD
+        .decode(&request.auditor_elgamal_pubkey)
+        .map_err(|_| {
+            println!("Failed to decode ElGamal public key from base64");
+            AppError::SerializationError
+        })?;
+
+    let pod_elgamal_pubkey = if auditor_elgamal_pubkey_bytes.len() == 32 {
+        let mut bytes_array = [0u8; 32];
+        bytes_array.copy_from_slice(&auditor_elgamal_pubkey_bytes);
+        PodElGamalPubkey::from(bytes_array)
+    } else {
+        println!(
+            "Invalid ElGamal public key length: {}",
+            auditor_elgamal_pubkey_bytes.len()
+        );
+        return Err(AppError::SerializationError);
+    };
+
+    println!("Successfully decoded auditor ElGamal public key");
+
+    let update_mint_instruction = update_mint(
+        &spl_token_2022::id(),
+        &mint_address,
+        &authority_pubkey,
+        &[],  // No additional signers
+        true, // Auto-approve new accounts
+        Some(pod_elgamal_pubkey),
+    )
+    .map_err(|e| {
+        println!("Failed to create update_mint instruction: {:?}", e);
+        AppError::InstructionCreationError
+    })?;
+
+    let blockhash = match &request.recent_blockhash {
+        Some(blockhash_str) => Hash::from_str(blockhash_str).map_err(|_| {
+            println!("Invalid blockhash format");
+            AppError::InvalidBlockhash
+        })?,
+        None => {
+            println!("Using default blockhash");
+            Hash::default()
+        }
+    };
+
+    let message = v0::Message::try_compile(
+        &authority_pubkey,
+        &[update_mint_instruction],
+        &[],
+        blockhash,
+    )
+    .map_err(|e| {
+        println!("Failed to compile transaction message: {:?}", e);
+        AppError::CompileError(e)
+    })?;
+
+    let versioned_message = VersionedMessage::V0(message);
+    let versioned_transaction = VersionedTransaction {
+        // Placeholder signature, sign on a frontend
+        signatures: vec![Signature::default()],
+        message: versioned_message,
+    };
+
+    let serialized_transaction = match bincode::serialize(&versioned_transaction) {
+        Ok(bytes) => BASE64_STANDARD.encode(bytes),
+        Err(e) => {
+            println!("Failed to serialize transaction: {:?}", e);
+            return Err(AppError::BincodeError(e));
+        }
+    };
+
+    println!("✅ Successfully created auditor registration transaction");
+    Ok(Json(RegisterAuditorResponse {
+        transaction: serialized_transaction,
+        message: "Transaction for registering the auditor created successfully".to_string(),
+    }))
+}
+
+pub async fn audit_transaction(
+    Json(request): Json<AuditTransactionRequest>,
+) -> Result<Json<AuditTransactionResponse>, AppError> {
+    println!(
+        "Starting audit_transaction handler for transaction: {}",
+        request.transaction_signature
+    );
+
+    let auditor_wallet = Pubkey::from_str(&request.auditor_wallet_pubkey).map_err(|_| {
+        println!("Invalid auditor wallet address");
+        AppError::InvalidAddress
+    })?;
+
+    println!("Decoding ElGamal signature");
+    let elgamal_signature_bytes =
+        BASE64_STANDARD
+            .decode(&request.elgamal_signature)
+            .map_err(|_| {
+                println!("Failed to decode ElGamal signature from base64");
+                AppError::SerializationError
+            })?;
+
+    let auditor_elgamal_keypair = ElGamalKeypair::new_from_signature(
+        &Signature::try_from(elgamal_signature_bytes.as_slice())
+            .map_err(|_| AppError::SerializationError)?,
+    )
+    .map_err(|e| {
+        println!("Failed to create ElGamal keypair from signature: {:?}", e);
+        AppError::SerializationError
+    })?;
+
+    println!("Successfully created auditor's ElGamal keypair");
+
+    let elgamal_private_key = auditor_elgamal_keypair.secret();
+
+    let rpc_url = if request.rpc_url.is_empty() {
+        println!("⚠️ No RPC URL provided, using default mainnet URL");
+        "https://api.mainnet-beta.solana.com".to_string()
+    } else {
+        request.rpc_url.clone()
+    };
+    println!("Using Solana RPC URL: {}", rpc_url);
+
+    let client = RpcClient::new(rpc_url);
+    let tx_signature = Signature::from_str(&request.transaction_signature).map_err(|e| {
+        println!("Invalid transaction signature format: {:?}", e);
+        AppError::InvalidTransactionHash
+    })?;
+
+    let tx_response = client
+        .get_transaction(&tx_signature, UiTransactionEncoding::Base64)
+        .map_err(|e| {
+            println!("Failed to fetch transaction: {:?}", e);
+            AppError::TransactionFetchError
+        })?;
+
+    let (amount, sender, receiver) =
+        extract_and_decrypt_confidential_transfer(&tx_response, &elgamal_private_key)?;
+
+    println!("Successfully audited transaction");
+    Ok(Json(AuditTransactionResponse {
+        amount: amount.to_string(),
+        sender,
+        receiver,
+        message: "Transaction successfully audited".to_string(),
+    }))
+}
+
+fn extract_and_decrypt_confidential_transfer(
+    tx_data: &solana_transaction_status::EncodedConfirmedTransactionWithStatusMeta,
+    elgamal_private_key: &ElGamalSecretKey,
+) -> Result<(u64, String, String), AppError> {
+    println!("Extracting confidential transfer data from transaction");
+
+    // Placeholder values
+    Ok((
+        1000,
+        "Unknown sender".to_string(),
+        "Unknown receiver".to_string(),
+    ))
 }

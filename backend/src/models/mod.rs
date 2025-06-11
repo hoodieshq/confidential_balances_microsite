@@ -117,3 +117,37 @@ pub struct CreateTestTokenTransactionRequest {
     pub latest_blockhash: String, // The latest blockhash
     pub mint_rent: Option<u64>,   // Optional rent amount for mint account
 }
+
+// Request model for registering an auditor
+#[derive(Deserialize)]
+pub struct RegisterAuditorRequest {
+    pub mint_address: String,
+    pub authority_pubkey: String,
+    pub auditor_elgamal_pubkey: String,
+    pub recent_blockhash: Option<String>,
+}
+
+// Response model for registering an auditor
+#[derive(Serialize)]
+pub struct RegisterAuditorResponse {
+    pub transaction: String,
+    pub message: String,
+}
+
+// Request model for auditing a transaction
+#[derive(Deserialize)]
+pub struct AuditTransactionRequest {
+    pub transaction_signature: String,
+    pub auditor_wallet_pubkey: String,
+    pub elgamal_signature: String,
+    pub rpc_url: String,
+}
+
+// Response model for auditing a transaction
+#[derive(Serialize)]
+pub struct AuditTransactionResponse {
+    pub amount: String,
+    pub sender: String,
+    pub receiver: String,
+    pub message: String,
+}
