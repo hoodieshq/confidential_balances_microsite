@@ -1,6 +1,6 @@
 import { atom, useSetAtom } from 'jotai'
 
-export type Step = 1 | 2 | 3 | 4 | 5
+export type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7
 export type DevModeItem = {
   title: string
   result: string
