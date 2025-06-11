@@ -19,7 +19,7 @@ export const AuditTransaction: FC = () => {
   })
 
   const {
-    formState: { isSubmitting, isValid },
+    formState: { isSubmitting },
   } = form
 
   const _handleSubmit = async (values: FormValues) => {

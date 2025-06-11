@@ -2,7 +2,6 @@ import { useConnection } from '@solana/wallet-adapter-react'
 import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import pluralize from 'pluralize'
-import { useDevMode } from '@/entities/dev-mode'
 import { useOperationLog } from '@/entities/operation-log'
 import { useToast } from '@/shared/ui/toast'
 
