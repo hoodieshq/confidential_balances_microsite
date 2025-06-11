@@ -14,7 +14,6 @@ interface AccountPageParams {
   [key: string]: string | string[] | undefined
 }
 
-// NOTE: control what account to render inside page component
 function PageView({ address }: { address: string }) {
   const {
     data: { tokenAccount, error, reason },
