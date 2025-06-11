@@ -115,7 +115,7 @@ export const useDepositCb = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publi
           variant: 'success',
         })
 
-        devMode.set(5, {
+        devMode.set(4, {
           title: 'Deposit Operation - COMPLETE',
           result: `Deposit transaction successful\n  Token account: ${tokenAccountPubkey}\n  Lamport amount: ${data.lamportAmount}\n  Signature: ${data.signature}`,
           success: true,

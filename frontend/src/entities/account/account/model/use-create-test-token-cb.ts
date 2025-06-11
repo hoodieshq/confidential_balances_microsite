@@ -283,12 +283,6 @@ export const useMintTestTokenCB = ({
           result: `Token-2022 minted\n  Wallet: ${walletAddressPubkey}\n  Mint address: ${data.mintAddress}\n  Amount: ${pluralize('token', data.amount, true)}\n  Signature: ${data.signature}`,
           success: true,
         })
-
-        devMode.set(4, {
-          title: 'Mint token Operation - COMPLETE',
-          result: `Token-2022 minted\n  Wallet: ${walletAddressPubkey}\n  Mint address: ${data.mintAddress}\n  Amount: ${pluralize('token', data.amount, true)}\n  Signature: ${data.signature}`,
-          success: true,
-        })
       }
 
       // Invalidate relevant queries to refresh data

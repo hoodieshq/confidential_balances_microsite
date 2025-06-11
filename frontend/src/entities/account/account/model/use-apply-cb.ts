@@ -2,6 +2,7 @@ import { getAccount, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey, VersionedTransaction } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useDevMode } from '@/entities/dev-mode'
 import { useOperationLog } from '@/entities/operation-log'
 import { useToast } from '@/shared/ui/toast'
 import { AES_SEED_MESSAGE } from './aes-seed-message'
@@ -19,6 +20,7 @@ export const useApplyCB = ({ address }: { address: PublicKey }) => {
 
   const toast = useToast()
   const log = useOperationLog()
+  const devMode = useDevMode()
 
   return useMutation({
     mutationKey: ['apply-pending-balance', { endpoint: connection.rpcEndpoint, address }],
@@ -125,6 +127,12 @@ export const useApplyCB = ({ address }: { address: PublicKey }) => {
           title: 'Apply Operation - COMPLETE',
           content: `Pending balance applied successfully\n  Signature: ${data.signature}`,
           variant: 'success',
+        })
+
+        devMode.set(5, {
+          title: 'Apply Operation - COMPLETE',
+          result: `Pending balance applied successfully\n  Signature: ${data.signature}`,
+          success: true,
         })
       }
 

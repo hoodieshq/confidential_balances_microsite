@@ -12,6 +12,7 @@ import { queryKey as confidentialVisibilityQK } from '@/entities/account/account
 import { queryKey as getBalanceQK } from '@/entities/account/account/model/use-get-balance'
 import { queryKey as getSignaturesQK } from '@/entities/account/account/model/use-get-signatures'
 import { queryKey as getTokenAccountsQK } from '@/entities/account/account/model/use-get-token-accounts'
+import { useDevMode } from '@/entities/dev-mode'
 import { useOperationLog } from '@/entities/operation-log'
 import { useToast } from '@/shared/ui/toast'
 
@@ -26,6 +27,7 @@ export const useTransferCB = ({
 
   const toast = useToast()
   const log = useOperationLog()
+  const devMode = useDevMode()
 
   return useMutation({
     mutationKey: ['transfer-cb', { endpoint: connection.rpcEndpoint, senderTokenAccountPubkey }],
@@ -184,6 +186,12 @@ export const useTransferCB = ({
           title: 'Transfer Operation - COMPLETE',
           content: `Transfer transaction successful\n  Token account: ${senderTokenAccountPubkey}\n  Amount: ${pluralize('token unit', data.amount, true)}${data.signatures.map((signature: string, index: number) => `\n  Signature${data.signatures.length > 1 ? ` #${index + 1}` : ''}: ${signature}`).join('')}`,
           variant: 'success',
+        })
+
+        devMode.set(7, {
+          title: 'Transfer Operation - COMPLETE',
+          result: `Transfer transaction successful\n  Token account: ${senderTokenAccountPubkey}\n  Amount: ${pluralize('token unit', data.amount, true)}${data.signatures.map((signature: string, index: number) => `\n  Signature${data.signatures.length > 1 ? ` #${index + 1}` : ''}: ${signature}`).join('')}`,
+          success: true,
         })
       }
 
