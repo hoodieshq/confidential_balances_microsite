@@ -2,8 +2,6 @@
 
 import { FC, useState } from 'react'
 import { ClusterModal, ClusterTable } from '@/entities/cluster/cluster'
-import { DataTable } from '@/shared/ui/data-table'
-import { Hero } from '@/shared/ui/hero'
 import { Text } from '@/shared/ui/text'
 
 export const Clusters: FC = () => {
@@ -16,15 +14,8 @@ export const Clusters: FC = () => {
         <Text>Configure list of clusters to work with.</Text>
       </div>
 
-      <div>
-        <Hero title="Clusters" subtitle="Manage and select your Solana clusters">
-          <ClusterModal show={showModal} hideModal={() => setShowModal(false)} />
-          <button className="btn btn-xs lg:btn-md btn-primary" onClick={() => setShowModal(true)}>
-            Add Cluster
-          </button>
-        </Hero>
-        <ClusterTable />
-      </div>
+      <ClusterModal show={showModal} hideModal={() => setShowModal(false)} />
+      <ClusterTable onAddCluster={() => setShowModal(true)} />
     </section>
   )
 }
