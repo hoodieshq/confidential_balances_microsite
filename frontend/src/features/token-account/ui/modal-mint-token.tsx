@@ -13,6 +13,7 @@ type ModalInitATAProps = {
   isInitializing: boolean
   onSuccess?: () => void
   onError?: () => void
+  submitLabel?: string
 }
 
 type FormData = {
@@ -26,6 +27,7 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
   isInitializing,
   onSuccess,
   onError,
+  submitLabel,
 }) => {
   const toast = useToast()
 
@@ -71,7 +73,7 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
       initializeAccount({ mintAddress: formValues.mintAddress })
       hide()
       form.reset()
-      toast.success('Mint token transaction submitted')
+      toast.info('Mint token transaction submitted')
       onSuccess?.()
     } catch (error) {
       console.error('Mint token failed:', error)
@@ -86,7 +88,7 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
       show={show}
       title="Mint token"
       submitDisabled={!isValid || isInitializing}
-      submitLabel={isInitializing ? 'Processing...' : 'Initialize'}
+      submitLabel={isInitializing ? 'Processing...' : (submitLabel ?? 'Initialize')}
       submit={handleSubmit}
     >
       <Form {...form}>

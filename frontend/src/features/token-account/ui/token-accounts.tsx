@@ -12,9 +12,10 @@ import {
 } from '@/entities/account/account/model/use-create-test-token-cb'
 import { useGetTokenAccounts } from '@/entities/account/account/model/use-get-token-accounts'
 import { ModalInitATA } from '@/entities/account/account/ui/modal-init-ata'
-import { ModalMintToken } from '@/entities/account/account/ui/modal-mint-token'
 import { ExplorerLink } from '@/entities/cluster/cluster'
 import { DataTable } from '@/shared/ui/data-table'
+import { ModalCreateMint } from './modal-create-mint'
+import { ModalMintToken } from './modal-mint-token'
 
 type DataTableAction = NonNullable<ComponentProps<typeof DataTable>['actions']>[0]
 
@@ -54,11 +55,14 @@ function ConnectedWalletTokenAccounts({
   console.log({ items })
 
   const [showInitializeModal, setShowInitializeModal] = useState(false)
+  const [showCreateMintModal, setShowCreateMintModal] = useState(false)
   const [showMintModal, setShowMintModal] = useState(false)
   const { mutate: initializeAccount, isPending: isInitializing } =
     useCreateAssociatedTokenAccountCB({ walletAddressPubkey: address })
 
-  const { mutate: createTestToken } = useCreateTestTokenCB({ walletAddressPubkey: address })
+  const { mutate: createTestToken, isPending: isCreatingMint } = useCreateTestTokenCB({
+    walletAddressPubkey: address,
+  })
   const { mutate: mintTestToken, isPending: isMinting } = useMintTestTokenCB({
     walletAddressPubkey: address,
   })
@@ -72,8 +76,8 @@ function ConnectedWalletTokenAccounts({
   }, [setShowMintModal])
 
   const onCreateTestToken = useCallback(() => {
-    createTestToken()
-  }, [createTestToken])
+    setShowCreateMintModal(true)
+  }, [setShowCreateMintModal])
 
   const emptyLabel = useMemo(() => {
     const noRecords = 'No token accounts found. Create new account to proceed'
@@ -102,7 +106,7 @@ function ConnectedWalletTokenAccounts({
       },
       {
         action: 'createTestToken',
-        title: 'Create test tokens',
+        title: 'Create test token',
         onClick: onCreateTestToken,
         icon: <PlusCircle />,
       },
@@ -141,6 +145,18 @@ function ConnectedWalletTokenAccounts({
         initializeAccount={initializeAccount}
         isInitializing={isInitializing}
       />
+      <ModalCreateMint
+        key="createMint"
+        show={showCreateMintModal}
+        hide={() => setShowCreateMintModal(false)}
+        submitCallback={(a) => {
+          createTestToken({
+            auditorElGamalPubkey: a.auditorAddress,
+          })
+        }}
+        isProcessing={isCreatingMint}
+        submitLabel="Create mint"
+      />
       <ModalMintToken
         key="mintTestToken"
         show={showMintModal}
@@ -149,6 +165,7 @@ function ConnectedWalletTokenAccounts({
           mintTestToken({ mintAddressPubkey: new PublicKey(a.mintAddress) })
         }}
         isInitializing={isMinting}
+        submitLabel="Mint token"
       />
       <DataTable
         title="Token accounts with confidential balances"

@@ -56,7 +56,11 @@ export const useCreateTestTokenCB = ({
       'create-token2022-test-mint',
       { endpoint: connection.rpcEndpoint, address: walletAddressPubkey },
     ],
-    mutationFn: async () => {
+    mutationFn: async ({
+      auditorElGamalPubkey,
+    }: {
+      auditorElGamalPubkey?: any /* use proper type here */
+    }) => {
       try {
         if (!wallet.publicKey) {
           throw new Error('Wallet not connected')
@@ -78,7 +82,11 @@ export const useCreateTestTokenCB = ({
         const mintRent = await connection.getMinimumBalanceForRentExemption(mintSpace)
         console.log('Mint account rent required:', mintRent, 'lamports')
 
-        const data = await serverRequest({ account: wallet.publicKey, mint: mintKeypair.publicKey })
+        const data = await serverRequest({
+          account: wallet.publicKey,
+          // auditor: auditorElGamalPubkey,
+          mint: mintKeypair.publicKey,
+        })
 
         // Get the latest blockhash
         const latestBlockhash = await connection.getLatestBlockhash()
