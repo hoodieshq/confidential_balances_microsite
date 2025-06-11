@@ -1,4 +1,4 @@
-import React, { FC, PropsWithChildren } from 'react'
+import React, { ComponentProps, FC, PropsWithChildren } from 'react'
 import { cva, VariantProps } from 'class-variance-authority'
 import copy from 'copy-to-clipboard'
 import { useToast } from '@/shared/ui/toast'
@@ -38,13 +38,14 @@ export const LogItem: FC<LogItemProps> = ({ title, children, variant, className 
       )}
       onClick={() => {
         if (title) {
+          type ChildProps = ComponentProps<typeof LogItemResult>
           const text = [
             title,
             ...(React.Children.map(children, (child) => {
               if (
                 React.isValidElement(child) &&
                 child.type === LogItemResult &&
-                typeof child.props.children === 'string'
+                typeof (child.props as ChildProps).children === 'string'
               ) {
                 return child.props.children
               }
