@@ -61,7 +61,11 @@ export const useCreateTestTokenCB = ({
       'create-token2022-test-mint',
       { endpoint: connection.rpcEndpoint, address: walletAddressPubkey },
     ],
-    mutationFn: async () => {
+    mutationFn: async ({
+      auditorElGamalPubkey,
+    }: {
+      auditorElGamalPubkey?: any /* use proper type here */
+    }) => {
       try {
         if (!wallet.publicKey) {
           throw new Error('Wallet not connected')
@@ -85,6 +89,7 @@ export const useCreateTestTokenCB = ({
 
         const data = await serverRequest({
           account: wallet.publicKey.toBase58(),
+          // auditor: auditorElGamalPubkey,
           mint: mintKeypair.publicKey.toBase58(),
           mint_rent: mintRent,
           latest_blockhash: (await connection.getLatestBlockhash()).blockhash,

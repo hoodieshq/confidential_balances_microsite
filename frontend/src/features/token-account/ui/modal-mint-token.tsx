@@ -93,7 +93,7 @@ export const ModalMintToken: FC<ModalMintTokenProps> = ({
       })
       hide()
       form.reset()
-      toast.success('Mint token transaction submitted')
+      toast.info('Mint token transaction submitted')
       onSuccess?.()
     } catch (error) {
       console.error('Mint token failed:', error)
