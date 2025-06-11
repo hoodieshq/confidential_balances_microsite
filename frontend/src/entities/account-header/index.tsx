@@ -78,8 +78,9 @@ export const AccountHeaderView: FC<
     <div className={cn(className, 'mb-5')}>
       <div className="flex flex-col items-baseline justify-between gap-4 sm:!flex-row sm:items-center">
         <div className="flex flex-row items-baseline gap-4">
-          {/* TODO: Wallet has same size as h1, but semantically that's incorrect. Have to split styling and semantics */}
-          <Text variant="header1">{label ?? 'Wallet'}</Text>
+          <Text variant="header1" as="p">
+            {label ?? 'Wallet'}
+          </Text>
           {isWallet ? (
             <WalletTitle />
           ) : (
