@@ -1,4 +1,5 @@
 import { ComponentProps } from 'react'
+import Link from 'next/link'
 
 export function Logo({
   href = '/',
@@ -6,10 +7,10 @@ export function Logo({
   ...props
 }: { pathname: string | null; href?: string } & ComponentProps<'a'>) {
   const isLink = pathname && pathname !== href
-  const Comp = isLink ? 'a' : 'span'
+  const Comp = isLink ? Link : 'span'
 
   return (
-    <Comp href={isLink ? href : undefined} className="-m-1.5 p-1.5" {...props}>
+    <Comp href={isLink ? href : '/'} className="-m-1.5 p-1.5" {...props}>
       <span className="sr-only">Confidential Balances Demo</span>
       <span className="flex items-start gap-[12px]">
         {/* eslint-disable @next/next/no-img-element */}
