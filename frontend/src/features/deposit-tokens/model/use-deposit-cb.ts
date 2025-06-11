@@ -6,13 +6,18 @@ import { queryKey as getBalanceQK } from '@/entities/account/account/model/use-g
 import { queryKey as getSignaturesQK } from '@/entities/account/account/model/use-get-signatures'
 import { queryKey as getTokenAccountsQK } from '@/entities/account/account/model/use-get-token-accounts'
 import { queryKey as getTokenBalanceQK } from '@/entities/account/account/model/use-get-token-balance'
+import { useDevMode } from '@/entities/dev-mode'
+import { useOperationLog } from '@/entities/operation-log'
 import { useToast } from '@/shared/ui/toast'
 
 export const useDepositCb = ({ tokenAccountPubkey }: { tokenAccountPubkey: PublicKey }) => {
   const { connection } = useConnection()
-  const client = useQueryClient()
-  const toast = useToast()
   const wallet = useWallet()
+  const client = useQueryClient()
+
+  const toast = useToast()
+  const log = useOperationLog()
+  const devMode = useDevMode()
 
   return useMutation({
     mutationKey: ['deposit-cb', { endpoint: connection.rpcEndpoint, tokenAccountPubkey }],
@@ -91,6 +96,7 @@ export const useDepositCb = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publi
         console.log('Deposit transaction signature:', signature)
         return {
           signature,
+          lamportAmount,
           ...data,
         }
       } catch (error) {
@@ -102,6 +108,18 @@ export const useDepositCb = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publi
       if (data.signature) {
         toast.transaction(data.signature)
         toast.success('Deposit transaction successful')
+
+        log.push({
+          title: 'Deposit Operation - COMPLETE',
+          content: `Deposit transaction successful\n  Token account: ${tokenAccountPubkey}\n  Lamport amount: ${data.lamportAmount}\n  Signature: ${data.signature}`,
+          variant: 'success',
+        })
+
+        devMode.set(5, {
+          title: 'Deposit Operation - COMPLETE',
+          result: `Deposit transaction successful\n  Token account: ${tokenAccountPubkey}\n  Lamport amount: ${data.lamportAmount}\n  Signature: ${data.signature}`,
+          success: true,
+        })
       }
 
       // Log that we're going to invalidate the has-pending-balance query
@@ -140,6 +158,11 @@ export const useDepositCb = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publi
     },
     onError: (error) => {
       toast.error(`Deposit failed! ${error}`)
+      log.push({
+        title: 'Deposit Operation - FAILED',
+        content: `Deposit transaction failed\n  Token account: ${tokenAccountPubkey}\n  Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: 'error',
+      })
     },
   })
 }

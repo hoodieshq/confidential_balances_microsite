@@ -2,14 +2,12 @@ import { FC } from 'react'
 import { Button } from '@solana-foundation/ms-tools-ui'
 import { NATIVE_MINT } from '@solana/spl-token'
 import { WalletAccountHeader } from '@/entities/account-header'
-import { useDevMode } from '@/entities/dev-mode/model/dev-mode-items'
-import { useOperationLog } from '@/entities/operation-log'
+import { useDevMode } from '@/entities/dev-mode'
 import { TokenAccounts } from '@/features/token-account/token-accounts'
 import { CardStep } from '@/shared/ui/card-step'
 import { Text } from '@/shared/ui/text'
 
 export const Dashboard: FC = () => {
-  const { push } = useOperationLog()
   const { set } = useDevMode()
 
   return (
@@ -60,14 +58,6 @@ export const Dashboard: FC = () => {
       <TokenAccounts />
       <div className="flex gap-2">
         {/* TODO: Just for testing purposes, remove later */}
-        <Button
-          variant="outline"
-          onClick={() => {
-            push(operations[Math.floor(Math.random() * operations.length)])
-          }}
-        >
-          Add random log entry
-        </Button>
         <Button
           variant="outline"
           onClick={() => {

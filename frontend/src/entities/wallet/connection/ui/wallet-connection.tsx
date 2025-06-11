@@ -10,7 +10,7 @@ export const WalletConnection: FC = () => {
   const connectWallet = useCallback(() => setVisible(true), [setVisible])
 
   return !connected ? (
-    <Alert className="cursor-pointer" variant="warning" onClick={connectWallet}>
+    <Alert className="z-50 cursor-pointer" variant="warning" onClick={connectWallet}>
       <AlertTitle>Wallet is not connected</AlertTitle>
       <AlertDescription>Please select the wallet to connect.</AlertDescription>
     </Alert>

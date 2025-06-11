@@ -88,7 +88,7 @@ export const OperationLogDrawer: FC<OperationLogDrawerProps> = ({
           <div
             ref={setScrollableRef}
             className={cn(
-              'flex-1 snap-y overflow-x-hidden overflow-y-auto scroll-smooth p-0',
+              'flex-1 snap-y overflow-x-hidden overflow-y-auto scroll-smooth px-0 pt-0 pb-8',
               snap === 1
                 ? 'max-h-[calc(100vh-50px)]'
                 : snap === 0.7

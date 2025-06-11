@@ -1,6 +1,8 @@
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey, VersionedTransaction } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useDevMode } from '@/entities/dev-mode'
+import { useOperationLog } from '@/entities/operation-log'
 import { useToast } from '@/shared/ui/toast'
 import { AES_SEED_MESSAGE } from './aes-seed-message'
 import { ELGAMAL_SEED_MESSAGE } from './elgamal-seed-message'
@@ -15,9 +17,12 @@ export const useCreateAssociatedTokenAccountCB = ({
   walletAddressPubkey: PublicKey
 }) => {
   const { connection } = useConnection()
-  const client = useQueryClient()
-  const toast = useToast()
   const wallet = useWallet()
+  const client = useQueryClient()
+
+  const toast = useToast()
+  const log = useOperationLog()
+  const devMode = useDevMode()
 
   return useMutation({
     mutationKey: ['initialize-account', { endpoint: connection.rpcEndpoint, walletAddressPubkey }],
@@ -100,7 +105,18 @@ export const useCreateAssociatedTokenAccountCB = ({
     onSuccess: (data) => {
       if (data.signature) {
         toast.transaction(data.signature)
-        toast.success('Account initialize txn created ')
+        toast.success('Account initialize txn created')
+
+        log.push({
+          title: 'Create account Operation - COMPLETE',
+          content: `Account initialize txn created\n  Wallet: ${walletAddressPubkey}\n  Signature: ${data.signature}`,
+          variant: 'success',
+        })
+        devMode.set(2, {
+          title: 'Create account Operation - COMPLETE',
+          result: `Account initialize txn created\n  Wallet: ${walletAddressPubkey}\n  Signature: ${data.signature}`,
+          success: true,
+        })
       }
 
       // Invalidate relevant queries to refresh data
@@ -119,8 +135,18 @@ export const useCreateAssociatedTokenAccountCB = ({
     onError: (error) => {
       if (error instanceof Error && error.message.includes('message signing')) {
         toast.error(`Message signing failed: ${error.message}`)
+        log.push({
+          title: 'Create account Operation - FAILED',
+          content: `Message signing failed\n  Wallet: ${walletAddressPubkey}\n  Error: ${error.message}`,
+          variant: 'error',
+        })
       } else {
         toast.error(`Initialization failed! ${error}`)
+        log.push({
+          title: 'Create account Operation - FAILED',
+          content: `Account initialization failed\n  Wallet: ${walletAddressPubkey}\n  Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          variant: 'success',
+        })
       }
     },
   })

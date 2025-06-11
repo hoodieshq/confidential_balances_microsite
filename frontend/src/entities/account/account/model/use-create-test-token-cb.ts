@@ -8,6 +8,9 @@ import {
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { Keypair, PublicKey, Transaction, VersionedTransaction } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import pluralize from 'pluralize'
+import { useDevMode } from '@/entities/dev-mode'
+import { useOperationLog } from '@/entities/operation-log'
 import { useToast } from '@/shared/ui/toast'
 import { queryKey as getBalanceQK } from './use-get-balance'
 import { queryKey as getSignaturesQK } from './use-get-signatures'
@@ -54,9 +57,12 @@ export const useCreateTestTokenCB = ({
   walletAddressPubkey: PublicKey
 }) => {
   const { connection } = useConnection()
-  const client = useQueryClient()
-  const toast = useToast()
   const wallet = useWallet()
+  const client = useQueryClient()
+
+  const toast = useToast()
+  const log = useOperationLog()
+  const devMode = useDevMode()
 
   return useMutation({
     mutationKey: [
@@ -133,6 +139,16 @@ export const useCreateTestTokenCB = ({
       if (data.signature) {
         toast.transaction(data.signature)
         toast.address('Token-2022 mint created!', data.mintAddress)
+        log.push({
+          title: 'Create test token Operation - COMPLETE',
+          content: `Token-2022 mint created\n  Wallet: ${walletAddressPubkey}\n  Mint address: ${data.mintAddress}\n  Signature: ${data.signature}`,
+          variant: 'success',
+        })
+        devMode.set(1, {
+          title: 'Create test token Operation - COMPLETE',
+          result: `Token-2022 mint created\n  Wallet: ${walletAddressPubkey}\n  Mint address: ${data.mintAddress}\n  Signature: ${data.signature}`,
+          success: true,
+        })
       }
 
       // Invalidate relevant queries to refresh data
@@ -150,6 +166,11 @@ export const useCreateTestTokenCB = ({
     },
     onError: (error) => {
       toast.error(`Token mint creation failed! ${error}`)
+      log.push({
+        title: 'Create test token Operation - FAILED',
+        content: `Token mint creation failed\n  Wallet: ${walletAddressPubkey}\n  Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: 'error',
+      })
     },
   })
 }
@@ -162,9 +183,12 @@ export const useMintTestTokenCB = ({
   amount?: number
 }) => {
   const { connection } = useConnection()
-  const client = useQueryClient()
-  const toast = useToast()
   const wallet = useWallet()
+  const client = useQueryClient()
+
+  const toast = useToast()
+  const log = useOperationLog()
+  const devMode = useDevMode()
 
   return useMutation({
     mutationKey: [
@@ -247,6 +271,24 @@ export const useMintTestTokenCB = ({
       if (data.signature) {
         toast.transaction(data.signature)
         toast.address(`Token-2022 minted (${data.amount})!`, data.mintAddress)
+
+        log.push({
+          title: 'Mint token Operation - COMPLETE',
+          content: `Token-2022 minted\n  Wallet: ${walletAddressPubkey}\n  Mint address: ${data.mintAddress}\n  Amount: ${pluralize('token', data.amount, true)}\n  Signature: ${data.signature}`,
+          variant: 'success',
+        })
+
+        devMode.set(3, {
+          title: 'Mint token Operation - COMPLETE',
+          result: `Token-2022 minted\n  Wallet: ${walletAddressPubkey}\n  Mint address: ${data.mintAddress}\n  Amount: ${pluralize('token', data.amount, true)}\n  Signature: ${data.signature}`,
+          success: true,
+        })
+
+        devMode.set(4, {
+          title: 'Mint token Operation - COMPLETE',
+          result: `Token-2022 minted\n  Wallet: ${walletAddressPubkey}\n  Mint address: ${data.mintAddress}\n  Amount: ${pluralize('token', data.amount, true)}\n  Signature: ${data.signature}`,
+          success: true,
+        })
       }
 
       // Invalidate relevant queries to refresh data
@@ -264,6 +306,11 @@ export const useMintTestTokenCB = ({
     },
     onError: (error) => {
       toast.error(`Token minting failed! ${error}`)
+      log.push({
+        title: 'Mint token Operation - FAILED',
+        content: `Token minting failed\n  Wallet: ${walletAddressPubkey}\n  Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: 'error',
+      })
     },
   })
 }

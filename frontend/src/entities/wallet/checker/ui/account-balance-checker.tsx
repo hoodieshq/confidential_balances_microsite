@@ -22,7 +22,7 @@ export const AccountBalanceChecker: FC<AccountBalanceCheckerProps> = ({ children
     return (
       <>
         <Alert
-          className="cursor-pointer"
+          className="z-50 cursor-pointer"
           variant="warning"
           onClick={() => setRequestAirdropOpen(true)}
         >
