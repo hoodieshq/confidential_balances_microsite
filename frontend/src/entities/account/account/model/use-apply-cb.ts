@@ -2,6 +2,7 @@ import { getAccount, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey, VersionedTransaction } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useOperationLog } from '@/entities/operation-log'
 import { useToast } from '@/shared/ui/toast'
 import { AES_SEED_MESSAGE } from './aes-seed-message'
 import { ELGAMAL_SEED_MESSAGE } from './elgamal-seed-message'
@@ -13,9 +14,11 @@ import { queryKey as getTokenAccountsQK } from './use-get-token-accounts'
 
 export const useApplyCB = ({ address }: { address: PublicKey }) => {
   const { connection } = useConnection()
-  const client = useQueryClient()
-  const toast = useToast()
   const wallet = useWallet()
+  const client = useQueryClient()
+
+  const toast = useToast()
+  const log = useOperationLog()
 
   return useMutation({
     mutationKey: ['apply-pending-balance', { endpoint: connection.rpcEndpoint, address }],
@@ -118,6 +121,11 @@ export const useApplyCB = ({ address }: { address: PublicKey }) => {
       if (data.signature) {
         toast.transaction(data.signature)
         toast.success('Pending balance applied successfully')
+        log.push({
+          title: 'Apply Operation - COMPLETE',
+          content: `Pending balance applied successfully\n  Signature: ${data.signature}`,
+          variant: 'success',
+        })
       }
 
       // Hide confidential balance using query cache
@@ -161,8 +169,18 @@ export const useApplyCB = ({ address }: { address: PublicKey }) => {
     onError: (error) => {
       if (error instanceof Error && error.message.includes('message signing')) {
         toast.error(`Message signing failed: ${error.message}`)
+        log.push({
+          title: 'Apply Operation - FAILED',
+          content: `Message signing failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          variant: 'error',
+        })
       } else {
         toast.error(`Failed to apply pending balance: ${error}`)
+        log.push({
+          title: 'Apply Operation - FAILED',
+          content: `Failed to apply pending balance: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          variant: 'error',
+        })
       }
     },
   })
