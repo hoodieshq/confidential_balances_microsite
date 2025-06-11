@@ -20,6 +20,7 @@ solana-client = "2.1.11"
 solana-transaction-status-client-types = "2.1.11"
 solana-zk-sdk = "2.1.11"
 solana-message = "2.1.11"
+solana-transaction-status = "2.1.11"
 
 # SPL dependencies
 spl-token-2022 = "7.0.0" 

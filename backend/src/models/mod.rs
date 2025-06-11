@@ -33,9 +33,9 @@ pub struct CreateCbAtaRequest {
 #[derive(Deserialize)]
 pub struct DepositCbRequest {
     pub token_account_address: String, // BASE64 encoded token account address
-    pub token_account_data: String, // BASE64 encoded account data
-    pub lamport_amount: String,     // The amount to deposit (as a string to handle large numbers)
-    pub mint_decimals: u8,          // The number of decimals for the mint
+    pub token_account_data: String,    // BASE64 encoded account data
+    pub lamport_amount: String, // The amount to deposit (as a string to handle large numbers)
+    pub mint_decimals: u8,      // The number of decimals for the mint
 }
 
 // Request model for the apply_cb endpoint
@@ -112,7 +112,41 @@ pub struct DecryptCbResponse {
 pub struct CreateTestTokenTransactionRequest {
     pub account: String,
     pub mint: String,
-    pub mint_rent: Option<u64>,           // Optional rent amount for mint account
-    pub initial_supply: Option<u64>,      // Optional initial supply in lamports
+    pub mint_rent: Option<u64>, // Optional rent amount for mint account
+    pub initial_supply: Option<u64>, // Optional initial supply in lamports
     pub recent_blockhash: Option<String>, // Optional recent blockhash for simulation
+}
+
+// Request model for registering an auditor
+#[derive(Deserialize)]
+pub struct RegisterAuditorRequest {
+    pub mint_address: String,
+    pub authority_pubkey: String,
+    pub auditor_elgamal_pubkey: String,
+    pub recent_blockhash: Option<String>,
+}
+
+// Response model for registering an auditor
+#[derive(Serialize)]
+pub struct RegisterAuditorResponse {
+    pub transaction: String,
+    pub message: String,
+}
+
+// Request model for auditing a transaction
+#[derive(Deserialize)]
+pub struct AuditTransactionRequest {
+    pub transaction_signature: String,
+    pub auditor_wallet_pubkey: String,
+    pub elgamal_signature: String,
+    pub rpc_url: String,
+}
+
+// Response model for auditing a transaction
+#[derive(Serialize)]
+pub struct AuditTransactionResponse {
+    pub amount: String,
+    pub sender: String,
+    pub receiver: String,
+    pub message: String,
 }

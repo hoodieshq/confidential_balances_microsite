@@ -1,11 +1,11 @@
 use axum::{
-    response::{IntoResponse, Response},
     http::StatusCode,
+    response::{IntoResponse, Response},
 };
-use std::fmt;
 use solana_program::program_error::ProgramError;
-use solana_zk_sdk::errors::ElGamalError;
 use solana_sdk::signature::SignerError;
+use solana_zk_sdk::errors::ElGamalError;
+use std::fmt;
 
 // Error response
 #[derive(Debug)]
@@ -15,6 +15,14 @@ pub enum AppError {
     SerializationError,
     ProofGeneration,
     MintMismatch,
+    InvalidTransactionHash,
+    TransactionFetchError,
+    DecryptionError,
+    TransactionDataNotFound,
+    InvalidPublicKey,
+    InvalidPrivateKey,
+    InvalidBlockhash,
+    InstructionCreationError,
     // Add variants for underlying errors
     TokenError(spl_token_2022::error::TokenError),
     BincodeError(bincode::Error),
@@ -35,7 +43,18 @@ impl fmt::Display for AppError {
             Self::InvalidAmount => write!(f, "Invalid amount format"),
             Self::SerializationError => write!(f, "Failed to serialize transaction"),
             Self::ProofGeneration => write!(f, "Failed to generate proof"),
-            Self::MintMismatch => write!(f, "Sender and recipient token accounts have different mints"),
+            Self::MintMismatch => write!(
+                f,
+                "Sender and recipient token accounts have different mints"
+            ),
+            Self::InvalidTransactionHash => write!(f, "Invalid transaction hash/signature format"),
+            Self::TransactionFetchError => write!(f, "Failed to fetch transaction data"),
+            Self::DecryptionError => write!(f, "Failed to decrypt confidential data"),
+            Self::TransactionDataNotFound => write!(f, "Required transaction data not found"),
+            Self::InvalidPublicKey => write!(f, "Invalid ElGamal public key format"),
+            Self::InvalidPrivateKey => write!(f, "Invalid ElGamal private key format"),
+            Self::InvalidBlockhash => write!(f, "Invalid blockhash format"),
+            Self::InstructionCreationError => write!(f, "Failed to create instruction"),
             Self::TokenError(e) => write!(f, "Token error: {}", e),
             Self::BincodeError(e) => write!(f, "Bincode error: {}", e),
             Self::Base64Error(e) => write!(f, "Base64 decoding error: {}", e),
@@ -52,10 +71,19 @@ impl fmt::Display for AppError {
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let status = match &self {
-            AppError::InvalidAddress | AppError::InvalidAmount | AppError::MintMismatch => StatusCode::BAD_REQUEST,
+            AppError::InvalidAddress
+            | AppError::InvalidAmount
+            | AppError::MintMismatch
+            | AppError::InvalidTransactionHash
+            | AppError::InvalidPublicKey
+            | AppError::InvalidPrivateKey
+            | AppError::InvalidBlockhash => StatusCode::BAD_REQUEST,
+            AppError::TransactionFetchError | AppError::TransactionDataNotFound => {
+                StatusCode::NOT_FOUND
+            }
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
-        
+
         (status, self.to_string()).into_response()
     }
 }
@@ -101,7 +129,7 @@ impl From<ElGamalError> for AppError {
     fn from(error: ElGamalError) -> Self {
         Self::ElGamalError(error)
     }
-} 
+}
 
 impl From<solana_message::CompileError> for AppError {
     fn from(error: solana_message::CompileError) -> Self {
