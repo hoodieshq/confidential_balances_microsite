@@ -24,6 +24,19 @@ type LogItemProps = PropsWithChildren<{
 }> &
   VariantProps<typeof logItemVariants>
 
+type ChildProps = ComponentProps<typeof LogItemResult>
+
+// Type guard function to check if child is LogItemResult with ChildProps
+const isLogItemResultWithChildProps = (
+  child: React.ReactNode
+): child is React.ReactElement<ChildProps, typeof LogItemResult> => {
+  return (
+    React.isValidElement<ChildProps>(child) &&
+    child.type === LogItemResult &&
+    typeof child.props.children === 'string'
+  )
+}
+
 export const LogItem: FC<LogItemProps> = ({ title, children, variant, className }) => {
   const toast = useToast()
 
@@ -38,15 +51,10 @@ export const LogItem: FC<LogItemProps> = ({ title, children, variant, className 
       )}
       onClick={() => {
         if (title) {
-          type ChildProps = ComponentProps<typeof LogItemResult>
           const text = [
             title,
             ...(React.Children.map(children, (child) => {
-              if (
-                React.isValidElement(child) &&
-                child.type === LogItemResult &&
-                typeof (child.props as ChildProps).children === 'string'
-              ) {
+              if (isLogItemResultWithChildProps(child)) {
                 return child.props.children
               }
               return null
