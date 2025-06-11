@@ -9,7 +9,7 @@ import { useToast } from '@/shared/ui/toast'
 type ModalCreateMintProps = {
   show: boolean
   hide: () => void
-  submitCallback: (params: { auditorAddress: string }) => void
+  submitCallback: (_params: { auditorAddress: string }) => void
   isProcessing: boolean
   onSuccess?: () => void
   onError?: () => void

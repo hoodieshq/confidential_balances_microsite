@@ -1,8 +1,6 @@
 import { FC } from 'react'
 import { NATIVE_MINT } from '@solana/spl-token'
 import { WalletAccountHeader } from '@/entities/account-header'
-import { useDevMode } from '@/entities/dev-mode/model/dev-mode-items'
-import { useOperationLog } from '@/entities/operation-log'
 import { TokenAccounts } from '@/features/token-account'
 import { CardStep } from '@/shared/ui/card-step'
 import { Text } from '@/shared/ui/text'
