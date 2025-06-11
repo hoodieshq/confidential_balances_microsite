@@ -53,7 +53,16 @@ export const ModalCreateMint: FC<ModalCreateMintProps> = ({
       new PublicKey(value)
       return true
     } catch (error) {
-      return 'Invalid address format'
+      try {
+        const decoded = atob(value)
+        if (decoded.length === 32) {
+          return true
+        } else {
+          return 'ElGamal key must be 32 bytes when decoded'
+        }
+      } catch {
+        return 'Invalid address or ElGamal key format'
+      }
     }
   }
 

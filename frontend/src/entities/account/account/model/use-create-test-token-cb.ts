@@ -18,7 +18,7 @@ import { useToast } from '@/shared/ui/toast'
 import { processMultiTransaction } from './process-multi-transaction'
 import { getCacheKey as getTokenAccountsCacheKey } from './use-get-token-accounts'
 
-async function serverRequest({ account, mint }: { account: PublicKey; mint: PublicKey }) {
+async function serverRequest({ account, mint, auditor }: { account: PublicKey; mint: PublicKey; auditor: String }) {
   // Now proceed with the transaction
   const route = `${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/create-test-token`
   const response = await fetch(route, {
@@ -29,6 +29,7 @@ async function serverRequest({ account, mint }: { account: PublicKey; mint: Publ
     body: JSON.stringify({
       account: account.toBase58(),
       mint: mint.toBase58(),
+      auditor,
     }),
   })
 
@@ -84,7 +85,7 @@ export const useCreateTestTokenCB = ({
 
         const data = await serverRequest({
           account: wallet.publicKey,
-          // auditor: auditorElGamalPubkey,
+          auditor: auditorElGamalPubkey,
           mint: mintKeypair.publicKey,
         })
 

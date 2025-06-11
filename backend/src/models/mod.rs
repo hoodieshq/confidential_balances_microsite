@@ -115,6 +115,7 @@ pub struct CreateTestTokenTransactionRequest {
     pub mint_rent: Option<u64>, // Optional rent amount for mint account
     pub initial_supply: Option<u64>, // Optional initial supply in lamports
     pub recent_blockhash: Option<String>, // Optional recent blockhash for simulation
+    pub auditor: Option<String>, // Optional auditor's ElGamal public key
 }
 
 // Request model for registering an auditor

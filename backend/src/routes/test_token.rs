@@ -9,6 +9,7 @@ use solana_sdk::{
     system_instruction,
     transaction::VersionedTransaction,
 };
+use solana_zk_sdk::encryption::pod::elgamal::PodElGamalPubkey;
 use spl_associated_token_account::{
     get_associated_token_address_with_program_id, instruction::create_associated_token_account,
 };
@@ -63,6 +64,25 @@ pub async fn create_test_token(
         "✅ Request data is correct: account={}, mint={}",
         request.account, request.mint
     );
+
+    let auditor_elgamal_pubkey = match &request.auditor {
+        Some(encoded_key) => {
+            println!("Decoding auditor ElGamal public key");
+            let key_bytes = BASE64_STANDARD.decode(encoded_key).map_err(|_| {
+                println!("Failed to decode ElGamal public key from base64");
+                AppError::SerializationError
+            })?;
+
+            if key_bytes.len() != 32 {
+                println!("Invalid ElGamal key length: {}", key_bytes.len());
+                return Err(AppError::SerializationError);
+            }
+            let mut bytes_array = [0u8; 32];
+            bytes_array.copy_from_slice(&key_bytes);
+            Some(PodElGamalPubkey::from(bytes_array))
+        }
+        None => None,
+    };
 
     // Validate that mint address is different from authority
     if mint_address == authority_pubkey {
@@ -130,7 +150,7 @@ pub async fn create_test_token(
         &mint_address,          // Mint account
         Some(authority_pubkey), // Authority that can modify confidential transfer settings
         true,                   // Auto approve new accounts
-        None,                   // No auditor ElGamal pubkey
+        auditor_elgamal_pubkey, // No auditor ElGamal pubkey
     )
     .map_err(|_| AppError::SerializationError)?;
 
