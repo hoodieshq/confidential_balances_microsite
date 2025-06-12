@@ -52,6 +52,7 @@ function ConnectedWalletConfidentialBalances({
     confidentialBalance,
   } = useDecryptConfidentialBalance()
 
+
   const onDecryptBalance = async () => {
     const result = await decryptBalance(account)
     if (result) {
@@ -166,7 +167,7 @@ function ConnectedWalletConfidentialBalances({
           confidentialBalance && isVisible
             ? [
                 [
-                  <div key="confidential-balance">
+                  <div key="confidential-balance" className="font-medium text-(color:--accent)">
                     {confidentialBalance} {pluralize('Token', Number(confidentialBalance))}
                   </div>,
                 ],
