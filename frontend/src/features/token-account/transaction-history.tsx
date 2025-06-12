@@ -1,5 +1,6 @@
 import { ComponentProps, FC, useMemo, useState } from 'react'
-import { Address, Badge } from '@solana-foundation/ms-tools-ui'
+import { useRouter } from 'next/navigation'
+import { Address, Badge, Button } from '@solana-foundation/ms-tools-ui'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
@@ -36,6 +37,7 @@ function ConnectedWalletTransactionHistory({
   address,
   limit = 5,
 }: Required<{ address: PublicKey }> & { limit?: number }) {
+  const router = useRouter()
   const [showAll, setShowAll] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const query = useGetSignatures({ address })
@@ -93,7 +95,7 @@ function ConnectedWalletTransactionHistory({
       title="Transaction History"
       labels={{ empty: emptyLabel }}
       actions={actions}
-      headers={['Signature', 'Slot', 'Block Time', 'Status']}
+      headers={['Signature', 'Slot', 'Block Time', 'Status', '']}
       rows={items?.map((item, i) => [
         <Address key={`tx-sig-${i}`} address={item.signature} asChild>
           <ExplorerLink
@@ -120,6 +122,14 @@ function ConnectedWalletTransactionHistory({
             Success
           </Badge>
         ),
+        <Button
+          key={`tx-action-${i}`}
+          variant="outline"
+          size="sm"
+          onClick={() => router.push(`/auditor/?tx=${item.signature}`)}
+        >
+          Audit
+        </Button>,
       ])}
     />
   )

@@ -9,12 +9,16 @@ type FormValues = {
   transaction: string
 }
 
-export const AuditTransaction: FC = () => {
+type AuditTransactionProps = {
+  tx?: string
+}
+
+export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
   // TODO: fill transactions from the backend
   const [transactions, setTransactions] = useState<number[]>([])
 
   const form = useForm<FormValues>({
-    defaultValues: { transaction: '' },
+    defaultValues: { transaction: tx },
     mode: 'onChange',
   })
 
