@@ -151,7 +151,7 @@ export const useTransferCB = ({
         )
 
         if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`)
+          throw new Error(`😵 HTTP error! Status: ${response.status}`)
         }
 
         const data = await response.json()

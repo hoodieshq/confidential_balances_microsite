@@ -1,11 +1,11 @@
 use axum::{
-    response::{IntoResponse, Response},
     http::StatusCode,
+    response::{IntoResponse, Response},
 };
-use std::fmt;
 use solana_program::program_error::ProgramError;
-use solana_zk_sdk::errors::ElGamalError;
 use solana_sdk::signature::SignerError;
+use solana_zk_sdk::errors::ElGamalError;
+use std::fmt;
 
 // Error response
 #[derive(Debug)]
@@ -35,7 +35,10 @@ impl fmt::Display for AppError {
             Self::InvalidAmount => write!(f, "Invalid amount format"),
             Self::SerializationError => write!(f, "Failed to serialize transaction"),
             Self::ProofGeneration => write!(f, "Failed to generate proof"),
-            Self::MintMismatch => write!(f, "Sender and recipient token accounts have different mints"),
+            Self::MintMismatch => write!(
+                f,
+                "Sender and recipient token accounts have different mints"
+            ),
             Self::TokenError(e) => write!(f, "Token error: {}", e),
             Self::BincodeError(e) => write!(f, "Bincode error: {}", e),
             Self::Base64Error(e) => write!(f, "Base64 decoding error: {}", e),
@@ -52,10 +55,12 @@ impl fmt::Display for AppError {
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let status = match &self {
-            AppError::InvalidAddress | AppError::InvalidAmount | AppError::MintMismatch => StatusCode::BAD_REQUEST,
+            AppError::InvalidAddress | AppError::InvalidAmount | AppError::MintMismatch => {
+                StatusCode::BAD_REQUEST
+            }
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
-        
+
         (status, self.to_string()).into_response()
     }
 }
@@ -101,7 +106,7 @@ impl From<ElGamalError> for AppError {
     fn from(error: ElGamalError) -> Self {
         Self::ElGamalError(error)
     }
-} 
+}
 
 impl From<solana_message::CompileError> for AppError {
     fn from(error: solana_message::CompileError) -> Self {

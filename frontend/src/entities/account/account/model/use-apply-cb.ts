@@ -13,6 +13,31 @@ import { queryKey as getBalanceQK } from './use-get-balance'
 import { queryKey as getSignaturesQK } from './use-get-signatures'
 import { queryKey as getTokenAccountsQK } from './use-get-token-accounts'
 
+async function serverRequest(request: {
+  ata_authority: string
+  elgamal_signature: string
+  aes_signature: string
+  token_account_data: string
+  latest_blockhash: string
+}) {
+  const route = `${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/apply-cb`
+  const response = await fetch(route, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  })
+
+  if (!response.ok) {
+    throw new Error(`😵 HTTP error! Status: ${response.status}`)
+  }
+
+  const data = await response.json()
+
+  return data
+}
+
 export const useApplyCB = ({ address }: { address: PublicKey }) => {
   const { connection } = useConnection()
   const wallet = useWallet()
@@ -59,28 +84,16 @@ export const useApplyCB = ({ address }: { address: PublicKey }) => {
           await getAccount(connection, address, 'confirmed', TOKEN_2022_PROGRAM_ID)
         ).owner.toBase58()
 
-        const request = {
+        const requestBody = {
           ata_authority: Buffer.from(ataAuthorityBase58).toString('base64'),
           elgamal_signature: elGamalSignatureBase64,
           aes_signature: aesSignatureBase64,
           token_account_data: Buffer.from(accountInfo.data).toString('base64'),
+          latest_blockhash: (await connection.getLatestBlockhash()).blockhash,
         }
 
         // Send the request to the backend
-        const route = `${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/apply-cb`
-        const response = await fetch(route, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(request),
-        })
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`)
-        }
-
-        const data = await response.json()
+        const data = await serverRequest(requestBody)
 
         // Deserialize the transaction from the response
         const serializedTransaction = Buffer.from(data.transaction, 'base64')
