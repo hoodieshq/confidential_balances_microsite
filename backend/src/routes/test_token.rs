@@ -3,7 +3,6 @@ use base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _};
 use bincode;
 use bs58;
 use solana_sdk::{
-    hash::Hash,
     message::{v0, VersionedMessage},
     pubkey::Pubkey,
     system_instruction,
@@ -20,6 +19,7 @@ use spl_token_2022::{
 
 use crate::errors::AppError;
 use crate::models::{CreateTestTokenTransactionRequest, TransactionResponse};
+use crate::routes::util::parse_latest_blockhash;
 
 // Helper function to parse a base58 address string into a Pubkey
 fn parse_base58_pubkey(address: &str) -> Result<Pubkey, AppError> {
@@ -29,19 +29,6 @@ fn parse_base58_pubkey(address: &str) -> Result<Pubkey, AppError> {
                 return Err(AppError::InvalidAddress);
             }
             Ok(Pubkey::new_from_array(bytes.try_into().unwrap()))
-        }
-        Err(_) => Err(AppError::InvalidAddress),
-    }
-}
-
-// Helper function to parse blockhash from base58 string
-fn parse_blockhash(blockhash_str: &str) -> Result<Hash, AppError> {
-    match bs58::decode(blockhash_str).into_vec() {
-        Ok(bytes) => {
-            if bytes.len() != 32 {
-                return Err(AppError::InvalidAddress);
-            }
-            Ok(Hash::new_from_array(bytes.try_into().unwrap()))
         }
         Err(_) => Err(AppError::InvalidAddress),
     }
@@ -151,18 +138,12 @@ pub async fn create_test_token(
     ];
 
     // Use blockhash from client or generate a placeholder
-    let dummy_blockhash = Hash::new_from_array([1; 32]);
-    let blockhash = match &request.recent_blockhash {
-        Some(blockhash_str) => parse_blockhash(blockhash_str)?,
-        None => {
-            println!("⚠️  Warning: Using placeholder blockhash. Frontend should provide recent blockhash for simulation.");
-            dummy_blockhash
-        }
-    };
+    let client_blockhash = parse_latest_blockhash(&request.latest_blockhash)?;
 
     println!("📝 Creating V0 message");
-    let v0_message = v0::Message::try_compile(&authority_pubkey, &instructions, &[], blockhash)
-        .map_err(|_| AppError::SerializationError)?;
+    let v0_message =
+        v0::Message::try_compile(&authority_pubkey, &instructions, &[], client_blockhash)
+            .map_err(|_| AppError::SerializationError)?;
     println!("✅ V0 message created successfully");
 
     // Get the number of required signatures

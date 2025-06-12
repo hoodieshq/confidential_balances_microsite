@@ -16,34 +16,24 @@ import { queryKey as getBalanceQK } from './use-get-balance'
 import { queryKey as getSignaturesQK } from './use-get-signatures'
 import { queryKey as getTokenAccountsQK } from './use-get-token-accounts'
 
-async function serverRequest({
-  account,
-  mint,
-  mintRent,
-  mintAmount,
-}: {
-  account: PublicKey
-  mint: PublicKey
-  mintRent: number
-  mintAmount: number
+async function serverRequest(request: {
+  account: string
+  mint: string
+  mint_rent: number
+  mint_amount: number
+  latest_blockhash: string
 }) {
-  // Now proceed with the transaction
   const route = `${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/create-test-token`
   const response = await fetch(route, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      account: account.toBase58(),
-      mint: mint.toBase58(),
-      mintRent,
-      mintAmount,
-    }),
+    body: JSON.stringify(request),
   })
 
   if (!response.ok) {
-    throw new Error(`HTTP error! Status: ${response.status}`)
+    throw new Error(`😵 HTTP error! Status: ${response.status}`)
   }
 
   const data = await response.json()
@@ -91,11 +81,14 @@ export const useCreateTestTokenCB = ({
         const mintRent = await connection.getMinimumBalanceForRentExemption(mintSpace)
         console.log('Mint account rent required:', mintRent, 'lamports')
 
+        console.log('A', (await connection.getLatestBlockhash()).blockhash)
+
         const data = await serverRequest({
-          account: wallet.publicKey,
-          mint: mintKeypair.publicKey,
-          mintRent,
-          mintAmount: 1000,
+          account: wallet.publicKey.toBase58(),
+          mint: mintKeypair.publicKey.toBase58(),
+          mint_rent: mintRent,
+          mint_amount: 1000,
+          latest_blockhash: (await connection.getLatestBlockhash()).blockhash,
         })
 
         // Deserialize the transaction from the response

@@ -10,6 +10,29 @@ import { useDevMode } from '@/entities/dev-mode'
 import { useOperationLog } from '@/entities/operation-log'
 import { useToast } from '@/shared/ui/toast'
 
+async function serverRequest(request: {
+  token_account_data: string
+  lamport_amount: string
+  mint_decimals: number
+  latest_blockhash: string
+}) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/deposit-cb`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  })
+
+  if (!response.ok) {
+    throw new Error(`😵 HTTP error! Status: ${response.status}`)
+  }
+
+  const data = await response.json()
+
+  return data
+}
+
 export const useDepositCb = ({ tokenAccountPubkey }: { tokenAccountPubkey: PublicKey }) => {
   const { connection } = useConnection()
   const wallet = useWallet()
@@ -52,30 +75,22 @@ export const useDepositCb = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publi
           return mint.decimals
         })()
 
-        // Call the deposit-cb endpoint
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/deposit-cb`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token_account_data: Buffer.from(ataAccountInfo.data).toString('base64'),
-            lamport_amount: lamportAmount,
-            mint_decimals: decimals,
-          }),
-        })
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`)
+        const requestBody = {
+          token_account_data: Buffer.from(ataAccountInfo.data).toString('base64'),
+          lamport_amount: lamportAmount,
+          mint_decimals: decimals,
+          latest_blockhash: (await connection.getLatestBlockhash()).blockhash,
         }
+        console.log('📤 Frontend request body:', JSON.stringify(requestBody, null, 2))
 
-        const data = await response.json()
+        // Call the deposit-cb endpoint
+        const data = await serverRequest(requestBody)
 
         // Deserialize the transaction from the response
         const serializedTransaction = Buffer.from(data.transaction, 'base64')
         const transaction = VersionedTransaction.deserialize(serializedTransaction)
 
-        // Get the latest blockhash for transaction confirmation
+        // Get the latest blockhash for the transaction
         const latestBlockhash = await connection.getLatestBlockhash()
 
         // Update the transaction's blockhash

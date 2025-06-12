@@ -27,6 +27,7 @@ pub struct CreateCbAtaRequest {
     pub ata_authority: String,     // The authority address for the confidential balance
     pub elgamal_signature: String, // ElGamal signature as base64 encoded bytes
     pub aes_signature: String,     // AES signature as base64 encoded bytes
+    pub latest_blockhash: String,  // The latest blockhash
 }
 
 // Request model for the deposit_cb endpoint
@@ -35,6 +36,7 @@ pub struct DepositCbRequest {
     pub token_account_data: String, // BASE64 encoded account data
     pub lamport_amount: String,     // The amount to deposit (as a string to handle large numbers)
     pub mint_decimals: u8,          // The number of decimals for the mint
+    pub latest_blockhash: String,   // The latest blockhash
 }
 
 // Request model for the apply_cb endpoint
@@ -44,6 +46,7 @@ pub struct ApplyCbRequest {
     pub elgamal_signature: String, // ElGamal signature as base64 encoded bytes
     pub aes_signature: String, // AES signature as base64 encoded bytes
     pub token_account_data: String, // BASE64 encoded account data
+    pub latest_blockhash: String, // The latest blockhash
 }
 
 // Request model for the transfer_cb endpoint
@@ -111,7 +114,7 @@ pub struct DecryptCbResponse {
 pub struct CreateTestTokenTransactionRequest {
     pub account: String,
     pub mint: String,
+    pub latest_blockhash: String, // The latest blockhash
     pub mint_rent: Option<u64>,   // Optional rent amount for mint account
     pub mint_amount: Option<u64>, // Optional initial supply in lamports
-    pub recent_blockhash: Option<String>, // Optional recent blockhash for simulation
 }
