@@ -81,8 +81,6 @@ export const useCreateTestTokenCB = ({
         const mintRent = await connection.getMinimumBalanceForRentExemption(mintSpace)
         console.log('Mint account rent required:', mintRent, 'lamports')
 
-        console.log('A', (await connection.getLatestBlockhash()).blockhash)
-
         const data = await serverRequest({
           account: wallet.publicKey.toBase58(),
           mint: mintKeypair.publicKey.toBase58(),
