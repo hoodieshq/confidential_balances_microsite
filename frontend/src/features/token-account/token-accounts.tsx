@@ -1,10 +1,10 @@
-import { ComponentProps, FC, useCallback, useMemo, useState } from 'react'
+import { ComponentProps, FC, PropsWithChildren, useCallback, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Address } from '@solana-foundation/ms-tools-ui'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
-import { Coins, PlusCircle, RefreshCw } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import { useCreateAssociatedTokenAccountCB } from '@/entities/account/account/model/use-create-associated-token-account-cb'
 import {
   useCreateTestTokenCB,
@@ -96,19 +96,20 @@ function ConnectedWalletTokenAccounts({
       {
         action: 'createTestToken',
         title: 'Create test token',
+        icon: <IconNumber>1</IconNumber>,
         onClick: onCreateTestToken,
-        icon: <PlusCircle />,
       },
       {
         action: 'createCTA',
         title: 'Create account',
+        icon: <IconNumber>2</IconNumber>,
         onClick: onCreateCTA,
       },
       {
         action: 'mintTestToken',
         title: 'Mint token',
+        icon: <IconNumber>3</IconNumber>,
         onClick: onMintTestToken,
-        icon: <Coins />,
       },
       {
         action: 'refetch',
@@ -173,3 +174,9 @@ function ConnectedWalletTokenAccounts({
     </>
   )
 }
+
+export const IconNumber: FC<PropsWithChildren> = ({ children }) => (
+  <div className="flex aspect-square size-3 items-center justify-center overflow-hidden rounded-full border border-[var(--muted)] text-[10px] text-[var(--muted)]">
+    {children}
+  </div>
+)

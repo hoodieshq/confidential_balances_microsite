@@ -18,26 +18,26 @@ export const Dashboard: FC = () => (
       <div className="grid grid-cols-1 gap-x-4 gap-y-2 @3xl/cards:grid-cols-12">
         <CardStep
           step={1}
-          title="Create test account"
-          description="Receive 1000 free tokens in your account for testing purposes"
+          title="Create test token"
+          description="Spin up a demo token on Devnet with Confidential Transfers already enabled"
           className="col-span-3"
         />
         <CardStep
           step={2}
-          title="Deposit tokens"
-          description="Deposit tokens into a confidential balance to start experimenting"
+          title="Create confidential account"
+          description="Set up a confidential token account and its encryption keys"
           className="col-span-3"
         />
         <CardStep
           step={3}
-          title="Try transfer or withdraw"
-          description="Transfer or withdraw tokens from confidential balances"
+          title="Mint tokens"
+          description="Receive free tokens in your account for testing purposes"
           className="col-span-3"
         />
         <CardStep
           step={4}
-          title="Go into dev mode"
-          description="Want to see how it all works under the hood? Check out dev mode for more info"
+          title="Start playing with token accounts"
+          description="Deposit, transfer, or withdraw in privacy mode"
           className="col-span-3"
         />
       </div>
