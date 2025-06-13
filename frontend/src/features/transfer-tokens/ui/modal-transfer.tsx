@@ -4,7 +4,7 @@ import { AccountLayout, getAssociatedTokenAddress, TOKEN_2022_PROGRAM_ID } from 
 import { useConnection } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
 import { useAtomValue } from 'jotai'
-import * as Icons from 'lucide-react'
+import { Check, Coins, Send, Wallet } from 'lucide-react'
 import pluralize from 'pluralize'
 import { useForm } from 'react-hook-form'
 import { useCurrentBalance, useMint } from '@/entities/account/account'
@@ -153,7 +153,7 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
       hide={hide}
       show={show}
       title="Transfer Confidential Balance"
-      icon={<Icons.Send />}
+      icon={<Send />}
       submitDisabled={!isValid || isSubmitting || isLoading}
       submitLabel={isSubmitting ? 'Processing...' : 'Confirm Transfer'}
       submit={form.handleSubmit(handleSubmit)}
@@ -177,17 +177,38 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
                 render={({ field }) => (
                   <Selector value={field.value} onValueChange={(value) => field.onChange(value)}>
                     <SelectorItem value="system">
-                      <Icons.Wallet />
+                      <Wallet />
                       Wallet
                     </SelectorItem>
                     <SelectorItem value="token">
-                      <Icons.Coins />
+                      <Coins />
                       Token Account
                     </SelectorItem>
                   </Selector>
                 )}
               />
             )}
+
+            <FormField
+              control={form.control}
+              name="recipientAddress"
+              rules={{
+                required: 'Address is required',
+                validate: validateRecipient,
+              }}
+              render={({ field }) => (
+                <Selector value={field.value} onValueChange={(value) => field.onChange(value)}>
+                  <SelectorItem value="system">
+                    <Wallet />
+                    Wallet
+                  </SelectorItem>
+                  <SelectorItem value="token">
+                    <Coins />
+                    Token Account
+                  </SelectorItem>
+                </Selector>
+              )}
+            />
 
             <FormField
               control={form.control}
@@ -206,10 +227,10 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
                   disabled={isSubmitting}
                   description={
                     !!resolvedTokenAccount ? (
-                      <p className="flex flex-row flex-nowrap items-center gap-2 text-[var(--accent)]">
-                        <Icons.Check className="size-4" />
+                      <div className="flex flex-row flex-nowrap items-center gap-2 text-[var(--accent)]">
+                        <Check className="size-4" />
                         <span>Valid wallet with initialized confidential balance</span>
-                      </p>
+                      </div>
                     ) : undefined
                   }
                   {...field}
@@ -244,6 +265,7 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
                   min={0}
                   max={balance && !loading ? balance : undefined}
                   {...field}
+                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
                 />
               )}
             />
