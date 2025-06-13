@@ -8,10 +8,12 @@ import {
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { Keypair, PublicKey, Transaction, VersionedTransaction } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useSetAtom } from 'jotai'
 import pluralize from 'pluralize'
 import { useDevMode } from '@/entities/dev-mode'
 import { useOperationLog } from '@/entities/operation-log'
 import { useToast } from '@/shared/ui/toast'
+import { latestMintAddressAtom } from './latest-mint-address'
 import { queryKey as getBalanceQK } from './use-get-balance'
 import { queryKey as getSignaturesQK } from './use-get-signatures'
 import { queryKey as getTokenAccountsQK } from './use-get-token-accounts'
@@ -53,6 +55,7 @@ export const useCreateTestTokenCB = ({
   const toast = useToast()
   const log = useOperationLog()
   const devMode = useDevMode()
+  const setLatestMintAddress = useSetAtom(latestMintAddressAtom)
 
   return useMutation({
     mutationKey: [
@@ -129,6 +132,7 @@ export const useCreateTestTokenCB = ({
     onSuccess: (data) => {
       if (data.signature) {
         toast.transaction(data.signature)
+        setLatestMintAddress(data.mintAddress)
         toast.address('Token-2022 mint created!', data.mintAddress)
         log.push({
           title: 'Create test token Operation - COMPLETE',
