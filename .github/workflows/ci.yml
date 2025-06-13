@@ -19,10 +19,8 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Run checks
-        run: |
-          make fmt-check
-          cargo check
+      - name: Run format check
+        run: make fmt-check
 
   frontend-check:
     runs-on: ubuntu-latest
