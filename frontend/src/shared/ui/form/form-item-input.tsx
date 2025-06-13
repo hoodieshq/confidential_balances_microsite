@@ -2,10 +2,10 @@ import { FC, InputHTMLAttributes, ReactNode } from 'react'
 import {
   FormControl,
   FormDescription,
+  FormItem,
   FormLabel,
   FormMessage,
-  FormItem as UIFormItem,
-} from '@solana-foundation/ms-tools-ui'
+} from '@solana-foundation/ms-tools-ui/components/form'
 import { Input } from '@/shared/ui/input'
 
 interface FormItemProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -22,7 +22,7 @@ export const FormItemInput: FC<FormItemProps & InputHTMLAttributes<HTMLInputElem
   ...inputProps
 }) => {
   return (
-    <UIFormItem>
+    <FormItem>
       {(label || hint) && (
         <FormLabel className="flex flex-nowrap items-center gap-2 text-sm leading-5 font-normal text-white">
           {label && <span className="flex-1">{label}</span>}
@@ -34,6 +34,6 @@ export const FormItemInput: FC<FormItemProps & InputHTMLAttributes<HTMLInputElem
       </FormControl>
       {description && <FormDescription>{description}</FormDescription>}
       <FormMessage />
-    </UIFormItem>
+    </FormItem>
   )
 }

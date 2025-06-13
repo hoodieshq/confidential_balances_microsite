@@ -1,8 +1,8 @@
 'use client'
 
 import { FC, PropsWithChildren, ReactNode } from 'react'
+import { Button } from '@solana-foundation/ms-tools-ui/components/button'
 import {
-  Button,
   Dialog,
   DialogClose,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@solana-foundation/ms-tools-ui'
+} from '@solana-foundation/ms-tools-ui/components/dialog'
 
 type ModalProps = PropsWithChildren<{
   title: string

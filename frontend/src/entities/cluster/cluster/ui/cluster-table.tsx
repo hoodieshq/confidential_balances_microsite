@@ -1,5 +1,6 @@
 import { ComponentProps, FC, useMemo } from 'react'
-import { Badge, Button } from '@solana-foundation/ms-tools-ui'
+import { Badge } from '@solana-foundation/ms-tools-ui/components/badge'
+import { Button } from '@solana-foundation/ms-tools-ui/components/button'
 import { IconTrash } from '@tabler/icons-react'
 import { Plus } from 'lucide-react'
 import { useCluster } from '@/shared/solana'

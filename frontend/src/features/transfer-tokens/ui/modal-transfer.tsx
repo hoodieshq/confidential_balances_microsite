@@ -1,5 +1,5 @@
 import { FC, useCallback, useState } from 'react'
-import { Form, FormField } from '@solana-foundation/ms-tools-ui'
+import { Form, FormField } from '@solana-foundation/ms-tools-ui/components/form'
 import { AccountLayout, getAssociatedTokenAddress, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token'
 import { useConnection } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'

@@ -1,7 +1,8 @@
 'use client'
 
 import { ComponentProps, FC, PropsWithChildren, Suspense, useRef } from 'react'
-import { cn, Skeleton } from '@solana-foundation/ms-tools-ui'
+import { Skeleton } from '@solana-foundation/ms-tools-ui/components/skeleton'
+import { cn } from '@solana-foundation/ms-tools-ui/lib/utils'
 import { useAtomValue } from 'jotai'
 import { devModeOpenAtom, DevModePanel } from '@/entities/dev-mode'
 import {

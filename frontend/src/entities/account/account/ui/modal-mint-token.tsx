@@ -1,5 +1,6 @@
 import { FC, useCallback } from 'react'
-import { Button, Form, FormField } from '@solana-foundation/ms-tools-ui'
+import { Button } from '@solana-foundation/ms-tools-ui/components/button'
+import { Form, FormField } from '@solana-foundation/ms-tools-ui/components/form'
 import { PublicKey } from '@solana/web3.js'
 import { useAtomValue } from 'jotai'
 import { useForm } from 'react-hook-form'

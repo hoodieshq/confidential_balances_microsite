@@ -1,5 +1,6 @@
 import { FC, useState } from 'react'
-import { Button, Form, FormField } from '@solana-foundation/ms-tools-ui'
+import { Button } from '@solana-foundation/ms-tools-ui/components/button'
+import { Form, FormField } from '@solana-foundation/ms-tools-ui/components/form'
 import * as Icons from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { Content } from '@/shared/ui/content'

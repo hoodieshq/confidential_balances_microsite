@@ -1,5 +1,5 @@
 import { ComponentProps, FC, useCallback, useLayoutEffect, useMemo, useState } from 'react'
-import { Button } from '@solana-foundation/ms-tools-ui'
+import { Button } from '@solana-foundation/ms-tools-ui/components/button'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
 import { ArrowDown, ArrowUp, Loader, Lock, Send, Unlock } from 'lucide-react'
