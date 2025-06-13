@@ -3,7 +3,7 @@ import { Button, Form, FormField } from '@solana-foundation/ms-tools-ui'
 import { PublicKey } from '@solana/web3.js'
 import { useAtomValue } from 'jotai'
 import { useForm } from 'react-hook-form'
-import { FormItemInput } from '@/shared/ui/form'
+import { FormItemTextarea } from '@/shared/ui/form'
 import { Modal } from '@/shared/ui/modal'
 import { useToast } from '@/shared/ui/toast'
 import { latestMintAddressAtom } from '../model/latest-mint-address'
@@ -115,7 +115,7 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
                 validate: validateMintAddress,
               }}
               render={({ field }: { field: any }) => (
-                <FormItemInput
+                <FormItemTextarea
                   label="Mint Address"
                   placeholder="Enter mint address"
                   className="overflow-hidden text-ellipsis"
