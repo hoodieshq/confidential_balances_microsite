@@ -26,7 +26,7 @@ export function Logo({
           loading="lazy"
           src="/logo_1x.png"
           srcSet="/logo_2x.png 2x"
-          className="h-[14px] w-auto max-w-none"
+          className="hidden h-[14px] w-auto max-w-none sm:block"
         />
         {/* eslint-enable @next/next/no-img-element */}
       </span>
