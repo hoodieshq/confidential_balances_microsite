@@ -19,6 +19,7 @@ type ModalInitATAProps = {
 
 type FormData = {
   mintAddress: string
+  mintAmount: number
 }
 
 export const ModalMintToken: FC<ModalInitATAProps> = ({
@@ -35,6 +36,7 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
   const form = useForm<FormData>({
     defaultValues: {
       mintAddress: '',
+      mintAmount: undefined,
     },
     mode: 'onChange',
   })
@@ -59,6 +61,14 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
     } catch (error) {
       return 'Invalid mint address format'
     }
+  }
+
+  const validateMintAmount = (value: number) => {
+    if (!value || value < 0) {
+      return 'Mint amount required'
+    }
+
+    return true
   }
 
   const handleSubmit = useCallback(() => {
@@ -107,7 +117,7 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
     >
       <Form {...form}>
         <form>
-          <div className="form-control">
+          <div className="flex flex-col gap-4">
             <FormField
               control={form.control}
               name="mintAddress"
@@ -118,6 +128,25 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
                 <FormItemTextarea
                   label="Mint Address"
                   placeholder="Enter mint address"
+                  className="overflow-hidden text-ellipsis"
+                  disabled={isInitializing}
+                  {...field}
+                />
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="mintAmount"
+              rules={{
+                validate: validateMintAmount,
+              }}
+              render={({ field }: { field: any }) => (
+                <FormItemInput
+                  type="number"
+                  label="Mint Amount"
+                  min={0}
+                  step={1}
+                  placeholder="Enter amount"
                   className="overflow-hidden text-ellipsis"
                   disabled={isInitializing}
                   {...field}
