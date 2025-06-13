@@ -42,7 +42,6 @@ import {
   TorusWalletAdapter,
   TrezorWalletAdapter,
   TrustWalletAdapter,
-  UnsafeBurnerWalletAdapter,
   XDEFIWalletAdapter,
 } from '@solana/wallet-adapter-wallets'
 import { useCluster } from '@/shared/solana'
@@ -81,7 +80,6 @@ const wallets = [
   new TorusWalletAdapter(),
   new TrezorWalletAdapter(),
   new TrustWalletAdapter(),
-  new UnsafeBurnerWalletAdapter(),
   new XDEFIWalletAdapter(),
 ]
 
