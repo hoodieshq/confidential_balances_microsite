@@ -148,9 +148,10 @@ function ConnectedWalletTokenAccounts({
         key="createMint"
         show={showCreateMintModal}
         hide={() => setShowCreateMintModal(false)}
-        submitCallback={(a) => {
+        submitCallback={({ auditorAddress }) => {
+          //!! rename
           createTestToken({
-            auditorElGamalPubkey: a.auditorAddress,
+            auditorElGamalPubkey: auditorAddress,
           })
         }}
         isProcessing={isCreatingMint}

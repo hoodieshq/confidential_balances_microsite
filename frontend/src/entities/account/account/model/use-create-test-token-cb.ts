@@ -23,6 +23,7 @@ async function serverRequest(request: {
   mint: string
   mint_rent: number
   latest_blockhash: string
+  auditor_elgamal_pubkey?: string
 }) {
   const route = `${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/create-test-token`
   const response = await fetch(route, {
@@ -61,11 +62,7 @@ export const useCreateTestTokenCB = ({
       'create-token2022-test-mint',
       { endpoint: connection.rpcEndpoint, address: walletAddressPubkey },
     ],
-    mutationFn: async ({
-      auditorElGamalPubkey,
-    }: {
-      auditorElGamalPubkey?: any /* use proper type here */
-    }) => {
+    mutationFn: async ({ auditorElGamalPubkey }: { auditorElGamalPubkey?: string }) => {
       try {
         if (!wallet.publicKey) {
           throw new Error('Wallet not connected')
@@ -87,9 +84,12 @@ export const useCreateTestTokenCB = ({
         const mintRent = await connection.getMinimumBalanceForRentExemption(mintSpace)
         console.log('Mint account rent required:', mintRent, 'lamports')
 
+        //!!rename
         const data = await serverRequest({
           account: wallet.publicKey.toBase58(),
-          // auditor: auditorElGamalPubkey,
+          auditor_elgamal_pubkey: auditorElGamalPubkey
+            ? auditorElGamalPubkey //Buffer.from(auditorElGamalPubkey).toString('base64')
+            : undefined,
           mint: mintKeypair.publicKey.toBase58(),
           mint_rent: mintRent,
           latest_blockhash: (await connection.getLatestBlockhash()).blockhash,

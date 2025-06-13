@@ -2,7 +2,7 @@ use crate::models::{
     AuditTransactionRequest, AuditTransactionResponse, RegisterAuditorRequest,
     RegisterAuditorResponse,
 };
-
+use bincode::Options;
 use {
     crate::{
         errors::AppError,
@@ -14,8 +14,9 @@ use {
     },
     axum::extract::Json,
     base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _},
-    bincode, bs58,
-    solana_client::rpc_client::RpcClient,
+    bincode,
+    bs58,
+    // solana_client::rpc_client::RpcClient,
     solana_sdk::{
         hash::Hash,
         message::{v0, VersionedMessage},
@@ -25,10 +26,10 @@ use {
         system_instruction,
         transaction::VersionedTransaction,
     },
-    solana_transaction_status::UiTransactionEncoding,
+    // solana_transaction_status::UiTransactionEncoding,
     solana_zk_sdk::{
         encryption::auth_encryption::AeCiphertext,
-        encryption::elgamal::{ElGamalPubkey, ElGamalSecretKey},
+        encryption::elgamal::ElGamalCiphertext,
         encryption::pod::elgamal::PodElGamalPubkey,
         zk_elgamal_proof_program::{
             self,
@@ -53,7 +54,7 @@ use {
             },
             BaseStateWithExtensions, ExtensionType, StateWithExtensionsOwned,
         },
-        instruction::reallocate,
+        instruction::{reallocate, TokenInstruction},
         solana_zk_sdk::encryption::{auth_encryption::AeKey, elgamal::ElGamalKeypair},
     },
     spl_token_confidential_transfer_proof_extraction::instruction::{ProofData, ProofLocation},
@@ -1505,11 +1506,16 @@ pub async fn audit_transaction(
         request.transaction_signature
     );
 
-    let auditor_wallet = Pubkey::from_str(&request.auditor_wallet_pubkey).map_err(|_| {
-        println!("Invalid auditor wallet address");
-        AppError::InvalidAddress
-    })?;
+    // Decode base64 transaction data
+    let transaction_bytes = BASE64_STANDARD
+        .decode(&request.transaction_data)
+        .map_err(|e| {
+            println!("Failed to decode base64 transaction data: {:?}", e);
+            AppError::Base64Error(e)
+        })?;
+    println!("Transaction decoded successfully!");
 
+    // Decode ElGamal signature
     println!("Decoding ElGamal signature");
     let elgamal_signature_bytes =
         BASE64_STANDARD
@@ -1532,49 +1538,155 @@ pub async fn audit_transaction(
 
     let elgamal_private_key = auditor_elgamal_keypair.secret();
 
-    let rpc_url = if request.rpc_url.is_empty() {
-        println!("⚠️ No RPC URL provided, using default mainnet URL");
-        "https://api.mainnet-beta.solana.com".to_string()
-    } else {
-        request.rpc_url.clone()
-    };
-    println!("Using Solana RPC URL: {}", rpc_url);
+    // Extract confidential transfer data
+    let (ciphertext_lo, ciphertext_hi, sender, recipient, mint) =
+        extract_confidential_transfer(&transaction_bytes)?;
 
-    let client = RpcClient::new(rpc_url);
-    let tx_signature = Signature::from_str(&request.transaction_signature).map_err(|e| {
-        println!("Invalid transaction signature format: {:?}", e);
-        AppError::InvalidTransactionHash
-    })?;
-
-    let tx_response = client
-        .get_transaction(&tx_signature, UiTransactionEncoding::Base64)
-        .map_err(|e| {
-            println!("Failed to fetch transaction: {:?}", e);
-            AppError::TransactionFetchError
+    // Decrypt the ciphertext using the auditor's private key
+    let decrypted_lo = elgamal_private_key
+        .decrypt(&ciphertext_lo)
+        .decode_u32()
+        .ok_or_else(|| {
+            println!("❌ Failed to decrypt low ciphertext");
+            AppError::DecryptionError
         })?;
 
-    let (amount, sender, receiver) =
-        extract_and_decrypt_confidential_transfer(&tx_response, &elgamal_private_key)?;
+    let decrypted_hi = elgamal_private_key
+        .decrypt(&ciphertext_hi)
+        .decode_u32()
+        .ok_or_else(|| {
+            println!("❌ Failed to decrypt high ciphertext");
+            AppError::DecryptionError
+        })?;
+
+    println!("✅ Successfully extracted confidential transfer data");
+    println!("📤 Sender: {}", sender);
+    println!("📥 Recipient: {}", recipient);
+    println!("🪙 Mint: {}", mint);
+    println!("💰 Decrypted amount: {}", -1);
 
     println!("Successfully audited transaction");
     Ok(Json(AuditTransactionResponse {
-        amount: amount.to_string(),
+        amount: decrypted_lo.to_string(),
         sender,
-        receiver,
+        receiver: recipient,
         message: "Transaction successfully audited".to_string(),
     }))
 }
 
-fn extract_and_decrypt_confidential_transfer(
-    tx_data: &solana_transaction_status::EncodedConfirmedTransactionWithStatusMeta,
-    elgamal_private_key: &ElGamalSecretKey,
-) -> Result<(u64, String, String), AppError> {
-    println!("Extracting confidential transfer data from transaction");
+// fn extract_and_decrypt_confidential_transfer(
+//     tx_data: &solana_transaction_status::EncodedConfirmedTransactionWithStatusMeta,
+//     elgamal_private_key: &ElGamalSecretKey,
+// ) -> Result<(u64, String, String), AppError> {
+//     println!("Extracting confidential transfer data from transaction");
 
-    // Placeholder values
-    Ok((
-        1000,
-        "Unknown sender".to_string(),
-        "Unknown receiver".to_string(),
-    ))
+//     // Placeholder values
+//     Ok((
+//         1000,
+//         "Unknown sender".to_string(),
+//         "Unknown receiver".to_string(),
+//     ))
+// }
+
+fn extract_confidential_transfer(
+    transaction_data: &[u8],
+) -> Result<(ElGamalCiphertext, ElGamalCiphertext, String, String, String), AppError> {
+    // Deserialize transaction directly from bytes
+    let versioned_transaction: VersionedTransaction = bincode::options()
+        .with_fixint_encoding()
+        .allow_trailing_bytes()
+        .deserialize(transaction_data)
+        .map_err(|e| {
+            println!("❌ Failed to deserialize transaction: {:?}", e);
+            AppError::SerializationError
+        })?;
+
+    println!("TX {:?}", versioned_transaction);
+
+    // Get V0 message
+    let message = match &versioned_transaction.message {
+        VersionedMessage::V0(message) => message,
+        _ => {
+            println!("❌ Expected V0 message");
+            return Err(AppError::SerializationError);
+        }
+    };
+
+    // Find confidential transfer instruction by properly deserializing token instructions
+    let (transfer_ix_index, transfer_ix) = message
+        .instructions
+        .iter()
+        .enumerate()
+        .find(|(_, ix)| {
+            let program_id = &message.account_keys[ix.program_id_index as usize];
+
+            // Check if instruction is for token-2022 program
+            if program_id != &spl_token_2022::id() {
+                return false;
+            }
+
+            // Try to deserialize the instruction data
+            match TokenInstruction::unpack(&ix.data) {
+                Ok(TokenInstruction::ConfidentialTransferExtension) => {
+                    println!("🔍 Found ConfidentialTransferExtension instruction");
+                    true
+                }
+                Ok(instruction) => {
+                    println!("🔍 Found other token instruction: {:?}", instruction);
+                    false
+                }
+                Err(e) => {
+                    println!("⚠️ Failed to deserialize token instruction: {:?}", e);
+                    false
+                }
+            }
+        })
+        .ok_or_else(|| {
+            println!("❌ No confidential transfer instruction found");
+            AppError::SerializationError
+        })?;
+
+    println!(
+        "✅ Found confidential transfer instruction at index {}",
+        transfer_ix_index
+    );
+
+    // Extract accounts
+    let sender = message.account_keys[transfer_ix.accounts[0] as usize].to_string();
+    let recipient = message.account_keys[transfer_ix.accounts[1] as usize].to_string();
+    let mint = message.account_keys[transfer_ix.accounts[2] as usize].to_string();
+
+    // For now, let's use a simplified approach to extract ciphertext data
+    // This is a temporary solution until we can properly decode the instruction
+    let data = &transfer_ix.data;
+
+    if data.len() < 129 {
+        // Need at least 1 + 64 + 64 bytes for discriminator + 2 ciphertexts
+        println!("⚠️ Instruction data too short for confidential transfer");
+        return Err(AppError::SerializationError);
+    }
+
+    // Skip the token instruction discriminator (1 byte) and confidential transfer discriminator
+    // Extract the ciphertext data - this is a simplified approach
+    let ciphertext_lo_bytes = &data[1..65]; // 64 bytes for ElGamal ciphertext
+    let ciphertext_hi_bytes = &data[65..129]; // Next 64 bytes for ElGamal ciphertext
+
+    // Convert to ElGamalCiphertext
+    let ciphertext_lo = ElGamalCiphertext::from_bytes(ciphertext_lo_bytes).ok_or_else(|| {
+        println!("❌ Failed to parse low ciphertext from bytes");
+        AppError::SerializationError
+    })?;
+
+    let ciphertext_hi = ElGamalCiphertext::from_bytes(ciphertext_hi_bytes).ok_or_else(|| {
+        println!("❌ Failed to parse low ciphertext from bytes");
+        AppError::SerializationError
+    })?;
+
+    println!("✅ Successfully extracted confidential transfer data");
+    println!("📤 Sender: {}", sender);
+    println!("📥 Recipient: {}", recipient);
+    println!("🪙 Mint: {}", mint);
+    println!("🔐 Successfully extracted ElGamal ciphertext data");
+
+    Ok((ciphertext_lo, ciphertext_hi, sender, recipient, mint))
 }

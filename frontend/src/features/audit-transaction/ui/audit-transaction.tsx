@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form'
 import { Content } from '@/shared/ui/content'
 import { FormItemInput, FormItemTextarea } from '@/shared/ui/form'
 import { useCreateElGamalKey } from '../model/use-create-elgamal-key'
+import { useDecryptAuditableTx } from '../model/use-decrypt-auditable-tx'
 
 type FormValues = {
   transaction: string
@@ -24,6 +25,10 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
   const { setVisible } = useWalletModal()
   const { generateElGamalKey, isGenerating, elGamalPubkey } = useCreateElGamalKey()
 
+  const { error: auditError, auditTransaction, isAuditing, auditResult } = useDecryptAuditableTx()
+
+  console.log({ auditError, auditResult, isAuditing })
+
   const form = useForm<FormValues>({
     defaultValues: { transaction: tx ?? '' },
     mode: 'onChange',
@@ -33,17 +38,16 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
     formState: { isSubmitting },
   } = form
 
-  const _handleSubmit = async (values: FormValues) => {
-    console.log(values)
-  }
-
   const handleConnectWallet = useCallback(() => {
     setVisible(true)
   }, [setVisible])
 
   const handleDecryptBalance = useCallback(() => {
+    const values = form.getValues()
+
     setAmount(1)
-  }, [setAmount])
+    auditTransaction(values.transaction)
+  }, [setAmount, form, auditTransaction])
 
   const handleCreateAudKey = useCallback(() => {
     generateElGamalKey()

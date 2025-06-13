@@ -1,6 +1,5 @@
 import { FC, useCallback } from 'react'
 import { Form, FormField } from '@solana-foundation/ms-tools-ui'
-import { PublicKey } from '@solana/web3.js'
 import { useForm } from 'react-hook-form'
 import { FormItemInput } from '@/shared/ui/form'
 import { Modal } from '@/shared/ui/modal'
@@ -45,16 +44,11 @@ export const ModalCreateMint: FC<ModalCreateMintProps> = ({
   const validateAuditorAddress = (value?: string) => {
     if (!value) return true
 
-    if (value && (value.length < 32 || value.length > 44)) {
+    if (value && value.length < 32) {
       return 'Invalid auditor address format'
     }
 
-    try {
-      new PublicKey(value)
-      return true
-    } catch (error) {
-      return 'Invalid address format'
-    }
+    return true
   }
 
   const handleSubmit = useCallback(() => {

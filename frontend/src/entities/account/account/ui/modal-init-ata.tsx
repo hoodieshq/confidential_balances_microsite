@@ -42,7 +42,6 @@ export const ModalInitATA: FC<ModalInitATAProps> = ({
     mode: 'onChange',
   })
 
-  // const mintAddress = form.watch('mintAddress')
   const {
     formState: { isValid },
   } = form
@@ -72,7 +71,6 @@ export const ModalInitATA: FC<ModalInitATAProps> = ({
       return
     }
 
-    // NOTE: consider moving toast interactions out of modal component to make it less "dirty"
     try {
       initializeAccount({ mintAddress: formValues.mintAddress })
       hide()

@@ -1,13 +1,17 @@
-use axum::extract::Json;
+use std::str::FromStr;
+
+use axum::extract::{FromRef, Json};
 use base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _};
 use bincode;
 use bs58;
 use solana_sdk::{
     message::{v0, VersionedMessage},
     pubkey::Pubkey,
+    signature::Signature,
     system_instruction,
     transaction::VersionedTransaction,
 };
+use solana_zk_sdk::encryption::{elgamal::ElGamalKeypair, pod::elgamal::PodElGamalPubkey};
 use spl_token_2022::{
     extension::{
         confidential_transfer::instruction::initialize_mint as initialize_confidential_transfer_mint,
@@ -96,13 +100,50 @@ pub async fn create_test_token(
         &spl_token_2022::id(), // Owner program (Token-2022)
     );
 
+    // TODO: rename into auditor_elgamal_signature
+    let auditor_elgamal_pk = match request.auditor_elgamal_pubkey {
+        Some(elgamal_string) => {
+            println!(
+                "🔍 Attempting to parse base64 elGamal encoded signature: {}",
+                elgamal_string
+            );
+            let decoded_elgamal_signature = BASE64_STANDARD
+                .decode(&elgamal_string)
+                .map_err(|_| AppError::SerializationError)?;
+
+            println!(
+                "✅ Base64 decoding successful, got {} bytes",
+                decoded_elgamal_signature.len()
+            );
+
+            // Create signature directly from bytes
+            let elgamal_signature = Signature::try_from(decoded_elgamal_signature.as_slice())
+                .map_err(|_| AppError::SerializationError)?;
+            println!("✅ ElGamal signature created successfully");
+
+            let auditor_elgamal_keypair = ElGamalKeypair::new_from_signature(&elgamal_signature)
+                .map_err(|_| AppError::SerializationError)?;
+            println!("✅ ElGamal keypair created successfully");
+
+            let elgamal_pubkey =
+                PodElGamalPubkey::from(auditor_elgamal_keypair.pubkey().to_owned());
+
+            println!(
+                "✅ ElGamal pubkey recovered from string successfully: pubkey={}",
+                elgamal_pubkey.to_string()
+            );
+            Some(elgamal_pubkey)
+        }
+        None => None,
+    };
+
     // Initialize ConfidentialTransferMint extension
     let initialize_confidential_transfer_mint_instruction = initialize_confidential_transfer_mint(
         &spl_token_2022::id(),  // Program ID
         &mint_address,          // Mint account
         Some(authority_pubkey), // Authority that can modify confidential transfer settings
         true,                   // Auto approve new accounts
-        None,                   // No auditor ElGamal pubkey
+        auditor_elgamal_pk,     // Optional auditor elGamal key
     )
     .map_err(|_| AppError::SerializationError)?;
 

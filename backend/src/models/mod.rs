@@ -114,8 +114,9 @@ pub struct DecryptCbResponse {
 pub struct CreateTestTokenTransactionRequest {
     pub account: String,
     pub mint: String,
-    pub latest_blockhash: String, // The latest blockhash
-    pub mint_rent: Option<u64>,   // Optional rent amount for mint account
+    pub latest_blockhash: String,               // The latest blockhash
+    pub mint_rent: Option<u64>,                 // Optional rent amount for mint account
+    pub auditor_elgamal_pubkey: Option<String>, // Optional elgamal key for auditor
 }
 
 // Request model for registering an auditor
@@ -138,6 +139,7 @@ pub struct RegisterAuditorResponse {
 #[derive(Deserialize)]
 pub struct AuditTransactionRequest {
     pub transaction_signature: String,
+    pub transaction_data: String,
     pub auditor_wallet_pubkey: String,
     pub elgamal_signature: String,
     pub rpc_url: String,
