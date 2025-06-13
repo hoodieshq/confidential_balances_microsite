@@ -2,8 +2,12 @@ import { useConnection } from '@solana/wallet-adapter-react'
 import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import pluralize from 'pluralize'
+import { queryKey as getBalaceQK } from '@/entities/account/account/model/use-get-balance'
+import { queryKey as getTokenBalanceByMintQK } from '@/entities/account/account/model/use-native-and-token-balance'
 import { useOperationLog } from '@/entities/operation-log'
 import { useToast } from '@/shared/ui/toast'
+
+const WSOL = new PublicKey('So11111111111111111111111111111111111111112')
 
 export const useRequestAirdrop = ({ address }: { address: PublicKey }) => {
   const { connection } = useConnection()
@@ -33,7 +37,11 @@ export const useRequestAirdrop = ({ address }: { address: PublicKey }) => {
 
       return Promise.all([
         client.invalidateQueries({
-          queryKey: ['get-balance', { endpoint: connection.rpcEndpoint, address }],
+          queryKey: getBalaceQK(connection.rpcEndpoint, address),
+        }),
+        // invalidate data for abstractions that use wsol to represent sol
+        client.invalidateQueries({
+          queryKey: getTokenBalanceByMintQK(connection.rpcEndpoint, address, WSOL),
         }),
         client.invalidateQueries({
           queryKey: ['get-signatures', { endpoint: connection.rpcEndpoint, address }],
