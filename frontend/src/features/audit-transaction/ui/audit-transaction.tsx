@@ -1,14 +1,14 @@
 import { FC, useCallback, useState } from 'react'
-import { Address } from '@solana-foundation/ms-tools-ui'
+import { Address } from '@solana-foundation/ms-tools-ui/components/address'
 import { Button } from '@solana-foundation/ms-tools-ui/components/button'
 import { Form, FormField } from '@solana-foundation/ms-tools-ui/components/form'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'
-import { Keypair } from '@solana/web3.js'
 import { Lock, Unlock, Wallet } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { Content } from '@/shared/ui/content'
 import { FormItemInput, FormItemTextarea } from '@/shared/ui/form'
+import { useCreateElGamalKey } from '../model/use-create-elgamal-key'
 
 type FormValues = {
   transaction: string
@@ -20,9 +20,9 @@ type AuditTransactionProps = {
 
 export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
   const [amount, setAmount] = useState<number>()
-  const [auditorKey, setAuditorKey] = useState<string>()
   const { connected, publicKey } = useWallet()
   const { setVisible } = useWalletModal()
+  const { generateElGamalKey, isGenerating, elGamalPubkey } = useCreateElGamalKey()
 
   const form = useForm<FormValues>({
     defaultValues: { transaction: tx ?? '' },
@@ -46,8 +46,8 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
   }, [setAmount])
 
   const handleCreateAudKey = useCallback(() => {
-    setAuditorKey(Keypair.generate().publicKey.toBase58())
-  }, [])
+    generateElGamalKey()
+  }, [generateElGamalKey])
 
   const isWalletConnected = connected && Boolean(publicKey)
 
@@ -84,13 +84,18 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
             Decode transaction balance
           </Button>
         )}
-        <div className="mt-5">
-          {auditorKey ? (
+        <div className="mt-5 overflow-hidden">
+          {elGamalPubkey ? (
             <div className="flex h-[26px] items-center">
-              <Address address={auditorKey} />
+              <Address address={elGamalPubkey} truncateChars={32} />
             </div>
           ) : (
-            <Button variant="outline" size="sm" onClick={handleCreateAudKey}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCreateAudKey}
+              disabled={isGenerating}
+            >
               Generate auditor&lsquo;s key
             </Button>
           )}
