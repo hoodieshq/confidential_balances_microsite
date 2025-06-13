@@ -1,10 +1,12 @@
 import { FC, useCallback } from 'react'
-import { Form, FormField } from '@solana-foundation/ms-tools-ui'
+import { Button, Form, FormField } from '@solana-foundation/ms-tools-ui'
 import { PublicKey } from '@solana/web3.js'
+import { useAtomValue } from 'jotai'
 import { useForm } from 'react-hook-form'
 import { FormItemInput } from '@/shared/ui/form'
 import { Modal } from '@/shared/ui/modal'
 import { useToast } from '@/shared/ui/toast'
+import { latestMintAddressAtom } from '../model/latest-mint-address'
 
 type ModalInitATAProps = {
   show: boolean
@@ -28,10 +30,11 @@ export const ModalInitATA: FC<ModalInitATAProps> = ({
   onError,
 }) => {
   const toast = useToast()
+  const latestMintAddress = useAtomValue(latestMintAddressAtom)
 
   const form = useForm<FormData>({
     defaultValues: {
-      mintAddress: undefined,
+      mintAddress: '',
     },
     mode: 'onChange',
   })
@@ -87,6 +90,19 @@ export const ModalInitATA: FC<ModalInitATAProps> = ({
       hide={hide}
       show={show}
       title="Initialize Associated Token Account"
+      footerAdditional={
+        latestMintAddress ? (
+          <Button
+            variant="outline"
+            onClick={() => {
+              form.setValue('mintAddress', latestMintAddress)
+              form.trigger('mintAddress')
+            }}
+          >
+            Use latest mint address
+          </Button>
+        ) : undefined
+      }
       submitDisabled={!isValid || isInitializing}
       submitLabel={isInitializing ? 'Processing...' : 'Initialize'}
       submit={handleSubmit}
