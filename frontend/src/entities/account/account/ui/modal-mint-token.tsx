@@ -146,6 +146,7 @@ export const ModalMintToken: FC<ModalMintTokenProps> = ({
                 validate: validateMintAmount,
               }}
               render={({ field }: { field: any }) => (
+                // eslint-disable-next-line react/jsx-no-undef
                 <FormItemInput
                   type="number"
                   label="Mint Amount"
