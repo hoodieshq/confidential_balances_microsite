@@ -2,8 +2,8 @@ import { FC, useState, type PropsWithChildren } from 'react'
 import { Alert, AlertDescription, AlertTitle } from '@solana-foundation/ms-tools-ui'
 import { PublicKey } from '@solana/web3.js'
 import * as Icons from 'lucide-react'
+import { useGetBalance } from '@/entities/account/account/model/use-get-balance'
 import { useCluster } from '@/shared/solana'
-import { useGetBalance } from '../model/use-get-balance'
 import { ModalRequestAirdrop } from './modal-request-airdrop'
 
 type AccountBalanceCheckerProps = PropsWithChildren<{
