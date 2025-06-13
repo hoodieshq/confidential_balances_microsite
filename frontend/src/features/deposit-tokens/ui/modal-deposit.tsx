@@ -1,10 +1,16 @@
 import { FC } from 'react'
+import { useParams } from 'next/navigation'
 import { Form, FormField } from '@solana-foundation/ms-tools-ui'
 import { PublicKey } from '@solana/web3.js'
 import * as Icons from 'lucide-react'
 import pluralize from 'pluralize'
 import { useForm } from 'react-hook-form'
-import { useMint } from '@/entities/account/account'
+import {
+  useCurrentBalance,
+  useGetTokenBalance,
+  useMint,
+  useNativeAndTokenBalance,
+} from '@/entities/account/account'
 import { Content } from '@/shared/ui/content'
 import { FormItemInput } from '@/shared/ui/form'
 import { Modal } from '@/shared/ui/modal'
@@ -25,6 +31,7 @@ export const ModalDeposit: FC<ModalDepositProps> = ({ show, hide, tokenAccountPu
   const toast = useToast()
   const depositMutation = useDepositCb({ tokenAccountPubkey })
 
+  const { balance, loading } = useCurrentBalance()
   const { tokenAccount, mintInfo, error, isLoading } = useMint(tokenAccountPubkey)
 
   const form = useForm<FormValues>({
@@ -70,7 +77,7 @@ export const ModalDeposit: FC<ModalDepositProps> = ({ show, hide, tokenAccountPu
 
   const amount = form.watch('amount')
   const decimals = mintInfo?.decimals ?? 9 // Default to 9 decimals until we load the actual value
-  const tokenType = mintInfo ? (mintInfo.isToken2022 ? 'Token-2022' : 'Standard Token') : '' // Token type from the mint info
+  // const tokenType = mintInfo ? (mintInfo.isToken2022 ? 'Token-2022' : 'Standard Token') : '' // Token type from the mint info
   const tokenUnits = amount ? pluralize('token unit', amount * Math.pow(10, decimals), true) : '' // Token units based on the input amount
 
   return (
@@ -107,9 +114,7 @@ export const ModalDeposit: FC<ModalDepositProps> = ({ show, hide, tokenAccountPu
                 type="number"
                 label="Amount (tokens)"
                 description={tokenUnits}
-                hint={[tokenType, pluralize('decimal', decimals, true)]
-                  .filter((x) => !!x)
-                  .join(', ')}
+                hint={balance && !loading ? `Max: ${pluralize('token', balance, true)}` : ''}
                 disabled={isSubmitting}
                 step={1 / Math.pow(10, decimals)}
                 {...field}

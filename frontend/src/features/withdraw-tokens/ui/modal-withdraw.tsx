@@ -4,7 +4,7 @@ import { PublicKey } from '@solana/web3.js'
 import * as Icons from 'lucide-react'
 import pluralize from 'pluralize'
 import { useForm } from 'react-hook-form'
-import { useMint } from '@/entities/account/account'
+import { useCurrentBalance, useMint } from '@/entities/account/account'
 import { Content } from '@/shared/ui/content'
 import { FormItemInput } from '@/shared/ui/form'
 import { Modal } from '@/shared/ui/modal'
@@ -25,6 +25,7 @@ export const ModalWithdraw: FC<ModalWithdrawProps> = ({ show, hide, tokenAccount
   const toast = useToast()
   const withdrawMutation = useWithdrawCB({ tokenAccountPubkey })
 
+  const { balance, loading } = useCurrentBalance()
   const { tokenAccount, mintInfo, error, isLoading } = useMint(tokenAccountPubkey)
 
   const form = useForm<FormValues>({
@@ -106,9 +107,7 @@ export const ModalWithdraw: FC<ModalWithdrawProps> = ({ show, hide, tokenAccount
                 type="number"
                 label="Amount (tokens)"
                 description={tokenUnits}
-                hint={[tokenType, pluralize('decimal', decimals, true)]
-                  .filter((x) => !!x)
-                  .join(', ')}
+                hint={balance && !loading ? `Max: ${pluralize('token', balance, true)}` : ''}
                 disabled={isSubmitting}
                 step={1 / Math.pow(10, decimals)}
                 {...field}
