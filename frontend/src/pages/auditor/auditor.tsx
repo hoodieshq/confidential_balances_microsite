@@ -15,7 +15,7 @@ export const Auditor: FC = () => {
         renderPortal={false}
       >
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl font-medium">
+          <DialogTitle className="flex items-center gap-2 text-left text-xl font-medium">
             <Icons.Send />
             Audit transaction
           </DialogTitle>

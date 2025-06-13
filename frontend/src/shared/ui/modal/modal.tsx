@@ -42,7 +42,7 @@ export const Modal: FC<ModalProps> = ({
     <Dialog open={show} onOpenChange={hide}>
       <DialogContent aria-describedby={description ? ariaDescribedBy : undefined}>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl font-medium">
+          <DialogTitle className="flex items-center gap-2 text-left text-xl font-medium">
             {icon}
             {title}
           </DialogTitle>
