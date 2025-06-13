@@ -1,6 +1,8 @@
 import { FC, type PropsWithChildren } from 'react'
+import { Alert, AlertDescription, AlertTitle } from '@solana-foundation/ms-tools-ui'
 import { useConnection } from '@solana/wallet-adapter-react'
 import { useQuery } from '@tanstack/react-query'
+import * as Icons from 'lucide-react'
 import { useCluster } from '@/shared/solana'
 
 type ClusterCheckerProps = PropsWithChildren<{}>
@@ -18,14 +20,15 @@ export const ClusterChecker: FC<ClusterCheckerProps> = ({ children }) => {
   if (query.isLoading) return undefined
 
   return query.isError || !query.data ? (
-    <div className="alert alert-warning text-warning-content/80 flex justify-center rounded-none">
-      <span>
+    <Alert className="z-50 cursor-pointer" variant="error" onClick={() => query.refetch()}>
+      <AlertTitle>
         Error connecting to cluster <strong>{cluster.name}</strong>
-      </span>
-      <button className="btn btn-xs btn-neutral" onClick={() => query.refetch()}>
-        Refresh
-      </button>
-    </div>
+      </AlertTitle>
+      <AlertDescription className="flex flex-nowrap items-center">
+        Reconnect
+        <Icons.ChevronRight className="size-4" />
+      </AlertDescription>
+    </Alert>
   ) : (
     children
   )
