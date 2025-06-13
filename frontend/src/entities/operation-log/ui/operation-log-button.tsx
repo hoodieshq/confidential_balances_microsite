@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import { Button } from '@solana-foundation/ms-tools-ui'
+import { Button } from '@solana-foundation/ms-tools-ui/components/button'
 import { useAtom } from 'jotai'
 import * as Icons from 'lucide-react'
 import { cn } from '@/shared/utils'

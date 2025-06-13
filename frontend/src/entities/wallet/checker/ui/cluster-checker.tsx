@@ -1,5 +1,9 @@
 import { FC, type PropsWithChildren } from 'react'
-import { Alert, AlertDescription, AlertTitle } from '@solana-foundation/ms-tools-ui'
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@solana-foundation/ms-tools-ui/components/alert'
 import { useConnection } from '@solana/wallet-adapter-react'
 import { useQuery } from '@tanstack/react-query'
 import * as Icons from 'lucide-react'

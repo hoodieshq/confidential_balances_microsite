@@ -1,5 +1,5 @@
 import { ComponentProps, FC } from 'react'
-import { Textarea as UITextarea } from '@solana-foundation/ms-tools-ui'
+import { Textarea as UITextarea } from '@solana-foundation/ms-tools-ui/components/textarea'
 import { cva } from 'class-variance-authority'
 import { cn } from '@/shared/utils'
 import styles from './input.module.css'

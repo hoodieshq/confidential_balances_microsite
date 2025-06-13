@@ -1,15 +1,14 @@
 'use client'
 
 import { FC, useCallback } from 'react'
+import { Form, FormField } from '@solana-foundation/ms-tools-ui/components/form'
 import {
-  Form,
-  FormField,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@solana-foundation/ms-tools-ui'
+} from '@solana-foundation/ms-tools-ui/components/select'
 import { Connection } from '@solana/web3.js'
 import { useForm } from 'react-hook-form'
 import { ClusterNetwork, useCluster } from '@/shared/solana'

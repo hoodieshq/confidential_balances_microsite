@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@solana-foundation/ms-tools-ui'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@solana-foundation/ms-tools-ui/components/dialog'
 import * as Icons from 'lucide-react'
 import { AuditTransaction } from '@/features/audit-transaction'
 
