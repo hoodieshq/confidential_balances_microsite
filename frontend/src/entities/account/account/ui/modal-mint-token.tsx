@@ -34,7 +34,7 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
 
   const form = useForm<FormData>({
     defaultValues: {
-      mintAddress: undefined,
+      mintAddress: '',
     },
     mode: 'onChange',
   })

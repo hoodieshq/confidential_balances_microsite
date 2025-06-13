@@ -18,7 +18,7 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
   const [transactions, setTransactions] = useState<number[]>([])
 
   const form = useForm<FormValues>({
-    defaultValues: { transaction: tx },
+    defaultValues: { transaction: tx ?? '' },
     mode: 'onChange',
   })
 
