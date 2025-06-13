@@ -116,5 +116,4 @@ pub struct CreateTestTokenTransactionRequest {
     pub mint: String,
     pub latest_blockhash: String, // The latest blockhash
     pub mint_rent: Option<u64>,   // Optional rent amount for mint account
-    pub mint_amount: Option<u64>, // Optional initial supply in lamports
 }

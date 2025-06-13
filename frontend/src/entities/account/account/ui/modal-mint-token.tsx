@@ -8,11 +8,12 @@ import { Modal } from '@/shared/ui/modal'
 import { useToast } from '@/shared/ui/toast'
 import { latestMintAddressAtom } from '../model/latest-mint-address'
 
-type ModalInitATAProps = {
+type ModalMintTokenProps = {
   show: boolean
   hide: () => void
-  initializeAccount: (_params: { mintAddress: string }) => void
+  initializeAccount: (_params: { mintAddress: string; mintAmount: number }) => void
   isInitializing: boolean
+  label?: string
   onSuccess?: () => void
   onError?: () => void
 }
@@ -22,11 +23,12 @@ type FormData = {
   mintAmount: number
 }
 
-export const ModalMintToken: FC<ModalInitATAProps> = ({
+export const ModalMintToken: FC<ModalMintTokenProps> = ({
   show,
   hide,
   initializeAccount,
   isInitializing,
+  label,
   onSuccess,
   onError,
 }) => {
@@ -41,7 +43,6 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
     mode: 'onChange',
   })
 
-  // const mintAddress = form.watch('mintAddress')
   const {
     formState: { isValid },
   } = form
@@ -63,8 +64,12 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
     }
   }
 
-  const validateMintAmount = (value: number) => {
-    if (!value || value < 0) {
+  const validateMintAmount = (value: number | string) => {
+    let amount = Number(value)
+
+    if (isNaN(amount)) return 'Invalid format'
+
+    if (!amount || amount <= 0) {
       return 'Mint amount required'
     }
 
@@ -81,7 +86,7 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
 
     // NOTE: consider moving toast interactions out of modal component to make it less "dirty"
     try {
-      initializeAccount({ mintAddress: formValues.mintAddress })
+      initializeAccount({ mintAddress: formValues.mintAddress, mintAmount: formValues.mintAmount })
       hide()
       form.reset()
       toast.success('Mint token transaction submitted')
@@ -112,7 +117,7 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
         ) : undefined
       }
       submitDisabled={!isValid || isInitializing}
-      submitLabel={isInitializing ? 'Processing...' : 'Initialize'}
+      submitLabel={isInitializing ? 'Processing...' : (label ?? 'Mint token')}
       submit={handleSubmit}
     >
       <Form {...form}>

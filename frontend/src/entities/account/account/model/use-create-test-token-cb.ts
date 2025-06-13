@@ -22,7 +22,6 @@ async function serverRequest(request: {
   account: string
   mint: string
   mint_rent: number
-  mint_amount: number
   latest_blockhash: string
 }) {
   const route = `${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/create-test-token`
@@ -88,7 +87,6 @@ export const useCreateTestTokenCB = ({
           account: wallet.publicKey.toBase58(),
           mint: mintKeypair.publicKey.toBase58(),
           mint_rent: mintRent,
-          mint_amount: 1000,
           latest_blockhash: (await connection.getLatestBlockhash()).blockhash,
         })
 
@@ -172,7 +170,7 @@ export const useCreateTestTokenCB = ({
 
 export const useMintTestTokenCB = ({
   walletAddressPubkey,
-  amount = 1000,
+  amount: defaultAmount = 1000,
 }: {
   walletAddressPubkey: PublicKey
   amount?: number
@@ -190,13 +188,19 @@ export const useMintTestTokenCB = ({
       'mint-token2022-test-mint',
       { endpoint: connection.rpcEndpoint, address: walletAddressPubkey },
     ],
-    mutationFn: async ({ mintAddressPubkey }: { mintAddressPubkey: PublicKey }) => {
+    mutationFn: async ({
+      mintAddressPubkey,
+      mintAmount = defaultAmount,
+    }: {
+      mintAddressPubkey: PublicKey
+      mintAmount?: number
+    }) => {
       try {
         if (!wallet.publicKey) {
           throw new Error('Wallet not connected')
         }
 
-        const tokenAmount = amount * Math.pow(10, 9)
+        const tokenAmount = mintAmount * Math.pow(10, 9)
 
         const destination = await getAssociatedTokenAddress(
           mintAddressPubkey,
@@ -254,7 +258,7 @@ export const useMintTestTokenCB = ({
         return {
           signature,
           mintAddress: mintAddressPubkey.toBase58(),
-          amount,
+          amount: mintAmount,
           amountLamports: tokenAmount,
         }
       } catch (error) {
