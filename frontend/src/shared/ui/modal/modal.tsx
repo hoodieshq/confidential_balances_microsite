@@ -14,6 +14,7 @@ import {
 
 type ModalProps = PropsWithChildren<{
   title: string
+  icon?: ReactNode
   hide: () => void
   show: boolean
   footerAdditional?: ReactNode
@@ -27,6 +28,7 @@ type ModalProps = PropsWithChildren<{
 export const Modal: FC<ModalProps> = ({
   children,
   title,
+  icon,
   hide,
   show,
   footerAdditional,
@@ -40,7 +42,10 @@ export const Modal: FC<ModalProps> = ({
     <Dialog open={show} onOpenChange={hide}>
       <DialogContent aria-describedby={description ? ariaDescribedBy : undefined}>
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2 text-xl font-medium">
+            {icon}
+            {title}
+          </DialogTitle>
           {description && <DialogDescription id={ariaDescribedBy}>{description}</DialogDescription>}
         </DialogHeader>
         {children}
