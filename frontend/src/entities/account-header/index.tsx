@@ -1,9 +1,11 @@
 import { ComponentProps, FC } from 'react'
 import { Address } from '@solana-foundation/ms-tools-ui'
 import { PublicKey } from '@solana/web3.js'
-import { useGetTokenBalance } from '@/entities/account/account/model/use-get-token-balance'
-import { useNativeAndTokenBalance } from '@/entities/account/account/model/use-native-and-token-balance'
-import { WalletTitle } from '@/entities/account/account/ui/wallet-title'
+import {
+  useGetTokenBalance,
+  useNativeAndTokenBalance,
+  WalletTitle,
+} from '@/entities/account/account'
 import { CardBalance } from '@/shared/ui/card-balance'
 import { Text } from '@/shared/ui/text'
 import { cn } from '@/shared/utils'

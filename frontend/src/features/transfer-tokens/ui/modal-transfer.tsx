@@ -7,7 +7,7 @@ import { useAtomValue } from 'jotai'
 import * as Icons from 'lucide-react'
 import pluralize from 'pluralize'
 import { useForm } from 'react-hook-form'
-import { useMint } from '@/entities/account/account'
+import { useCurrentBalance, useMint } from '@/entities/account/account'
 import { devModeOpenAtom } from '@/entities/dev-mode'
 import { Content } from '@/shared/ui/content'
 import { FormItemInput } from '@/shared/ui/form'
@@ -34,6 +34,7 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
   const devMode = useAtomValue(devModeOpenAtom)
   const transferMutation = useTransferCB({ senderTokenAccountPubkey: tokenAccountPubkey })
 
+  const { balance, loading } = useCurrentBalance()
   const [resolvedTokenAccount, setResolvedTokenAccount] = useState<PublicKey | null>(null)
 
   const form = useForm<FormValues>({
@@ -221,9 +222,7 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
                 type="number"
                 label="Amount (tokens)"
                 description={tokenUnits}
-                hint={[tokenType, pluralize('decimal', decimals, true)]
-                  .filter((x) => !!x)
-                  .join(', ')}
+                hint={balance && !loading ? `Max: ${pluralize('token', balance, true)}` : ''}
                 disabled={isSubmitting}
                 step={1 / Math.pow(10, decimals)}
                 {...field}
