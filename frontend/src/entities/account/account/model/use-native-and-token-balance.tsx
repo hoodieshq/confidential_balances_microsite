@@ -1,6 +1,5 @@
 import { NATIVE_MINT } from '@solana/spl-token'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import * as web3 from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 import { QueryObserverOptions, useQuery } from '@tanstack/react-query'
 import { nativeToUiAmount } from './native-to-ui-amount'
