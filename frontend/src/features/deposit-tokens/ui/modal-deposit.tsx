@@ -1,16 +1,10 @@
 import { FC } from 'react'
-import { useParams } from 'next/navigation'
 import { Form, FormField } from '@solana-foundation/ms-tools-ui'
 import { PublicKey } from '@solana/web3.js'
 import * as Icons from 'lucide-react'
 import pluralize from 'pluralize'
 import { useForm } from 'react-hook-form'
-import {
-  useCurrentBalance,
-  useGetTokenBalance,
-  useMint,
-  useNativeAndTokenBalance,
-} from '@/entities/account/account'
+import { useCurrentBalance, useMint } from '@/entities/account/account'
 import { Content } from '@/shared/ui/content'
 import { FormItemInput } from '@/shared/ui/form'
 import { Modal } from '@/shared/ui/modal'
@@ -45,6 +39,8 @@ export const ModalDeposit: FC<ModalDepositProps> = ({ show, hide, tokenAccountPu
     formState: { isSubmitting, isValid },
   } = form
 
+  const decimals = mintInfo?.decimals ?? 9 // Default to 9 decimals until we load the actual value
+
   const handleSubmit = async (values: FormValues) => {
     if (values.amount <= 0) {
       toast.error('Please enter a valid amount')
@@ -75,11 +71,6 @@ export const ModalDeposit: FC<ModalDepositProps> = ({ show, hide, tokenAccountPu
     }
   }
 
-  const amount = form.watch('amount')
-  const decimals = mintInfo?.decimals ?? 9 // Default to 9 decimals until we load the actual value
-  // const tokenType = mintInfo ? (mintInfo.isToken2022 ? 'Token-2022' : 'Standard Token') : '' // Token type from the mint info
-  const tokenUnits = amount ? pluralize('token unit', amount * Math.pow(10, decimals), true) : '' // Token units based on the input amount
-
   return (
     <Modal
       hide={hide}
@@ -105,18 +96,26 @@ export const ModalDeposit: FC<ModalDepositProps> = ({ show, hide, tokenAccountPu
             rules={{
               required: 'Amount is required',
               min: {
-                value: 1,
+                value: 0.0000000001,
                 message: 'Amount must be greater than 0',
               },
+              max:
+                balance && !loading
+                  ? {
+                      value: balance,
+                      message: 'Amount must be less than or equal to the current balance',
+                    }
+                  : undefined,
             }}
             render={({ field }) => (
               <FormItemInput
                 type="number"
                 label="Amount (tokens)"
-                description={tokenUnits}
                 hint={balance && !loading ? `Max: ${pluralize('token', balance, true)}` : ''}
                 disabled={isSubmitting}
-                step={1 / Math.pow(10, decimals)}
+                step={0.01}
+                min={0}
+                max={balance && !loading ? balance : undefined}
                 {...field}
                 onChange={(e) => field.onChange(e.target.valueAsNumber)}
               />
