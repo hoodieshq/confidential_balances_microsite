@@ -52,7 +52,6 @@ function ConnectedWalletConfidentialBalances({
     confidentialBalance,
   } = useDecryptConfidentialBalance()
 
-
   const onDecryptBalance = async () => {
     const result = await decryptBalance(account)
     if (result) {
@@ -155,7 +154,7 @@ function ConnectedWalletConfidentialBalances({
       <DataTable
         title="Confidential Balances"
         emptyComp={
-          <div className="flex justify-between">
+          <div className="flex flex-col justify-between gap-2 sm:flex-row">
             Balance is encrypted. Decrypt with wallet to see the balance.
             <Button disabled={isDecrypting} size="sm" variant="outline" onClick={onDecryptBalance}>
               {isDecrypting ? <Loader /> : <Unlock />} Decrypt available balance
