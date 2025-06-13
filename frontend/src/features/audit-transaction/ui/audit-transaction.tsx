@@ -1,10 +1,12 @@
-import { FC, useState } from 'react'
+import { FC, useCallback, useState } from 'react'
 import { Button } from '@solana-foundation/ms-tools-ui/components/button'
 import { Form, FormField } from '@solana-foundation/ms-tools-ui/components/form'
-import * as Icons from 'lucide-react'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { useWalletModal } from '@solana/wallet-adapter-react-ui'
+import { Lock, Unlock, Wallet } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { Content } from '@/shared/ui/content'
-import { FormItemInput } from '@/shared/ui/form'
+import { FormItemInput, FormItemTextarea } from '@/shared/ui/form'
 
 type FormValues = {
   transaction: string
@@ -15,8 +17,9 @@ type AuditTransactionProps = {
 }
 
 export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
-  // TODO: fill transactions from the backend
-  const [transactions, setTransactions] = useState<number[]>([])
+  const [amount, setAmount] = useState<number | undefined>(undefined)
+  const { connected, publicKey } = useWallet()
+  const { setVisible } = useWalletModal()
 
   const form = useForm<FormValues>({
     defaultValues: { transaction: tx ?? '' },
@@ -31,6 +34,16 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
     console.log(values)
   }
 
+  const handleConnectWallet = useCallback(() => {
+    setVisible(true)
+  }, [setVisible])
+
+  const handleDecryptBalance = useCallback(() => {
+    setAmount(1)
+  }, [setAmount])
+
+  const isWalletConnected = connected && Boolean(publicKey)
+
   return (
     <Form {...form}>
       <Content>
@@ -40,47 +53,30 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
           control={form.control}
           name="transaction"
           rules={{
-            required: 'Transaction is required',
+            required: 'Transaction hash is required',
           }}
           render={({ field }) => (
-            <FormItemInput label="Transaction hash" disabled={isSubmitting} {...field} />
+            <FormItemTextarea label="Transaction hash" disabled={isSubmitting} {...field} />
           )}
         />
 
-        {transactions.length === 0 && (
-          <FormItemInput
-            label="Transaction hash"
-            disabled={true}
-            placeholder="$$$$$"
-            icon={<Icons.Lock />}
-          />
+        {!amount ? (
+          <FormItemInput label="Amount" disabled={true} placeholder="$$$$$" icon={<Lock />} />
+        ) : (
+          <FormItemInput label="Amount" disabled={true} value={amount} icon={<Unlock />} />
         )}
 
-        {transactions.map((transfer, index) => (
-          <FormItemInput
-            key={index}
-            label={`Transfer ${index + 1}`}
-            readOnly={true}
-            icon={<Icons.Unlock />}
-            value={transfer}
-          />
-        ))}
-
-        {transactions.length === 0 && (
-          <Button onClick={() => setTransactions([1, 2, 3])}>
-            <Icons.Wallet />
+        {!isWalletConnected ? (
+          <Button onClick={handleConnectWallet}>
+            <Wallet />
             Connect auditor wallet
           </Button>
-        )}
-
-        {transactions.length > 0 && (
-          <Button>
-            <Icons.Unlock />
-            Decrypt balance
+        ) : (
+          <Button onClick={handleDecryptBalance}>
+            <Wallet />
+            Decode transaction balance
           </Button>
         )}
-
-        {/* <Button variant="outline">Clear</Button> */}
       </Content>
     </Form>
   )

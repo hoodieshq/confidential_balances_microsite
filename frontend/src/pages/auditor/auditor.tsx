@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@solana-foundation/ms-tools-ui/components/dialog'
-import * as Icons from 'lucide-react'
+import { Radar } from 'lucide-react'
 import { AuditTransaction } from '@/features/audit-transaction'
 
 export const Auditor: FC = () => {
@@ -18,10 +18,12 @@ export const Auditor: FC = () => {
       <DialogContent
         className="relative top-auto right-0 left-auto z-0 mx-auto mt-12 translate-x-0 translate-y-0"
         renderPortal={false}
+        // TODO: uncomment this line when Dialogcontent will support optional component for default close
+        // closeComp={undefined}
       >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-left text-xl font-medium">
-            <Icons.Send />
+            <Radar />
             Audit transaction
           </DialogTitle>
         </DialogHeader>
