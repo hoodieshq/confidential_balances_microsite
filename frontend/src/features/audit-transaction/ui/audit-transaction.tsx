@@ -1,8 +1,10 @@
 import { FC, useCallback, useState } from 'react'
+import { Address } from '@solana-foundation/ms-tools-ui'
 import { Button } from '@solana-foundation/ms-tools-ui/components/button'
 import { Form, FormField } from '@solana-foundation/ms-tools-ui/components/form'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'
+import { Keypair } from '@solana/web3.js'
 import { Lock, Unlock, Wallet } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { Content } from '@/shared/ui/content'
@@ -17,7 +19,8 @@ type AuditTransactionProps = {
 }
 
 export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
-  const [amount, setAmount] = useState<number | undefined>(undefined)
+  const [amount, setAmount] = useState<number>()
+  const [auditorKey, setAuditorKey] = useState<string>()
   const { connected, publicKey } = useWallet()
   const { setVisible } = useWalletModal()
 
@@ -41,6 +44,10 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
   const handleDecryptBalance = useCallback(() => {
     setAmount(1)
   }, [setAmount])
+
+  const handleCreateAudKey = useCallback(() => {
+    setAuditorKey(Keypair.generate().publicKey.toBase58())
+  }, [])
 
   const isWalletConnected = connected && Boolean(publicKey)
 
@@ -77,6 +84,17 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
             Decode transaction balance
           </Button>
         )}
+        <div className="mt-5">
+          {auditorKey ? (
+            <div className="flex h-[26px] items-center">
+              <Address address={auditorKey} />
+            </div>
+          ) : (
+            <Button variant="outline" size="sm" onClick={handleCreateAudKey}>
+              Generate auditor&lsquo;s key
+            </Button>
+          )}
+        </div>
       </Content>
     </Form>
   )
