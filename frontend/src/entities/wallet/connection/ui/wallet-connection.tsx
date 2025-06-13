@@ -1,5 +1,9 @@
 import { FC, useCallback } from 'react'
-import { Alert, AlertDescription, AlertTitle } from '@solana-foundation/ms-tools-ui/components/alert'
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@solana-foundation/ms-tools-ui/components/alert'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'
 

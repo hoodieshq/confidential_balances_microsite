@@ -1,5 +1,9 @@
 import { FC, useState, type PropsWithChildren } from 'react'
-import { Alert, AlertDescription, AlertTitle } from '@solana-foundation/ms-tools-ui/components/alert'
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@solana-foundation/ms-tools-ui/components/alert'
 import { PublicKey } from '@solana/web3.js'
 import * as Icons from 'lucide-react'
 import { useGetBalance } from '@/entities/account/account/model/use-get-balance'

@@ -1,6 +1,7 @@
 'use client'
 
 import { ComponentProps, FC, PropsWithChildren, Suspense, useRef } from 'react'
+import { Skeleton } from '@solana-foundation/ms-tools-ui/components/skeleton'
 import { cn } from '@solana-foundation/ms-tools-ui/lib/utils'
 import { useAtomValue } from 'jotai'
 import { devModeOpenAtom, DevModePanel } from '@/entities/dev-mode'
@@ -12,7 +13,6 @@ import {
 import { WalletChecker } from '@/entities/wallet/checker'
 import { Header } from '@/shared/ui/header'
 import { StickyPanel } from '@/shared/ui/sticky-panel'
-import { Skeleton } from '@solana-foundation/ms-tools-ui/components/skeleton'
 
 type LayoutProps = PropsWithChildren<{
   links: ComponentProps<typeof Header>['navigation']
