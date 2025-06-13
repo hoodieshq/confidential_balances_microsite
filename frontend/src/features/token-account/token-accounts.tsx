@@ -144,8 +144,11 @@ function ConnectedWalletTokenAccounts({
         key="mintTestToken"
         show={showMintModal}
         hide={() => setShowMintModal(false)}
-        initializeAccount={(a) => {
-          mintTestToken({ mintAddressPubkey: new PublicKey(a.mintAddress) })
+        initializeAccount={({ mintAmount, mintAddress }) => {
+          mintTestToken({
+            mintAddressPubkey: new PublicKey(mintAddress),
+            mintAmount,
+          })
         }}
         isInitializing={isMinting}
       />

@@ -13,6 +13,7 @@ type ModalInitATAProps = {
   hide: () => void
   initializeAccount: (_params: { mintAddress: string }) => void
   isInitializing: boolean
+  label?: string
   onSuccess?: () => void
   onError?: () => void
 }
@@ -26,6 +27,7 @@ export const ModalInitATA: FC<ModalInitATAProps> = ({
   hide,
   initializeAccount,
   isInitializing,
+  label,
   onSuccess,
   onError,
 }) => {
@@ -104,7 +106,7 @@ export const ModalInitATA: FC<ModalInitATAProps> = ({
         ) : undefined
       }
       submitDisabled={!isValid || isInitializing}
-      submitLabel={isInitializing ? 'Processing...' : 'Initialize'}
+      submitLabel={isInitializing ? 'Processing...' : (label ?? 'Initialize')}
       submit={handleSubmit}
     >
       <Form {...form}>

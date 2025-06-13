@@ -3,29 +3,32 @@ import { Button, Form, FormField } from '@solana-foundation/ms-tools-ui'
 import { PublicKey } from '@solana/web3.js'
 import { useAtomValue } from 'jotai'
 import { useForm } from 'react-hook-form'
-import { FormItemTextarea } from '@/shared/ui/form'
+import { FormItemInput, FormItemTextarea } from '@/shared/ui/form'
 import { Modal } from '@/shared/ui/modal'
 import { useToast } from '@/shared/ui/toast'
 import { latestMintAddressAtom } from '../model/latest-mint-address'
 
-type ModalInitATAProps = {
+type ModalMintTokenProps = {
   show: boolean
   hide: () => void
-  initializeAccount: (_params: { mintAddress: string }) => void
+  initializeAccount: (_params: { mintAddress: string; mintAmount: number }) => void
   isInitializing: boolean
+  label?: string
   onSuccess?: () => void
   onError?: () => void
 }
 
 type FormData = {
   mintAddress: string
+  mintAmount: number
 }
 
-export const ModalMintToken: FC<ModalInitATAProps> = ({
+export const ModalMintToken: FC<ModalMintTokenProps> = ({
   show,
   hide,
   initializeAccount,
   isInitializing,
+  label,
   onSuccess,
   onError,
 }) => {
@@ -35,11 +38,11 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
   const form = useForm<FormData>({
     defaultValues: {
       mintAddress: '',
+      mintAmount: undefined,
     },
     mode: 'onChange',
   })
 
-  // const mintAddress = form.watch('mintAddress')
   const {
     formState: { isValid },
   } = form
@@ -61,6 +64,18 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
     }
   }
 
+  const validateMintAmount = (value: number | string) => {
+    let amount = Number(value)
+
+    if (isNaN(amount)) return 'Invalid format'
+
+    if (!amount || amount <= 0) {
+      return 'Mint amount required'
+    }
+
+    return true
+  }
+
   const handleSubmit = useCallback(() => {
     const formValues = form.getValues()
 
@@ -71,7 +86,7 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
 
     // NOTE: consider moving toast interactions out of modal component to make it less "dirty"
     try {
-      initializeAccount({ mintAddress: formValues.mintAddress })
+      initializeAccount({ mintAddress: formValues.mintAddress, mintAmount: formValues.mintAmount })
       hide()
       form.reset()
       toast.success('Mint token transaction submitted')
@@ -102,12 +117,12 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
         ) : undefined
       }
       submitDisabled={!isValid || isInitializing}
-      submitLabel={isInitializing ? 'Processing...' : 'Initialize'}
+      submitLabel={isInitializing ? 'Processing...' : (label ?? 'Mint token')}
       submit={handleSubmit}
     >
       <Form {...form}>
         <form>
-          <div className="form-control">
+          <div className="flex flex-col gap-4">
             <FormField
               control={form.control}
               name="mintAddress"
@@ -118,6 +133,25 @@ export const ModalMintToken: FC<ModalInitATAProps> = ({
                 <FormItemTextarea
                   label="Mint Address"
                   placeholder="Enter mint address"
+                  className="overflow-hidden text-ellipsis"
+                  disabled={isInitializing}
+                  {...field}
+                />
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="mintAmount"
+              rules={{
+                validate: validateMintAmount,
+              }}
+              render={({ field }: { field: any }) => (
+                <FormItemInput
+                  type="number"
+                  label="Mint Amount"
+                  min={0}
+                  step={1}
+                  placeholder="Enter amount"
                   className="overflow-hidden text-ellipsis"
                   disabled={isInitializing}
                   {...field}

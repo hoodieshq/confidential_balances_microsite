@@ -43,14 +43,9 @@ pub async fn create_test_token(
     // Parse the mint address to allow creating instructions for mint initialization with basic supply
     let mint_address = parse_base58_pubkey(&request.mint)?;
 
-    let mint_amount = match request.mint_amount {
-        Some(amount) => amount,
-        None => 1_000,
-    };
-
     println!(
-        "✅ Request data is correct: account={}, mint={}, amount={}",
-        request.account, request.mint, mint_amount,
+        "✅ Request data is correct: account={}, mint={}",
+        request.account, request.mint,
     );
 
     // Validate that mint address is different from authority
