@@ -18,4 +18,4 @@ ignoredBuiltDependencies:
   - protobufjs
   - tiny-secp256k1
   - usb
-  - utf-8-validate"
+  - utf-8-validate
