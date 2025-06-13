@@ -1,6 +1,7 @@
 import { FC } from 'react'
 import { Form, FormField } from '@solana-foundation/ms-tools-ui'
 import { PublicKey } from '@solana/web3.js'
+import * as Icons from 'lucide-react'
 import pluralize from 'pluralize'
 import { useForm } from 'react-hook-form'
 import { useMint } from '@/entities/account/account'
@@ -76,6 +77,7 @@ export const ModalWithdraw: FC<ModalWithdrawProps> = ({ show, hide, tokenAccount
       hide={hide}
       show={show}
       title="Withdraw from Confidential Balance"
+      icon={<Icons.Send />}
       submitDisabled={!isValid || isSubmitting || isLoading}
       submitLabel={isSubmitting ? 'Processing...' : 'Confirm Withdraw'}
       submit={form.handleSubmit(handleSubmit)}

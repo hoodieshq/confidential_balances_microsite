@@ -151,6 +151,7 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
       hide={hide}
       show={show}
       title="Transfer Confidential Balance"
+      icon={<Icons.Send />}
       submitDisabled={!isValid || isSubmitting || isLoading}
       submitLabel={isSubmitting ? 'Processing...' : 'Confirm Transfer'}
       submit={form.handleSubmit(handleSubmit)}

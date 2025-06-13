@@ -1,6 +1,7 @@
 import { FC } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@solana-foundation/ms-tools-ui'
+import * as Icons from 'lucide-react'
 import { AuditTransaction } from '@/features/audit-transaction'
 
 export const Auditor: FC = () => {
@@ -14,7 +15,10 @@ export const Auditor: FC = () => {
         renderPortal={false}
       >
         <DialogHeader>
-          <DialogTitle>Audit transaction</DialogTitle>
+          <DialogTitle className="flex items-center gap-2 text-xl font-medium">
+            <Icons.Send />
+            Audit transaction
+          </DialogTitle>
         </DialogHeader>
         <AuditTransaction tx={tx} />
       </DialogContent>

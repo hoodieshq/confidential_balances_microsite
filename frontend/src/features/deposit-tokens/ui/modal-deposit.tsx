@@ -1,6 +1,7 @@
 import { FC } from 'react'
 import { Form, FormField } from '@solana-foundation/ms-tools-ui'
 import { PublicKey } from '@solana/web3.js'
+import * as Icons from 'lucide-react'
 import pluralize from 'pluralize'
 import { useForm } from 'react-hook-form'
 import { useMint } from '@/entities/account/account'
@@ -77,6 +78,7 @@ export const ModalDeposit: FC<ModalDepositProps> = ({ show, hide, tokenAccountPu
       hide={hide}
       show={show}
       title="Deposit to Confidential Balance"
+      icon={<Icons.ArrowDown />}
       submitDisabled={!isValid || isSubmitting || isLoading}
       submitLabel={isSubmitting ? 'Processing...' : 'Confirm Deposit'}
       submit={form.handleSubmit(handleSubmit)}
