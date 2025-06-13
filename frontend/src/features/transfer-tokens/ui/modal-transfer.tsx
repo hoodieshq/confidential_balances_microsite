@@ -199,6 +199,14 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
                     : 'Token account address'
                 }
                 disabled={isSubmitting}
+                description={
+                  !!resolvedTokenAccount ? (
+                    <div className="flex flex-row flex-nowrap items-center gap-2 text-[var(--accent)]">
+                      <Icons.Check className="size-4" />
+                      <span>Valid wallet with initialized confidential balance</span>
+                    </div>
+                  ) : undefined
+                }
                 {...field}
               />
             )}

@@ -1,4 +1,4 @@
-import { FC, InputHTMLAttributes } from 'react'
+import { FC, InputHTMLAttributes, ReactNode } from 'react'
 import {
   FormControl,
   FormDescription,
@@ -9,7 +9,7 @@ import {
 import { Input } from '../input/input'
 
 interface FormItemProps extends InputHTMLAttributes<HTMLInputElement> {
-  description?: string
+  description?: ReactNode
   label?: string
   hint?: string
   icon?: React.ReactNode
