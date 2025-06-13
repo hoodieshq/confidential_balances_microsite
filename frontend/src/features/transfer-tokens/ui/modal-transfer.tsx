@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form'
 import { useCurrentBalance, useMint } from '@/entities/account/account'
 import { devModeOpenAtom } from '@/entities/dev-mode'
 import { Content } from '@/shared/ui/content'
-import { FormItemInput } from '@/shared/ui/form'
+import { FormItemInput, FormItemTextarea } from '@/shared/ui/form'
 import { Modal } from '@/shared/ui/modal'
 import { Selector, SelectorItem } from '@/shared/ui/selector'
 import { useToast } from '@/shared/ui/toast'
@@ -192,7 +192,7 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
               validate: validateRecipient,
             }}
             render={({ field }) => (
-              <FormItemInput
+              <FormItemTextarea
                 label={
                   form.watch('addressType') === 'system'
                     ? 'Wallet address'

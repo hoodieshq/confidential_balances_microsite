@@ -1,4 +1,4 @@
-import { FC, InputHTMLAttributes, ReactNode } from 'react'
+import { FC, ReactNode, TextareaHTMLAttributes } from 'react'
 import {
   FormControl,
   FormDescription,
@@ -6,16 +6,16 @@ import {
   FormMessage,
   FormItem as UIFormItem,
 } from '@solana-foundation/ms-tools-ui'
-import { Input } from '@/shared/ui/input'
+import { Textarea } from '@/shared/ui/input'
 
-interface FormItemProps extends InputHTMLAttributes<HTMLInputElement> {
+interface FormItemProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   description?: ReactNode
   label?: string
   hint?: string
   icon?: React.ReactNode
 }
 
-export const FormItemInput: FC<FormItemProps & InputHTMLAttributes<HTMLInputElement>> = ({
+export const FormItemTextarea: FC<FormItemProps & TextareaHTMLAttributes<HTMLTextAreaElement>> = ({
   description,
   label,
   hint,
@@ -30,7 +30,7 @@ export const FormItemInput: FC<FormItemProps & InputHTMLAttributes<HTMLInputElem
         </FormLabel>
       )}
       <FormControl>
-        <Input {...inputProps} />
+        <Textarea {...inputProps} />
       </FormControl>
       {description && <FormDescription>{description}</FormDescription>}
       <FormMessage />
