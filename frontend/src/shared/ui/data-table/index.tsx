@@ -70,12 +70,12 @@ export function DataTable({
   return (
     <div className={cn(dataTableVariants(), className)}>
       {title ? (
-        <div className="flex flex-row justify-between px-6 py-4">
+        <div className="flex flex-col justify-between gap-2 px-6 py-4 sm:flex-row">
           {title}
           {actions ? (
             <ActionsComp
               data-slot="data-table-actions"
-              className="flex flex-row items-center gap-1"
+              className="flex flex-row flex-wrap items-center gap-1 overflow-hidden"
               {...actionProps}
             >
               {actions.map(({ icon, ...action }) => (
