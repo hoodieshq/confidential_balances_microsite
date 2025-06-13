@@ -154,7 +154,6 @@ function ConnectedWalletTokenAccounts({
           })
         }}
         isProcessing={isCreatingMint}
-        submitLabel="Create mint"
       />
       <ModalMintToken
         key="mintTestToken"
@@ -167,7 +166,6 @@ function ConnectedWalletTokenAccounts({
           })
         }}
         isInitializing={isMinting}
-        submitLabel="Mint token"
       />
       <DataTable
         title="Token accounts with confidential balances"

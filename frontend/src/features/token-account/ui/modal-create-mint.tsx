@@ -11,9 +11,9 @@ type ModalCreateMintProps = {
   hide: () => void
   submitCallback: (_params: { auditorAddress: string }) => void
   isProcessing: boolean
+  label?: string
   onSuccess?: () => void
   onError?: () => void
-  submitLabel?: string
 }
 
 type FormData = {
@@ -25,9 +25,9 @@ export const ModalCreateMint: FC<ModalCreateMintProps> = ({
   hide,
   submitCallback,
   isProcessing,
+  label,
   onSuccess,
   onError,
-  submitLabel,
 }) => {
   const toast = useToast()
 
@@ -84,7 +84,7 @@ export const ModalCreateMint: FC<ModalCreateMintProps> = ({
       show={show}
       title="Create Mint"
       submitDisabled={isProcessing}
-      submitLabel={isProcessing ? 'Processing...' : (submitLabel ?? 'Initialize')}
+      submitLabel={isProcessing ? 'Processing...' : (label ?? 'Initialize')}
       submit={handleSubmit}
     >
       <Form {...form}>

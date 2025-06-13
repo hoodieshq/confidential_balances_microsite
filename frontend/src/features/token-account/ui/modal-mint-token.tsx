@@ -4,10 +4,10 @@ import { Form, FormField } from '@solana-foundation/ms-tools-ui/components/form'
 import { PublicKey } from '@solana/web3.js'
 import { useAtomValue } from 'jotai'
 import { useForm } from 'react-hook-form'
+import { latestMintAddressAtom } from '@/entities/account/account/model/latest-mint-address'
 import { FormItemInput, FormItemTextarea } from '@/shared/ui/form'
 import { Modal } from '@/shared/ui/modal'
 import { useToast } from '@/shared/ui/toast'
-import { latestMintAddressAtom } from '../model/latest-mint-address'
 
 type ModalMintTokenProps = {
   show: boolean
@@ -121,7 +121,7 @@ export const ModalMintToken: FC<ModalMintTokenProps> = ({
         ) : undefined
       }
       submitDisabled={!isValid || isInitializing}
-      submitLabel={isInitializing ? 'Processing...' : (label ?? 'Mint token')}
+      submitLabel={isInitializing ? 'Processing...' : (label ?? 'Mint Token')}
       submit={handleSubmit}
     >
       <Form {...form}>
