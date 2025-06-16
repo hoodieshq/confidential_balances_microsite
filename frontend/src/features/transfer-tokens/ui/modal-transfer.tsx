@@ -145,7 +145,7 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
   }
 
   const recipientAddress = form.watch('recipientAddress')
-  useEffect(() => setResolvedTokenAccount(null), [recipientAddress, setResolvedTokenAccount])
+  useEffect(() => setResolvedTokenAccount(null), [recipientAddress])
 
   return (
     <Modal
