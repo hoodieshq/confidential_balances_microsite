@@ -105,7 +105,7 @@ export const ModalCluster: FC<ModalClusterProps> = ({ hide, show }) => {
       submit={handleSubmit}
     >
       <Form {...form}>
-        <form className="flex flex-col gap-4">
+        <form className="flex flex-col gap-4" onSubmit={form.handleSubmit(handleSubmit)}>
           <FormField
             control={form.control}
             name="name"

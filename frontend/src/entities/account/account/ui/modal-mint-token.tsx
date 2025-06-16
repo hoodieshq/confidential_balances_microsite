@@ -122,7 +122,7 @@ export const ModalMintToken: FC<ModalMintTokenProps> = ({
       submit={handleSubmit}
     >
       <Form {...form}>
-        <form>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
           <div className="flex flex-col gap-4">
             <FormField
               control={form.control}
