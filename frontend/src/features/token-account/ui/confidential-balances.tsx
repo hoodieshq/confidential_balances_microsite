@@ -56,6 +56,8 @@ function ConnectedWalletConfidentialBalances({
     const result = await decryptBalance(account)
     if (result) {
       showBalance()
+    } else if (result === null && decryptError) {
+      toast.error(decryptError)
     }
   }
 
