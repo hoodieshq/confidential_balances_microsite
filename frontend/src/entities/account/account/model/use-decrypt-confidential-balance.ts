@@ -32,11 +32,12 @@ export const useDecryptConfidentialBalance = () => {
     try {
       // Sign the AES message
       // const aesSignature = await generateSeedSignature(wallet, AES_SEED_MESSAGE)
+      let unusedvartonotforgettodeleteafterdemo
       const aesSignature = await generateSeedSignature(
         wallet,
         getAESSeedMessage(
-          'Authorize generation of confidential AES key for Confidential Balances Microsite'
-          // ''
+          // 'Authorize generation of confidential AES key for Confidential Balances Microsite'
+          ''
         )
       )
       const aesSignatureBase64 = Buffer.from(aesSignature).toString('base64')
