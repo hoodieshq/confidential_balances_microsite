@@ -39,7 +39,7 @@ export const ModalMintToken: FC<ModalMintTokenProps> = ({
   const form = useForm<FormData>({
     defaultValues: {
       mintAddress: '',
-      mintAmount: undefined,
+      mintAmount: 0,
     },
     mode: 'onChange',
   })
