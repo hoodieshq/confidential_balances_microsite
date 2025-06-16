@@ -58,28 +58,30 @@ export const ModalRequestAirdrop: FC<ModalRequestAirdropProps> = ({ hide, show, 
       submit={form.handleSubmit(handleSubmit)}
     >
       <Form {...form}>
-        <p>Request airdrop to your account</p>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <p>Request airdrop to your account</p>
 
-        <FormField
-          control={form.control}
-          name="amount"
-          rules={{
-            required: 'Amount is required',
-            min: {
-              value: 1,
-              message: 'Amount must be greater than 0',
-            },
-          }}
-          render={({ field }) => (
-            <FormItemInput
-              type="number"
-              label="Amount (tokens)"
-              disabled={isSubmitting}
-              {...field}
-              onChange={(e) => field.onChange(e.target.valueAsNumber)}
-            />
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="amount"
+            rules={{
+              required: 'Amount is required',
+              min: {
+                value: 1,
+                message: 'Amount must be greater than 0',
+              },
+            }}
+            render={({ field }) => (
+              <FormItemInput
+                type="number"
+                label="Amount (tokens)"
+                disabled={isSubmitting}
+                {...field}
+                onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+              />
+            )}
+          />
+        </form>
       </Form>
     </Modal>
   )

@@ -158,95 +158,97 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
       submit={form.handleSubmit(handleSubmit)}
     >
       <Form {...form}>
-        <Content
-          isLoading={isLoading}
-          error={error}
-          loadingMessage="Loading token information..."
-          errorMessage="Error loading token information:"
-        >
-          <p>
-            Transfer tokens from your account to a wallet account with confidential balance set up
-          </p>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <Content
+            isLoading={isLoading}
+            error={error}
+            loadingMessage="Loading token information..."
+            errorMessage="Error loading token information:"
+          >
+            <p>
+              Transfer tokens from your account to a wallet account with confidential balance set up
+            </p>
 
-          {devMode && (
+            {devMode && (
+              <FormField
+                control={form.control}
+                name="addressType"
+                render={({ field }) => (
+                  <Selector value={field.value} onValueChange={(value) => field.onChange(value)}>
+                    <SelectorItem value="system">
+                      <Icons.Wallet />
+                      Wallet
+                    </SelectorItem>
+                    <SelectorItem value="token">
+                      <Icons.Coins />
+                      Token Account
+                    </SelectorItem>
+                  </Selector>
+                )}
+              />
+            )}
+
             <FormField
               control={form.control}
-              name="addressType"
+              name="recipientAddress"
+              rules={{
+                required: 'Address is required',
+                validate: validateRecipient,
+              }}
               render={({ field }) => (
-                <Selector value={field.value} onValueChange={(value) => field.onChange(value)}>
-                  <SelectorItem value="system">
-                    <Icons.Wallet />
-                    Wallet
-                  </SelectorItem>
-                  <SelectorItem value="token">
-                    <Icons.Coins />
-                    Token Account
-                  </SelectorItem>
-                </Selector>
+                <FormItemTextarea
+                  label={
+                    form.watch('addressType') === 'system'
+                      ? 'Wallet address'
+                      : 'Token account address'
+                  }
+                  disabled={isSubmitting}
+                  description={
+                    !!resolvedTokenAccount ? (
+                      <p className="flex flex-row flex-nowrap items-center gap-2 text-[var(--accent)]">
+                        <Icons.Check className="size-4" />
+                        <span>Valid wallet with initialized confidential balance</span>
+                      </p>
+                    ) : undefined
+                  }
+                  {...field}
+                />
               )}
             />
-          )}
 
-          <FormField
-            control={form.control}
-            name="recipientAddress"
-            rules={{
-              required: 'Address is required',
-              validate: validateRecipient,
-            }}
-            render={({ field }) => (
-              <FormItemTextarea
-                label={
-                  form.watch('addressType') === 'system'
-                    ? 'Wallet address'
-                    : 'Token account address'
-                }
-                disabled={isSubmitting}
-                description={
-                  !!resolvedTokenAccount ? (
-                    <p className="flex flex-row flex-nowrap items-center gap-2 text-[var(--accent)]">
-                      <Icons.Check className="size-4" />
-                      <span>Valid wallet with initialized confidential balance</span>
-                    </p>
-                  ) : undefined
-                }
-                {...field}
-              />
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="amount"
-            rules={{
-              required: 'Amount is required',
-              min: {
-                value: 0.0000000001,
-                message: 'Amount must be greater than 0',
-              },
-              max:
-                balance && !loading
-                  ? {
-                      value: balance,
-                      message: 'Amount must be less than or equal to the current balance',
-                    }
-                  : undefined,
-            }}
-            render={({ field }) => (
-              <FormItemInput
-                type="number"
-                label="Amount (tokens)"
-                hint={balance && !loading ? `Max: ${pluralize('token', balance, true)}` : ''}
-                disabled={isSubmitting}
-                step={0.01}
-                min={0}
-                max={balance && !loading ? balance : undefined}
-                {...field}
-                onChange={(e) => field.onChange(e.target.valueAsNumber)}
-              />
-            )}
-          />
-        </Content>
+            <FormField
+              control={form.control}
+              name="amount"
+              rules={{
+                required: 'Amount is required',
+                min: {
+                  value: 0.0000000001,
+                  message: 'Amount must be greater than 0',
+                },
+                max:
+                  balance && !loading
+                    ? {
+                        value: balance,
+                        message: 'Amount must be less than or equal to the current balance',
+                      }
+                    : undefined,
+              }}
+              render={({ field }) => (
+                <FormItemInput
+                  type="number"
+                  label="Amount (tokens)"
+                  hint={balance && !loading ? `Max: ${pluralize('token', balance, true)}` : ''}
+                  disabled={isSubmitting}
+                  step={0.01}
+                  min={0}
+                  max={balance && !loading ? balance : undefined}
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                />
+              )}
+            />
+          </Content>
+        </form>
       </Form>
     </Modal>
   )

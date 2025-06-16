@@ -111,7 +111,7 @@ export const ModalInitATA: FC<ModalInitATAProps> = ({
       submit={handleSubmit}
     >
       <Form {...form}>
-        <form>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
           <div className="form-control">
             <FormField
               control={form.control}

@@ -82,46 +82,48 @@ export const ModalDeposit: FC<ModalDepositProps> = ({ show, hide, tokenAccountPu
       submit={form.handleSubmit(handleSubmit)}
     >
       <Form {...form}>
-        <Content
-          isLoading={isLoading}
-          error={error}
-          loadingMessage="Loading token information..."
-          errorMessage="Error loading token information:"
-        >
-          <p>Deposit tokens from your account to current confidential balance</p>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <Content
+            isLoading={isLoading}
+            error={error}
+            loadingMessage="Loading token information..."
+            errorMessage="Error loading token information:"
+          >
+            <p>Deposit tokens from your account to current confidential balance</p>
 
-          <FormField
-            control={form.control}
-            name="amount"
-            rules={{
-              required: 'Amount is required',
-              min: {
-                value: 0.0000000001,
-                message: 'Amount must be greater than 0',
-              },
-              max:
-                balance && !loading
-                  ? {
-                      value: balance,
-                      message: 'Amount must be less than or equal to the current balance',
-                    }
-                  : undefined,
-            }}
-            render={({ field }) => (
-              <FormItemInput
-                type="number"
-                label="Amount (tokens)"
-                hint={balance && !loading ? `Max: ${pluralize('token', balance, true)}` : ''}
-                disabled={isSubmitting}
-                step={0.01}
-                min={0}
-                max={balance && !loading ? balance : undefined}
-                {...field}
-                onChange={(e) => field.onChange(e.target.valueAsNumber)}
-              />
-            )}
-          />
-        </Content>
+            <FormField
+              control={form.control}
+              name="amount"
+              rules={{
+                required: 'Amount is required',
+                min: {
+                  value: 0.0000000001,
+                  message: 'Amount must be greater than 0',
+                },
+                max:
+                  balance && !loading
+                    ? {
+                        value: balance,
+                        message: 'Amount must be less than or equal to the current balance',
+                      }
+                    : undefined,
+              }}
+              render={({ field }) => (
+                <FormItemInput
+                  type="number"
+                  label="Amount (tokens)"
+                  hint={balance && !loading ? `Max: ${pluralize('token', balance, true)}` : ''}
+                  disabled={isSubmitting}
+                  step={0.01}
+                  min={0}
+                  max={balance && !loading ? balance : undefined}
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                />
+              )}
+            />
+          </Content>
+        </form>
       </Form>
     </Modal>
   )
