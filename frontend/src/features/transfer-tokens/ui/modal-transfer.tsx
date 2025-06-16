@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from 'react'
+import { FC, useCallback, useEffect, useState } from 'react'
 import { Form, FormField } from '@solana-foundation/ms-tools-ui/components/form'
 import { AccountLayout, getAssociatedTokenAddress, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token'
 import { useConnection } from '@solana/wallet-adapter-react'
@@ -143,6 +143,9 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
       toast.error(`Transfer failed: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
+
+  const recipientAddress = form.watch('recipientAddress')
+  useEffect(() => setResolvedTokenAccount(null), [recipientAddress, setResolvedTokenAccount])
 
   return (
     <Modal
