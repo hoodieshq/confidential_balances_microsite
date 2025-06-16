@@ -158,7 +158,7 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
       submit={form.handleSubmit(handleSubmit)}
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)}>
+        <form className="flex flex-col gap-4" onSubmit={form.handleSubmit(handleSubmit)}>
           <Content
             isLoading={isLoading}
             error={error}
