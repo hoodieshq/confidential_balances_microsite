@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { ELGAMAL_SEED_MESSAGE, generateSeedSignature } from '@/entities/account/account'
-import { useOperationLog } from '@/entities/operation-log'
 import { VersionedTransaction } from '@solana/web3.js'
 import bs58 from 'bs58'
+import { ELGAMAL_SEED_MESSAGE, generateSeedSignature } from '@/entities/account/account'
+import { useOperationLog } from '@/entities/operation-log'
 
 export const useDecryptAuditableTx = () => {
   const { connection } = useConnection()
@@ -43,15 +43,12 @@ export const useDecryptAuditableTx = () => {
       console.log('TD', { transactionData })
 
       // Convert base58 signatures to Uint8Arrays
-      const signatures = transactionData.transaction.signatures.map(sig =>
-        new Uint8Array(bs58.decode(sig))
+      const signatures = transactionData.transaction.signatures.map(
+        (sig) => new Uint8Array(bs58.decode(sig))
       )
 
       // Create a new VersionedTransaction with the same data
-      const tx = new VersionedTransaction(
-        transactionData.transaction.message,
-        signatures
-      )
+      const tx = new VersionedTransaction(transactionData.transaction.message, signatures)
       const serializedTx = tx.serialize()
       const base64Tx = Buffer.from(serializedTx).toString('base64')
 
