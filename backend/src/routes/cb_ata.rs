@@ -22,7 +22,6 @@ use {
         system_instruction,
         transaction::VersionedTransaction,
     },
-    // solana_transaction_status::UiTransactionEncoding,
     solana_zk_sdk::{
         encryption::auth_encryption::AeCiphertext,
         encryption::elgamal::ElGamalCiphertext,
