@@ -60,7 +60,6 @@ function ConnectedWalletTransactionHistory({
   }, [query])
 
   const actions = useMemo(() => {
-    // NOTE: preserve original functionality by invalidating data
     const onRefreshSignatures = async () => {
       setIsRefreshing(true)
       await query.refetch()
@@ -123,11 +122,13 @@ function ConnectedWalletTransactionHistory({
             Success
           </Badge>
         ),
-        <Button key={`tx-action-${i}`} variant="outline" size="sm" asChild>
-          <Link target="blank" href={`/auditor/?tx=${item.signature}`}>
-            Audit <ExternalLink />
-          </Link>
-        </Button>,
+        item.hasConfidentialTransfer ? (
+          <Button key={`tx-action-${i}`} variant="outline" size="sm" asChild>
+            <Link target="blank" href={`/auditor/?tx=${item.signature}`}>
+              Audit <ExternalLink />
+            </Link>
+          </Button>
+        ) : undefined,
       ])}
     />
   )
