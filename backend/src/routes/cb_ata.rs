@@ -1,7 +1,4 @@
-use crate::models::{
-    AuditTransactionRequest, AuditTransactionResponse, RegisterAuditorRequest,
-    RegisterAuditorResponse,
-};
+use crate::models::{AuditTransactionRequest, AuditTransactionResponse};
 use bincode::Options;
 use {
     crate::{
@@ -30,7 +27,6 @@ use {
     solana_zk_sdk::{
         encryption::auth_encryption::AeCiphertext,
         encryption::elgamal::ElGamalCiphertext,
-        encryption::pod::elgamal::PodElGamalPubkey,
         zk_elgamal_proof_program::{
             self,
             instruction::{close_context_state, ContextStateInfo},
@@ -47,8 +43,8 @@ use {
                     ApplyPendingBalanceAccountInfo, TransferAccountInfo, WithdrawAccountInfo,
                 },
                 instruction::{
-                    apply_pending_balance, configure_account, deposit, transfer, update_mint,
-                    withdraw, PubkeyValidityProofData, TransferInstructionData,
+                    apply_pending_balance, configure_account, deposit, transfer, withdraw,
+                    PubkeyValidityProofData, TransferInstructionData,
                 },
                 ConfidentialTransferAccount,
             },
@@ -59,8 +55,7 @@ use {
     },
     spl_token_confidential_transfer_proof_extraction::instruction::{ProofData, ProofLocation},
     spl_token_confidential_transfer_proof_generation::{
-        transfer::TransferProofData, try_combine_lo_hi_ciphertexts, withdraw::WithdrawProofData,
-        TRANSFER_AMOUNT_LO_BITS,
+        transfer::TransferProofData, withdraw::WithdrawProofData, TRANSFER_AMOUNT_LO_BITS,
     },
     std::str::FromStr,
 };
@@ -1441,26 +1436,45 @@ pub async fn audit_transaction(
     println!("Successfully created auditor's ElGamal keypair");
 
     // Extract confidential transfer data
-    let (transfer_amount_auditor_ciphertext, sender, recipient, mint) =
+    let (ct_lo, ct_hi, sender, recipient, mint) =
         extract_confidential_transfer(&transaction_bytes)?;
 
-    let decrypted_amount = auditor_elgamal_keypair
-        .secret()
-        .decrypt(&transfer_amount_auditor_ciphertext);
+    let decrypted_lo = auditor_elgamal_keypair.secret().decrypt(&ct_lo);
+    let decrypted_hi = auditor_elgamal_keypair.secret().decrypt(&ct_hi);
 
-    let decrypted_decoded_amount = decrypted_amount
-        .decode_u32()
-        .ok_or(AppError::DecryptionError)?;
+    let lo_value = match decrypted_lo.decode_u32() {
+        Some(v) => v as u64,
+        None => {
+            println!("⚠️ Can't decode lo bits");
+            return Err(AppError::DecryptionError);
+        }
+    };
+
+    let hi_value = match decrypted_hi.decode_u32() {
+        Some(v) => v as u64,
+        None => {
+            println!("⚠️ Can't decode hi bits");
+            return Err(AppError::DecryptionError);
+        }
+    };
+
+    let full_value = hi_value
+        .checked_shl(TRANSFER_AMOUNT_LO_BITS as u32)
+        .and_then(|hi_shifted| hi_shifted.checked_add(lo_value))
+        .ok_or_else(|| {
+            println!("⚠️ Full amount overflow");
+            AppError::DecryptionError
+        })?;
 
     println!("✅ Successfully extracted confidential transfer data");
     println!("📤 Sender: {}", sender);
     println!("📥 Recipient: {}", recipient);
     println!("🪙 Mint: {}", mint);
-    println!("💰 Decrypted amount: {}", decrypted_decoded_amount);
+    println!("💰 Decrypted amount: {}", full_value);
 
     println!("Successfully audited transaction");
     Ok(Json(AuditTransactionResponse {
-        amount: decrypted_decoded_amount.to_string(),
+        amount: full_value.to_string(),
         sender,
         receiver: recipient,
         message: "Transaction successfully audited".to_string(),
@@ -1469,7 +1483,7 @@ pub async fn audit_transaction(
 
 fn extract_confidential_transfer(
     transaction_data: &[u8],
-) -> Result<(ElGamalCiphertext, String, String, String), AppError> {
+) -> Result<(ElGamalCiphertext, ElGamalCiphertext, String, String, String), AppError> {
     // Deserialize transaction directly from bytes
     let versioned_transaction: VersionedTransaction = bincode::options()
         .with_fixint_encoding()
@@ -1550,13 +1564,5 @@ fn extract_confidential_transfer(
     let ct_pod_hi = decoded_instruction.transfer_amount_auditor_ciphertext_hi;
     let ct_hi = ElGamalCiphertext::try_from(ct_pod_hi)?;
 
-    // Combine the low and high ciphertexts to get the full transfer amount ciphertext
-    let transfer_amount_auditor_ciphertext =
-        try_combine_lo_hi_ciphertexts(&ct_lo, &ct_hi, TRANSFER_AMOUNT_LO_BITS).ok_or_else(
-            || {
-                println!("❌ Failed to combine ciphertexts");
-                AppError::DecryptionError
-            },
-        )?;
-    Ok((transfer_amount_auditor_ciphertext, sender, recipient, mint))
+    Ok((ct_lo, ct_hi, sender, recipient, mint))
 }
