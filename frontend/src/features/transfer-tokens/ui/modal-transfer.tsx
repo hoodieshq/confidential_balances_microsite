@@ -146,7 +146,14 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
   }
 
   const recipientAddress = form.watch('recipientAddress')
+  const addressType = form.watch('addressType')
+
   useEffect(() => setResolvedTokenAccount(null), [recipientAddress])
+
+  // Clear recipient field error when switching address type
+  useEffect(() => {
+    form.clearErrors('recipientAddress')
+  }, [addressType, form])
 
   return (
     <Modal
@@ -197,27 +204,6 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
                 validate: validateRecipient,
               }}
               render={({ field }) => (
-                <Selector value={field.value} onValueChange={(value) => field.onChange(value)}>
-                  <SelectorItem value="system">
-                    <Wallet />
-                    Wallet
-                  </SelectorItem>
-                  <SelectorItem value="token">
-                    <Coins />
-                    Token Account
-                  </SelectorItem>
-                </Selector>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="recipientAddress"
-              rules={{
-                required: 'Address is required',
-                validate: validateRecipient,
-              }}
-              render={({ field }) => (
                 <FormItemTextarea
                   label={
                     form.watch('addressType') === 'system'
@@ -227,10 +213,16 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
                   disabled={isSubmitting}
                   description={
                     !!resolvedTokenAccount ? (
-                      <div className="flex flex-row flex-nowrap items-center gap-2 text-[var(--accent)]">
+                      <span className="flex flex-row flex-nowrap items-center gap-2 text-[var(--accent)]">
                         <Check className="size-4" />
-                        <span>Valid wallet with initialized confidential balance</span>
-                      </div>
+                        <span>
+                          {form.watch('addressType') === 'system' ? (
+                            <>Valid wallet with initialized confidential balance</>
+                          ) : (
+                            <>Valid token account with initialized confidential balance</>
+                          )}
+                        </span>
+                      </span>
                     ) : undefined
                   }
                   {...field}
@@ -265,7 +257,6 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
                   min={0}
                   max={balance && !loading ? balance : undefined}
                   {...field}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
                 />
               )}
             />
