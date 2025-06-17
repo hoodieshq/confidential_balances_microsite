@@ -1,7 +1,7 @@
 import { FC, useCallback } from 'react'
 import { Form, FormField } from '@solana-foundation/ms-tools-ui'
 import { useForm } from 'react-hook-form'
-import { FormItemInput } from '@/shared/ui/form'
+import { FormItemInput, FormItemTextarea } from '@/shared/ui/form'
 import { Modal } from '@/shared/ui/modal'
 import { useToast } from '@/shared/ui/toast'
 
@@ -91,7 +91,7 @@ export const ModalCreateMint: FC<ModalCreateMintProps> = ({
                 validate: validateAuditorAddress,
               }}
               render={({ field }) => (
-                <FormItemInput
+                <FormItemTextarea
                   label="Auditor Address"
                   placeholder="Enter auditor address"
                   className="overflow-hidden text-ellipsis"
