@@ -202,7 +202,7 @@ mod tests {
             .into();
         let _base58_error: AppError = bs58::decode("0OIl").into_vec().unwrap_err().into();
 
-        // Note: Other variants like TokenError, BincodeError, etc. are used via From traits
+        // NOTE: Other variants like TokenError, BincodeError, etc. are used via From traits
         // or are actively used in the codebase, so they don't need explicit construction here
     }
 }

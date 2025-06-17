@@ -100,7 +100,7 @@ export const ModalInitATA: FC<ModalInitATAProps> = ({
               form.trigger('mintAddress')
             }}
           >
-            Use latest mint address
+            Use last created mint
           </Button>
         ) : undefined
       }

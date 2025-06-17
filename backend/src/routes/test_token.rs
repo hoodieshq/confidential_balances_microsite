@@ -1,5 +1,4 @@
-use std::str::FromStr;
-
+// TODO: change file name to match the enpoint name
 use axum::extract::Json;
 use base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _};
 use bincode;
@@ -19,6 +18,7 @@ use spl_token_2022::{
     instruction::{initialize_mint, initialize_mint_close_authority},
     state::Mint,
 };
+use std::str::FromStr;
 
 use crate::errors::AppError;
 use crate::models::{CreateTestTokenTransactionRequest, TransactionResponse};
@@ -37,7 +37,7 @@ fn parse_base58_pubkey(address: &str) -> Result<Pubkey, AppError> {
     }
 }
 
-// Handler for creating a test token mint with confidential transfers and close mint support
+/// Handler for creating a test token mint with confidential transfers and close mint support
 pub async fn create_test_token(
     Json(request): Json<CreateTestTokenTransactionRequest>,
 ) -> Result<Json<TransactionResponse>, AppError> {
@@ -99,7 +99,6 @@ pub async fn create_test_token(
         &spl_token_2022::id(), // Owner program (Token-2022)
     );
 
-    // TODO: rename into auditor_elgamal_signature
     let auditor_elgamal_pk = match request.auditor_elgamal_pubkey {
         Some(elgamal_string) => {
             println!(
@@ -115,21 +114,8 @@ pub async fn create_test_token(
                 decoded_elgamal_signature.len()
             );
 
-            let pod_pubkey = PodElGamalPubkey::from_str(&elgamal_string)
+            let elgamal_pubkey = PodElGamalPubkey::from_str(&elgamal_string)
                 .map_err(|_| AppError::SerializationError)?;
-
-            // !! TODO: remove upon finish
-            // // Create signature directly from bytes
-            // let elgamal_signature = Signature::try_from(decoded_elgamal_signature.as_slice())
-            //     .map_err(|_| AppError::SerializationError)?;
-            // println!("✅ ElGamal signature created successfully");
-
-            // let auditor_elgamal_keypair = ElGamalKeypair::new_from_signature(&elgamal_signature)
-            //     .map_err(|_| AppError::SerializationError)?;
-            // println!("✅ ElGamal keypair created successfully");
-
-            let elgamal_pubkey = pod_pubkey;
-            // PodElGamalPubkey::from(auditor_elgamal_keypair.pubkey().to_owned());
 
             println!(
                 "✅ ElGamal pubkey recovered from string successfully: pubkey={}",

@@ -88,7 +88,6 @@ function ConnectedWalletTokenAccounts({
   }, [query])
 
   const actions = useMemo(() => {
-    // NOTE: preserve original functionality by invalidating data
     const onInvalidateBalance = async () => {
       await query.refetch()
       await client.invalidateQueries({
@@ -149,7 +148,6 @@ function ConnectedWalletTokenAccounts({
         show={showCreateMintModal}
         hide={() => setShowCreateMintModal(false)}
         submitCallback={({ auditorAddress }) => {
-          //!! rename
           createTestToken({
             auditorElGamalPubkey: auditorAddress,
           })

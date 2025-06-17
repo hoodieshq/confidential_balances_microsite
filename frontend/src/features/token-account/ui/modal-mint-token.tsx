@@ -85,7 +85,7 @@ export const ModalMintToken: FC<ModalMintTokenProps> = ({
       return
     }
 
-    // NOTE: consider moving toast interactions out of modal component to make it less "dirty"
+    // NOTE: consider moving toast interactions out of modal component to make them less "dirty"
     try {
       initializeAccount({
         mintAddress: formValues.mintAddress,
@@ -116,7 +116,7 @@ export const ModalMintToken: FC<ModalMintTokenProps> = ({
               form.trigger('mintAddress')
             }}
           >
-            Use latest mint address
+            Use last created mint
           </Button>
         ) : undefined
       }
