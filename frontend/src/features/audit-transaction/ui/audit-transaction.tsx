@@ -1,10 +1,10 @@
-import { FC, useCallback, useState } from 'react'
+import { FC, useCallback } from 'react'
 import { Address } from '@solana-foundation/ms-tools-ui/components/address'
 import { Button } from '@solana-foundation/ms-tools-ui/components/button'
 import { Form, FormField } from '@solana-foundation/ms-tools-ui/components/form'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'
-import { Lock, Unlock, Wallet } from 'lucide-react'
+import { Loader, Lock, Unlock, Wallet } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { Content } from '@/shared/ui/content'
 import { FormItemInput, FormItemTextarea } from '@/shared/ui/form'
@@ -20,14 +20,11 @@ type AuditTransactionProps = {
 }
 
 export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
-  const [amount, setAmount] = useState<number>()
   const { connected, publicKey } = useWallet()
   const { setVisible } = useWalletModal()
   const { generateElGamalKey, isGenerating, elGamalPubkey } = useCreateElGamalKey()
 
-  const { error: auditError, auditTransaction, isAuditing, auditResult } = useDecryptAuditableTx()
-
-  console.log({ auditError, auditResult, isAuditing })
+  const { auditTransaction, isAuditing, auditResult, reset: auditReset } = useDecryptAuditableTx()
 
   const form = useForm<FormValues>({
     defaultValues: { transaction: tx ?? '' },
@@ -44,10 +41,8 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
 
   const handleDecryptBalance = useCallback(() => {
     const values = form.getValues()
-
-    setAmount(1)
     auditTransaction(values.transaction)
-  }, [setAmount, form, auditTransaction])
+  }, [form, auditTransaction])
 
   const handleCreateAudKey = useCallback(() => {
     generateElGamalKey()
@@ -71,10 +66,20 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
           )}
         />
 
-        {!amount ? (
-          <FormItemInput label="Amount" disabled={true} placeholder="$$$$$" icon={<Lock />} />
+        {auditResult?.amount ? (
+          <FormItemInput
+            label="Amount (with lamports)"
+            disabled={true}
+            value={auditResult.amount}
+            icon={<Unlock />}
+          />
         ) : (
-          <FormItemInput label="Amount" disabled={true} value={amount} icon={<Unlock />} />
+          <FormItemInput
+            label="Amount (with lamports)"
+            disabled={true}
+            placeholder="$$$$$"
+            icon={isAuditing ? <Loader /> : <Lock />}
+          />
         )}
 
         {!isWalletConnected ? (
@@ -83,12 +88,15 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
             Connect auditor wallet
           </Button>
         ) : (
-          <Button onClick={handleDecryptBalance}>
-            <Wallet />
+          <Button
+            onClick={handleDecryptBalance}
+            disabled={Boolean(auditResult) || !form.getValues().transaction}
+          >
+            {isAuditing ? <Loader /> : <Wallet />}
             Decode transaction balance
           </Button>
         )}
-        <div className="mt-5 overflow-hidden">
+        <div className="mt-5 flex flex-row gap-2 overflow-hidden">
           {elGamalPubkey ? (
             <div className="flex h-[26px] items-center">
               <Address address={elGamalPubkey} truncateChars={32} />
@@ -103,6 +111,18 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
               Generate auditor&lsquo;s key
             </Button>
           )}
+          {Boolean(auditResult) ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                auditReset()
+                form.setValue('transaction', '')
+              }}
+            >
+              Clear
+            </Button>
+          ) : undefined}
         </div>
       </Content>
     </Form>

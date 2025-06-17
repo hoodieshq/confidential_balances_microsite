@@ -6,6 +6,7 @@ import { VersionedTransaction } from '@solana/web3.js'
 import bs58 from 'bs58'
 import { ELGAMAL_SEED_MESSAGE, generateSeedSignature } from '@/entities/account/account'
 import { useOperationLog } from '@/entities/operation-log'
+import { useToast } from '@/shared/ui/toast'
 
 export const useDecryptAuditableTx = () => {
   const { connection } = useConnection()
@@ -15,6 +16,7 @@ export const useDecryptAuditableTx = () => {
   const [auditResult, setAuditResult] = useState<any | null>(null)
 
   const log = useOperationLog()
+  const toast = useToast()
 
   const auditTransaction = async (transactionSignature: string) => {
     if (!wallet.signMessage || !wallet.publicKey) {
@@ -92,6 +94,10 @@ export const useDecryptAuditableTx = () => {
         content: `Failed to audit transaction: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: 'error',
       })
+
+      if (error instanceof Error) {
+        toast.error(`Audit failed: ${error.message}`)
+      }
 
       setError(error instanceof Error ? error.message : 'Failed to audit transaction')
       return null

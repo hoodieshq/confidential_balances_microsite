@@ -1,4 +1,4 @@
-import { FC, InputHTMLAttributes, ReactNode } from 'react'
+import { FC, InputHTMLAttributes, ReactNode, useId } from 'react'
 import {
   FormControl,
   FormDescription,
@@ -21,6 +21,8 @@ export const FormItemInput: FC<FormItemProps & InputHTMLAttributes<HTMLInputElem
   hint,
   ...inputProps
 }) => {
+  // add unique key to make invalidation work better
+  const inputKey = useId()
   return (
     <FormItem>
       {(label || hint) && (
@@ -30,7 +32,7 @@ export const FormItemInput: FC<FormItemProps & InputHTMLAttributes<HTMLInputElem
         </FormLabel>
       )}
       <FormControl>
-        <Input {...inputProps} />
+        <Input key={`input-${inputKey}-${inputProps.value ?? ''}`} {...inputProps} />
       </FormControl>
       {description && <FormDescription>{description}</FormDescription>}
       <FormMessage />
