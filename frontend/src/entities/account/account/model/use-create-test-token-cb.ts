@@ -84,16 +84,15 @@ export const useCreateTestTokenCB = ({
         const mintRent = await connection.getMinimumBalanceForRentExemption(mintSpace)
         console.log('Mint account rent required:', mintRent, 'lamports')
 
-        //!!rename
-        const data = await serverRequest({
+        const requestBody = {
           account: wallet.publicKey.toBase58(),
-          auditor_elgamal_pubkey: auditorElGamalPubkey
-            ? auditorElGamalPubkey //Buffer.from(auditorElGamalPubkey).toString('base64')
-            : undefined,
+          auditor_elgamal_pubkey: auditorElGamalPubkey ? auditorElGamalPubkey : undefined,
           mint: mintKeypair.publicKey.toBase58(),
           mint_rent: mintRent,
           latest_blockhash: (await connection.getLatestBlockhash()).blockhash,
-        })
+        }
+
+        const data = await serverRequest(requestBody)
 
         // Deserialize the transaction from the response
         const serializedTransaction = Buffer.from(data.transaction, 'base64')

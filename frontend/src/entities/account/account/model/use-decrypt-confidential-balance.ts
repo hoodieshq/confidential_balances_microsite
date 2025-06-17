@@ -2,12 +2,11 @@
 
 import { useState } from 'react'
 import { Account, getMint, Mint, TOKEN_2022_PROGRAM_ID, unpackAccount } from '@solana/spl-token'
-import { WalletError, WalletSignInError, WalletSignMessageError } from '@solana/wallet-adapter-base'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
 import { useDevMode } from '@/entities/dev-mode'
 import { useOperationLog } from '@/entities/operation-log'
-import { AES_SEED_MESSAGE, getAESSeedMessage } from './aes-seed-message'
+import { AES_SEED_MESSAGE } from './aes-seed-message'
 import { generateSeedSignature } from './generate-seed-signature'
 
 export const useDecryptConfidentialBalance = () => {
@@ -31,15 +30,7 @@ export const useDecryptConfidentialBalance = () => {
 
     try {
       // Sign the AES message
-      // const aesSignature = await generateSeedSignature(wallet, AES_SEED_MESSAGE)
-      let unusedvartonotforgettodeleteafterdemo
-      const aesSignature = await generateSeedSignature(
-        wallet,
-        getAESSeedMessage(
-          // 'Authorize generation of confidential AES key for Confidential Balances Microsite'
-          ''
-        )
-      )
+      const aesSignature = await generateSeedSignature(wallet, AES_SEED_MESSAGE)
       const aesSignatureBase64 = Buffer.from(aesSignature).toString('base64')
       console.log('AES base64 signature:', aesSignatureBase64)
 
@@ -101,28 +92,14 @@ export const useDecryptConfidentialBalance = () => {
 
       return decryptedBalance
     } catch (error) {
+      console.error('Decryption failed:', error)
       log.push({
         title: 'Decrypt Operation - FAILED',
         content: `Failed to decrypt balance: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: 'error',
       })
 
-      let errorMessage: string | undefined
-      if (error instanceof WalletError) {
-        switch (error.name) {
-          case WalletSignMessageError.name: {
-            errorMessage = 'Failed to sign operation with wallet'
-            break
-          }
-          default: {
-            errorMessage = 'Failed to interact with wallet'
-          }
-        }
-      } else if (error instanceof Error) {
-        errorMessage = error.message
-      }
-
-      setError(errorMessage ?? 'Failed to decrypt balance')
+      setError(error instanceof Error ? error.message : 'Failed to decrypt balance')
       return null
     } finally {
       setIsDecrypting(false)

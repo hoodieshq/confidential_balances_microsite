@@ -116,17 +116,21 @@ pub async fn create_test_token(
                 decoded_elgamal_signature.len()
             );
 
-            // Create signature directly from bytes
-            let elgamal_signature = Signature::try_from(decoded_elgamal_signature.as_slice())
+            let pod_pubkey = PodElGamalPubkey::from_str(&elgamal_string)
                 .map_err(|_| AppError::SerializationError)?;
-            println!("✅ ElGamal signature created successfully");
 
-            let auditor_elgamal_keypair = ElGamalKeypair::new_from_signature(&elgamal_signature)
-                .map_err(|_| AppError::SerializationError)?;
-            println!("✅ ElGamal keypair created successfully");
+            // !! TODO: remove upon finish
+            // // Create signature directly from bytes
+            // let elgamal_signature = Signature::try_from(decoded_elgamal_signature.as_slice())
+            //     .map_err(|_| AppError::SerializationError)?;
+            // println!("✅ ElGamal signature created successfully");
 
-            let elgamal_pubkey =
-                PodElGamalPubkey::from(auditor_elgamal_keypair.pubkey().to_owned());
+            // let auditor_elgamal_keypair = ElGamalKeypair::new_from_signature(&elgamal_signature)
+            //     .map_err(|_| AppError::SerializationError)?;
+            // println!("✅ ElGamal keypair created successfully");
+
+            let elgamal_pubkey = pod_pubkey;
+            // PodElGamalPubkey::from(auditor_elgamal_keypair.pubkey().to_owned());
 
             println!(
                 "✅ ElGamal pubkey recovered from string successfully: pubkey={}",

@@ -18,8 +18,8 @@ mod routes;
 // Use our route handlers
 use routes::{
     apply_cb, audit_transaction, create_cb_ata, create_memo_transaction, create_test_token,
-    decrypt_cb, deposit_cb, health_check, hello_world, register_auditor, transfer_cb,
-    transfer_cb_space, withdraw_cb, withdraw_cb_space,
+    decrypt_cb, deposit_cb, health_check, hello_world, register_auditor, reveal_elgamal_pubkey,
+    transfer_cb, transfer_cb_space, withdraw_cb, withdraw_cb_space,
 };
 
 #[tokio::main]
@@ -63,6 +63,7 @@ async fn main() {
         .route("/create-test-token", post(create_test_token))
         .route("/register-auditor", post(register_auditor))
         .route("/audit-transaction", post(audit_transaction))
+        .route("/reveal-elgamal-pubkey", post(reveal_elgamal_pubkey))
         .layer(cors)
         .layer(TraceLayer::new_for_http());
 

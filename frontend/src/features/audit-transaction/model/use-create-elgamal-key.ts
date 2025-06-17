@@ -6,6 +6,25 @@ import { ELGAMAL_SEED_MESSAGE, generateSeedSignature } from '@/entities/account/
 import { useOperationLog } from '@/entities/operation-log'
 import { useToast } from '@/shared/ui/toast'
 
+async function serverRequest(request: { elgamal_signature: string }) {
+  const route = `${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/reveal-elgamal-pubkey`
+  const response = await fetch(route, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  })
+
+  if (!response.ok) {
+    throw new Error(`😵 HTTP error! Status: ${response.status}`)
+  }
+
+  const data = await response.json()
+
+  return data
+}
+
 export const useCreateElGamalKey = () => {
   const wallet = useWallet()
   const [isGenerating, setIsGenerating] = useState(false)
@@ -30,15 +49,23 @@ export const useCreateElGamalKey = () => {
       const elGamalSignatureBase64 = Buffer.from(elGamalSignature).toString('base64')
       console.log('ElGamal base64 signature:', elGamalSignatureBase64)
 
-      setElGamalPubkey(elGamalSignatureBase64)
+      // Call the backend to reveal the public key
+      const requestBody = {
+        elgamal_signature: elGamalSignatureBase64,
+      }
+
+      const data = await serverRequest(requestBody)
+
+      // Store the actual public key returned from the backend
+      setElGamalPubkey(data.pubkey)
 
       log.push({
         title: 'ElGamal Key Generation - COMPLETE',
-        content: `ElGamal key generated successfully`,
+        content: `ElGamal public key revealed: ${data.pubkey}`,
         variant: 'success',
       })
 
-      return elGamalSignatureBase64
+      return data.pubkey
     } catch (error) {
       console.error('ElGamal key generation failed:', error)
       toast.error(`ElGamal key generation failed! ${error}`)

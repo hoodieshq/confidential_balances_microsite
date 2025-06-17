@@ -153,3 +153,16 @@ pub struct AuditTransactionResponse {
     pub receiver: String,
     pub message: String,
 }
+
+// Request model for revealing ElGamal public key
+#[derive(Deserialize)]
+pub struct RevealElGamalPubkeyRequest {
+    pub elgamal_signature: String, // Base64 encoded ElGamal signature
+}
+
+// Response model for revealing ElGamal public key
+#[derive(Serialize)]
+pub struct RevealElGamalPubkeyResponse {
+    pub pubkey: String, // ElGamal public key as string
+    pub message: String,
+}
