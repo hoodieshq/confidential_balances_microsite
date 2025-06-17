@@ -1,7 +1,7 @@
 import { FC, useCallback } from 'react'
 import { Form, FormField } from '@solana-foundation/ms-tools-ui'
 import { useForm } from 'react-hook-form'
-import { FormItemInput, FormItemTextarea } from '@/shared/ui/form'
+import { FormItemTextarea } from '@/shared/ui/form'
 import { Modal } from '@/shared/ui/modal'
 import { useToast } from '@/shared/ui/toast'
 
