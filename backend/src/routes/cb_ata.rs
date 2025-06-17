@@ -48,18 +48,19 @@ use {
                 },
                 instruction::{
                     apply_pending_balance, configure_account, deposit, transfer, update_mint,
-                    withdraw, PubkeyValidityProofData,
+                    withdraw, PubkeyValidityProofData, TransferInstructionData,
                 },
                 ConfidentialTransferAccount,
             },
             BaseStateWithExtensions, ExtensionType, StateWithExtensionsOwned,
         },
-        instruction::{reallocate, TokenInstruction},
+        instruction::{decode_instruction_data, reallocate, TokenInstruction},
         solana_zk_sdk::encryption::{auth_encryption::AeKey, elgamal::ElGamalKeypair},
     },
     spl_token_confidential_transfer_proof_extraction::instruction::{ProofData, ProofLocation},
     spl_token_confidential_transfer_proof_generation::{
-        transfer::TransferProofData, withdraw::WithdrawProofData,
+        transfer::TransferProofData, try_combine_lo_hi_ciphertexts, withdraw::WithdrawProofData,
+        TRANSFER_AMOUNT_LO_BITS,
     },
     std::str::FromStr,
 };
@@ -1536,64 +1537,49 @@ pub async fn audit_transaction(
 
     println!("Successfully created auditor's ElGamal keypair");
 
-    let elgamal_private_key = auditor_elgamal_keypair.secret();
+    // TODO: Debug purpose only
+
+    let auditor_pubkey = auditor_elgamal_keypair.pubkey();
+    let pubkey_bytes =
+        bincode::serialize(&auditor_pubkey).map_err(|_| AppError::SerializationError)?;
+    let pubkey_base64 = BASE64_STANDARD.encode(&pubkey_bytes);
+
+    println!("🔑 Auditor ElGamal pubkey (base64): {}", pubkey_base64);
+    println!(
+        "🔑 Auditor ElGamal pubkey first 8 bytes: {:?}",
+        &pubkey_bytes[..8.min(pubkey_bytes.len())]
+    );
 
     // Extract confidential transfer data
-    let (ciphertext_lo, ciphertext_hi, sender, recipient, mint) =
+    let (transfer_amount_auditor_ciphertext, sender, recipient, mint) =
         extract_confidential_transfer(&transaction_bytes)?;
 
-    // concat ciphertexts and decypher only after
-    // spl-token proof generaton
-    //
-    // Decrypt the ciphertext using the auditor's private key
-    let decrypted_lo = elgamal_private_key
-        .decrypt(&ciphertext_lo)
-        .decode_u32()
-        .ok_or_else(|| {
-            println!("❌ Failed to decrypt low ciphertext");
-            AppError::DecryptionError
-        })?;
+    let decrypted_amount = auditor_elgamal_keypair
+        .secret()
+        .decrypt(&transfer_amount_auditor_ciphertext);
 
-    let decrypted_hi = elgamal_private_key
-        .decrypt(&ciphertext_hi)
+    let decrypted_decoded_amount = decrypted_amount
         .decode_u32()
-        .ok_or_else(|| {
-            println!("❌ Failed to decrypt high ciphertext");
-            AppError::DecryptionError
-        })?;
+        .ok_or(AppError::DecryptionError)?;
 
     println!("✅ Successfully extracted confidential transfer data");
     println!("📤 Sender: {}", sender);
     println!("📥 Recipient: {}", recipient);
     println!("🪙 Mint: {}", mint);
-    println!("💰 Decrypted amount: {}", -1);
+    println!("💰 Decrypted amount: {}", decrypted_decoded_amount);
 
     println!("Successfully audited transaction");
     Ok(Json(AuditTransactionResponse {
-        amount: decrypted_lo.to_string(),
+        amount: decrypted_decoded_amount.to_string(),
         sender,
         receiver: recipient,
         message: "Transaction successfully audited".to_string(),
     }))
 }
 
-// fn extract_and_decrypt_confidential_transfer(
-//     tx_data: &solana_transaction_status::EncodedConfirmedTransactionWithStatusMeta,
-//     elgamal_private_key: &ElGamalSecretKey,
-// ) -> Result<(u64, String, String), AppError> {
-//     println!("Extracting confidential transfer data from transaction");
-
-//     // Placeholder values
-//     Ok((
-//         1000,
-//         "Unknown sender".to_string(),
-//         "Unknown receiver".to_string(),
-//     ))
-// }
-
 fn extract_confidential_transfer(
     transaction_data: &[u8],
-) -> Result<(ElGamalCiphertext, ElGamalCiphertext, String, String, String), AppError> {
+) -> Result<(ElGamalCiphertext, String, String, String), AppError> {
     // Deserialize transaction directly from bytes
     let versioned_transaction: VersionedTransaction = bincode::options()
         .with_fixint_encoding()
@@ -1659,8 +1645,6 @@ fn extract_confidential_transfer(
     let recipient = message.account_keys[transfer_ix.accounts[1] as usize].to_string();
     let mint = message.account_keys[transfer_ix.accounts[2] as usize].to_string();
 
-    // For now, let's use a simplified approach to extract ciphertext data
-    // This is a temporary solution until we can properly decode the instruction
     let data = &transfer_ix.data;
 
     if data.len() < 129 {
@@ -1669,27 +1653,20 @@ fn extract_confidential_transfer(
         return Err(AppError::SerializationError);
     }
 
-    // Skip the token instruction discriminator (1 byte) and confidential transfer discriminator
-    // Extract the ciphertext data - this is a simplified approach
-    let ciphertext_lo_bytes = &data[1..65]; // 64 bytes for ElGamal ciphertext
-    let ciphertext_hi_bytes = &data[65..129]; // Next 64 bytes for ElGamal ciphertext
+    let input = &data[1..];
+    let decoded_instruction: TransferInstructionData = *decode_instruction_data(&input)?;
+    let ct_pod_lo = decoded_instruction.transfer_amount_auditor_ciphertext_lo;
+    let ct_lo = ElGamalCiphertext::try_from(ct_pod_lo)?;
+    let ct_pod_hi = decoded_instruction.transfer_amount_auditor_ciphertext_hi;
+    let ct_hi = ElGamalCiphertext::try_from(ct_pod_hi)?;
 
-    // Convert to ElGamalCiphertext
-    let ciphertext_lo = ElGamalCiphertext::from_bytes(ciphertext_lo_bytes).ok_or_else(|| {
-        println!("❌ Failed to parse low ciphertext from bytes");
-        AppError::SerializationError
-    })?;
-
-    let ciphertext_hi = ElGamalCiphertext::from_bytes(ciphertext_hi_bytes).ok_or_else(|| {
-        println!("❌ Failed to parse low ciphertext from bytes");
-        AppError::SerializationError
-    })?;
-
-    println!("✅ Successfully extracted confidential transfer data");
-    println!("📤 Sender: {}", sender);
-    println!("📥 Recipient: {}", recipient);
-    println!("🪙 Mint: {}", mint);
-    println!("🔐 Successfully extracted ElGamal ciphertext data");
-
-    Ok((ciphertext_lo, ciphertext_hi, sender, recipient, mint))
+    // Combine the low and high ciphertexts to get the full transfer amount ciphertext
+    let transfer_amount_auditor_ciphertext =
+        try_combine_lo_hi_ciphertexts(&ct_lo, &ct_hi, TRANSFER_AMOUNT_LO_BITS).ok_or_else(
+            || {
+                println!("❌ Failed to combine ciphertexts");
+                AppError::DecryptionError
+            },
+        )?;
+    Ok((transfer_amount_auditor_ciphertext, sender, recipient, mint))
 }
