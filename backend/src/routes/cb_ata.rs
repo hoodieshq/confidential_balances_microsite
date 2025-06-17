@@ -11,8 +11,7 @@ use {
     },
     axum::extract::Json,
     base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _},
-    bincode,
-    bs58,
+    bincode, bs58,
     solana_sdk::{
         hash::Hash,
         message::{v0, VersionedMessage},
