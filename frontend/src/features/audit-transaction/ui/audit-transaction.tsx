@@ -1,4 +1,4 @@
-import { FC, useCallback } from 'react'
+import { FC, useCallback, useId } from 'react'
 import { Address } from '@solana-foundation/ms-tools-ui/components/address'
 import { Button } from '@solana-foundation/ms-tools-ui/components/button'
 import { Form, FormField } from '@solana-foundation/ms-tools-ui/components/form'
@@ -23,6 +23,9 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
   const { connected, publicKey } = useWallet()
   const { setVisible } = useWalletModal()
   const { generateElGamalKey, isGenerating, elGamalPubkey } = useCreateElGamalKey()
+
+  // add unique key to make invalidation work better
+  const inputKey = useId()
 
   const { auditTransaction, isAuditing, auditResult, reset: auditReset } = useDecryptAuditableTx()
 
@@ -68,6 +71,7 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
 
         {auditResult?.amount ? (
           <FormItemInput
+            key={`input-${inputKey}-${auditResult.amount ?? ''}`}
             label="Amount (with lamports)"
             disabled={true}
             value={auditResult.amount}
@@ -75,6 +79,7 @@ export const AuditTransaction: FC<AuditTransactionProps> = ({ tx }) => {
           />
         ) : (
           <FormItemInput
+            key="input-empty-amount"
             label="Amount (with lamports)"
             disabled={true}
             placeholder="$$$$$"

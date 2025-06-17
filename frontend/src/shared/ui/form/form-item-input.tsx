@@ -21,8 +21,6 @@ export const FormItemInput: FC<FormItemProps & InputHTMLAttributes<HTMLInputElem
   hint,
   ...inputProps
 }) => {
-  // add unique key to make invalidation work better
-  const inputKey = useId()
   return (
     <FormItem>
       {(label || hint) && (
@@ -32,7 +30,7 @@ export const FormItemInput: FC<FormItemProps & InputHTMLAttributes<HTMLInputElem
         </FormLabel>
       )}
       <FormControl>
-        <Input key={`input-${inputKey}-${inputProps.value ?? ''}`} {...inputProps} />
+        <Input {...inputProps} />
       </FormControl>
       {description && <FormDescription>{description}</FormDescription>}
       <FormMessage />
