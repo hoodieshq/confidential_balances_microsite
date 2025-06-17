@@ -86,7 +86,9 @@
   "pnpm": {
     "overrides": {
       "image-size@>=1.1.0 <1.2.1": ">=1.2.1",
-      "@solana/wallet-adapter-react-base@<0.9.26": ">=0.9.26"
+      "@solana/wallet-adapter-react-base@<0.9.26": ">=0.9.26",
+      "brace-expansion@>=1.0.0 <=1.1.11": ">=1.1.12",
+      "brace-expansion@>=2.0.0 <=2.0.1": ">=2.0.2"
     }
   },
   "peerDependencies": {
