@@ -55,11 +55,6 @@ pub async fn reveal_elgamal_pubkey(
     let pubkey_string = format!("{}", public_key);
     println!("✅ Public key extracted: {}", pubkey_string);
 
-    let decoded_pubkey = BASE64_STANDARD.decode(&pubkey_string).map_err(|e| {
-        println!("⛔️ Failed to decode base64 signature: {}", e);
-        AppError::Base64Error(e)
-    })?;
-
     println!("🎉 reveal_elgamal_pubkey completed successfully");
     Ok(Json(RevealElGamalPubkeyResponse {
         pubkey: pubkey_string,

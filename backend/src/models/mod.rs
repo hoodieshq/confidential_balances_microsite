@@ -140,9 +140,7 @@ pub struct RegisterAuditorResponse {
 pub struct AuditTransactionRequest {
     pub transaction_signature: String,
     pub transaction_data: String,
-    pub auditor_wallet_pubkey: String,
     pub elgamal_signature: String,
-    pub rpc_url: String,
 }
 
 // Response model for auditing a transaction

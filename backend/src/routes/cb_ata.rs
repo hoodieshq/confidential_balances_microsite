@@ -13,7 +13,6 @@ use {
     base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _},
     bincode,
     bs58,
-    // solana_client::rpc_client::RpcClient,
     solana_sdk::{
         hash::Hash,
         message::{v0, VersionedMessage},
@@ -329,7 +328,7 @@ pub async fn deposit_cb(
             value
         }
         Err(e) => {
-            println!("⚠️ Failed to parse amount: {}", e);
+            println!("⛔️ Failed to parse amount: {}", e);
             return Err(AppError::InvalidAmount);
         }
     };
@@ -1353,7 +1352,7 @@ pub async fn withdraw_cb_space() -> Result<Json<WithdrawCbSpaceResponse>, AppErr
     }))
 }
 
-// Handler for decrypting a Confidential Balance
+/// Handler for decrypting a Confidential Balance
 pub async fn decrypt_cb(
     Json(request): Json<DecryptCbRequest>,
 ) -> Result<Json<DecryptCbResponse>, AppError> {
@@ -1397,6 +1396,7 @@ pub async fn decrypt_cb(
     }))
 }
 
+/// Handler for auditing Confidential Balance inside the Transfer
 pub async fn audit_transaction(
     Json(request): Json<AuditTransactionRequest>,
 ) -> Result<Json<AuditTransactionResponse>, AppError> {
@@ -1409,7 +1409,7 @@ pub async fn audit_transaction(
     let transaction_bytes = BASE64_STANDARD
         .decode(&request.transaction_data)
         .map_err(|e| {
-            println!("Failed to decode base64 transaction data: {:?}", e);
+            println!("⛔️ Failed to decode base64 transaction data: {:?}", e);
             AppError::Base64Error(e)
         })?;
     println!("Transaction decoded successfully!");
@@ -1429,11 +1429,11 @@ pub async fn audit_transaction(
             .map_err(|_| AppError::InvalidAuditorSignature)?,
     )
     .map_err(|e| {
-        println!("Failed to create ElGamal keypair: {:?}", e);
+        println!("⛔️ Failed to create ElGamal keypair: {:?}", e);
         AppError::AuditorAccessDenied
     })?;
 
-    println!("Successfully created auditor's ElGamal keypair");
+    println!("✅ Successfully created auditor's ElGamal keypair");
 
     // Extract confidential transfer data
     let (ct_lo, ct_hi, sender, recipient, mint) =
@@ -1472,7 +1472,7 @@ pub async fn audit_transaction(
     println!("🪙 Mint: {}", mint);
     println!("💰 Decrypted amount: {}", full_value);
 
-    println!("Successfully audited transaction");
+    println!("✅ Successfully audited transaction");
     Ok(Json(AuditTransactionResponse {
         amount: full_value.to_string(),
         sender,
@@ -1490,17 +1490,15 @@ fn extract_confidential_transfer(
         .allow_trailing_bytes()
         .deserialize(transaction_data)
         .map_err(|e| {
-            println!("❌ Failed to deserialize transaction: {:?}", e);
+            println!("⛔️ Failed to deserialize transaction: {:?}", e);
             AppError::SerializationError
         })?;
-
-    println!("TX {:?}", versioned_transaction);
 
     // Get V0 message
     let message = match &versioned_transaction.message {
         VersionedMessage::V0(message) => message,
         _ => {
-            println!("❌ Expected V0 message");
+            println!("⚠️ Expected V0 message");
             return Err(AppError::SerializationError);
         }
     };
@@ -1529,13 +1527,13 @@ fn extract_confidential_transfer(
                     false
                 }
                 Err(e) => {
-                    println!("⚠️ Failed to deserialize token instruction: {:?}", e);
+                    println!("⛔️ Failed to deserialize token instruction: {:?}", e);
                     false
                 }
             }
         })
         .ok_or_else(|| {
-            println!("❌ No confidential transfer instruction found");
+            println!("⛔️ No confidential transfer instruction found");
             AppError::NoConfidentialTransferFound
         })?;
 

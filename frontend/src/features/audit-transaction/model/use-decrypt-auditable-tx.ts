@@ -42,8 +42,6 @@ export const useDecryptAuditableTx = () => {
         throw new Error('Can not fetch transaction')
       }
 
-      console.log('TD', { transactionData })
-
       // Convert base58 signatures to Uint8Arrays
       const signatures = transactionData.transaction.signatures.map(
         (sig) => new Uint8Array(bs58.decode(sig))
@@ -57,9 +55,7 @@ export const useDecryptAuditableTx = () => {
       const requestBody = {
         transaction_signature: transactionSignature,
         transaction_data: base64Tx,
-        auditor_wallet_pubkey: wallet.publicKey.toBase58(),
         elgamal_signature: elGamalSignatureBase64,
-        rpc_url: connection.rpcEndpoint,
       }
 
       const response = await fetch(

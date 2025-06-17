@@ -18,8 +18,8 @@ mod routes;
 // Use our route handlers
 use routes::{
     apply_cb, audit_transaction, create_cb_ata, create_memo_transaction, create_test_token,
-    decrypt_cb, deposit_cb, health_check, hello_world, reveal_elgamal_pubkey,
-    transfer_cb, transfer_cb_space, withdraw_cb, withdraw_cb_space,
+    decrypt_cb, deposit_cb, health_check, hello_world, reveal_elgamal_pubkey, transfer_cb,
+    transfer_cb_space, withdraw_cb, withdraw_cb_space,
 };
 
 #[tokio::main]
