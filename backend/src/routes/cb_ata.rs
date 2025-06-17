@@ -1542,6 +1542,9 @@ pub async fn audit_transaction(
     let (ciphertext_lo, ciphertext_hi, sender, recipient, mint) =
         extract_confidential_transfer(&transaction_bytes)?;
 
+    // concat ciphertexts and decypher only after
+    // spl-token proof generaton
+    //
     // Decrypt the ciphertext using the auditor's private key
     let decrypted_lo = elgamal_private_key
         .decrypt(&ciphertext_lo)
