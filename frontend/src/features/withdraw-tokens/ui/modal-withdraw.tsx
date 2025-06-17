@@ -18,7 +18,7 @@ type ModalWithdrawProps = {
 }
 
 type FormValues = {
-  amount: number
+  amount: string
 }
 
 export const ModalWithdraw: FC<ModalWithdrawProps> = ({ show, hide, tokenAccountPubkey }) => {
@@ -30,7 +30,7 @@ export const ModalWithdraw: FC<ModalWithdrawProps> = ({ show, hide, tokenAccount
 
   const form = useForm<FormValues>({
     defaultValues: {
-      amount: 0,
+      amount: '0',
     },
     mode: 'onChange',
   })
@@ -39,11 +39,11 @@ export const ModalWithdraw: FC<ModalWithdrawProps> = ({ show, hide, tokenAccount
     formState: { isSubmitting, isValid },
   } = form
 
-  const amount = form.watch('amount')
   const decimals = mintInfo?.decimals ?? 9 // Default to 9 decimals until we load the actual value
 
   const handleSubmit = async (values: FormValues) => {
-    if (values.amount <= 0) {
+    const amount = Number(values.amount)
+    if (isNaN(amount) || amount <= 0) {
       toast.error('Please enter a valid amount')
       return
     }
@@ -118,7 +118,6 @@ export const ModalWithdraw: FC<ModalWithdrawProps> = ({ show, hide, tokenAccount
                   min={0}
                   max={balance && !loading ? balance : undefined}
                   {...field}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
                 />
               )}
             />

@@ -23,7 +23,7 @@ type ModalTransferProps = {
 }
 
 type FormValues = {
-  amount: number
+  amount: string
   recipientAddress: string
   addressType: 'system' | 'token'
 }
@@ -39,7 +39,7 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
 
   const form = useForm<FormValues>({
     defaultValues: {
-      amount: 0,
+      amount: '0',
       recipientAddress: '',
       addressType: 'system',
     },
@@ -111,7 +111,8 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
   const decimals = mintInfo?.decimals ?? 9 // Default to 9 decimals until we load the actual value
 
   const handleSubmit = async (values: FormValues) => {
-    if (values.amount <= 0) {
+    const amount = Number(values.amount)
+    if (isNaN(amount) || amount <= 0) {
       toast.error('Please enter a valid amount')
       return
     }
@@ -127,7 +128,7 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
     }
 
     try {
-      const tokenAmount = values.amount * Math.pow(10, decimals)
+      const tokenAmount = amount * Math.pow(10, decimals)
       await transferMutation.mutateAsync({
         amount: tokenAmount,
         recipientAddress: resolvedTokenAccount.toBase58(),
@@ -243,7 +244,6 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
                   min={0}
                   max={balance && !loading ? balance : undefined}
                   {...field}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
                 />
               )}
             />
