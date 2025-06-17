@@ -14,7 +14,7 @@ type ModalRequestAirdropProps = {
 }
 
 type FormValues = {
-  amount: number
+  amount: string
 }
 
 export const ModalRequestAirdrop: FC<ModalRequestAirdropProps> = ({ hide, show, address }) => {
@@ -23,7 +23,7 @@ export const ModalRequestAirdrop: FC<ModalRequestAirdropProps> = ({ hide, show, 
 
   const form = useForm<FormValues>({
     defaultValues: {
-      amount: 1,
+      amount: '1',
     },
     mode: 'onChange',
   })
@@ -33,13 +33,14 @@ export const ModalRequestAirdrop: FC<ModalRequestAirdropProps> = ({ hide, show, 
   } = form
 
   const handleSubmit = async (values: FormValues) => {
-    if (values.amount <= 0) {
+    const amount = Number(values.amount)
+    if (isNaN(amount) || amount <= 0) {
       toast.error('Please enter a valid amount')
       return
     }
 
     try {
-      await mutation.mutateAsync(values.amount)
+      await mutation.mutateAsync(amount)
       toast.success('Airdrop requested')
       hide()
     } catch (error) {
@@ -77,7 +78,6 @@ export const ModalRequestAirdrop: FC<ModalRequestAirdropProps> = ({ hide, show, 
                 label="Amount (tokens)"
                 disabled={isSubmitting}
                 {...field}
-                onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
               />
             )}
           />

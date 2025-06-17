@@ -21,7 +21,7 @@ type ModalMintTokenProps = {
 
 type FormData = {
   mintAddress: string
-  mintAmount: number
+  mintAmount: string
 }
 
 export const ModalMintToken: FC<ModalMintTokenProps> = ({
@@ -39,7 +39,7 @@ export const ModalMintToken: FC<ModalMintTokenProps> = ({
   const form = useForm<FormData>({
     defaultValues: {
       mintAddress: '',
-      mintAmount: 0,
+      mintAmount: '0',
     },
     mode: 'onChange',
   })
@@ -87,7 +87,10 @@ export const ModalMintToken: FC<ModalMintTokenProps> = ({
 
     // NOTE: consider moving toast interactions out of modal component to make it less "dirty"
     try {
-      initializeAccount({ mintAddress: formValues.mintAddress, mintAmount: formValues.mintAmount })
+      initializeAccount({
+        mintAddress: formValues.mintAddress,
+        mintAmount: Number(formValues.mintAmount),
+      })
       hide()
       form.reset()
       toast.success('Mint token transaction submitted')

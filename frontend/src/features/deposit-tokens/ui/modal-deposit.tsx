@@ -18,7 +18,7 @@ type ModalDepositProps = {
 }
 
 type FormValues = {
-  amount: number
+  amount: string
 }
 
 export const ModalDeposit: FC<ModalDepositProps> = ({ show, hide, tokenAccountPubkey }) => {
@@ -30,7 +30,7 @@ export const ModalDeposit: FC<ModalDepositProps> = ({ show, hide, tokenAccountPu
 
   const form = useForm<FormValues>({
     defaultValues: {
-      amount: 0,
+      amount: '0',
     },
     mode: 'onChange',
   })
@@ -42,7 +42,8 @@ export const ModalDeposit: FC<ModalDepositProps> = ({ show, hide, tokenAccountPu
   const decimals = mintInfo?.decimals ?? 9 // Default to 9 decimals until we load the actual value
 
   const handleSubmit = async (values: FormValues) => {
-    if (values.amount <= 0) {
+    const amount = Number(values.amount)
+    if (isNaN(amount) || amount <= 0) {
       toast.error('Please enter a valid amount')
       return
     }
@@ -55,7 +56,7 @@ export const ModalDeposit: FC<ModalDepositProps> = ({ show, hide, tokenAccountPu
     try {
       // Convert to token units based on mint decimals
       const factor = Math.pow(10, decimals)
-      const tokenAmount = (values.amount * factor).toString()
+      const tokenAmount = (amount * factor).toString()
 
       await depositMutation.mutateAsync({
         lamportAmount: tokenAmount,
@@ -118,7 +119,6 @@ export const ModalDeposit: FC<ModalDepositProps> = ({ show, hide, tokenAccountPu
                   min={0}
                   max={balance && !loading ? balance : undefined}
                   {...field}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
                 />
               )}
             />
