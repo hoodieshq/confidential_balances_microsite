@@ -2,7 +2,6 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
-use base64::write;
 use solana_program::program_error::ProgramError;
 use solana_sdk::signature::SignerError;
 use solana_zk_sdk::errors::ElGamalError;

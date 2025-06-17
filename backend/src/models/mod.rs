@@ -116,16 +116,7 @@ pub struct CreateTestTokenTransactionRequest {
     pub mint: String,
     pub latest_blockhash: String,               // The latest blockhash
     pub mint_rent: Option<u64>,                 // Optional rent amount for mint account
-    pub auditor_elgamal_pubkey: Option<String>, // Optional elgamal key for auditor
-}
-
-// Request model for registering an auditor
-#[derive(Deserialize)]
-pub struct RegisterAuditorRequest {
-    pub mint_address: String,
-    pub authority_pubkey: String,
-    pub auditor_elgamal_pubkey: String,
-    pub recent_blockhash: Option<String>,
+    pub auditor_elgamal_pubkey: Option<String>, // Optional ElGamal key for auditor
 }
 
 // Response model for registering an auditor
@@ -138,24 +129,24 @@ pub struct RegisterAuditorResponse {
 // Request model for auditing a transaction
 #[derive(Deserialize)]
 pub struct AuditTransactionRequest {
-    pub transaction_signature: String,
-    pub transaction_data: String,
-    pub elgamal_signature: String,
+    pub transaction_signature: String, // BASE64 encoded signature
+    pub transaction_data: String,      // BASE64 encoded data for transaction
+    pub elgamal_signature: String,     // BASE64 encoded ElGamal signature
 }
 
 // Response model for auditing a transaction
 #[derive(Serialize)]
 pub struct AuditTransactionResponse {
-    pub amount: String,
-    pub sender: String,
-    pub receiver: String,
+    pub amount: String,   // Full amount of the Transfer
+    pub sender: String,   // Transfer's sender
+    pub receiver: String, // Transfer's receiver
     pub message: String,
 }
 
 // Request model for revealing ElGamal public key
 #[derive(Deserialize)]
 pub struct RevealElGamalPubkeyRequest {
-    pub elgamal_signature: String, // Base64 encoded ElGamal signature
+    pub elgamal_signature: String, // BASE64 encoded ElGamal signature
 }
 
 // Response model for revealing ElGamal public key
