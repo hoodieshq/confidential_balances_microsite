@@ -6,8 +6,8 @@ pub mod test_token;
 pub mod util;
 
 pub use cb_ata::{
-    apply_cb, audit_transaction, create_cb_ata, decrypt_cb, deposit_cb, register_auditor,
-    transfer_cb, transfer_cb_space, withdraw_cb, withdraw_cb_space,
+    apply_cb, audit_transaction, create_cb_ata, decrypt_cb, deposit_cb, transfer_cb,
+    transfer_cb_space, withdraw_cb, withdraw_cb_space,
 };
 pub use health::{health_check, hello_world};
 pub use memo_transaction::create_memo_transaction;

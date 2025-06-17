@@ -1402,103 +1402,6 @@ pub async fn decrypt_cb(
     }))
 }
 
-pub async fn register_auditor(
-    Json(request): Json<RegisterAuditorRequest>,
-) -> Result<Json<RegisterAuditorResponse>, AppError> {
-    println!(
-        "🔐 Starting register_auditor handler for mint: {}",
-        request.mint_address
-    );
-
-    let mint_address = Pubkey::from_str(&request.mint_address).map_err(|_| {
-        println!("Invalid mint address format");
-        AppError::InvalidAddress
-    })?;
-
-    let authority_pubkey = Pubkey::from_str(&request.authority_pubkey).map_err(|_| {
-        println!("Invalid authority address format");
-        AppError::InvalidAddress
-    })?;
-
-    println!("Decoding auditor ElGamal public key");
-    let auditor_elgamal_pubkey_bytes = BASE64_STANDARD
-        .decode(&request.auditor_elgamal_pubkey)
-        .map_err(|_| {
-            println!("Failed to decode ElGamal public key from base64");
-            AppError::SerializationError
-        })?;
-
-    let pod_elgamal_pubkey = if auditor_elgamal_pubkey_bytes.len() == 32 {
-        let mut bytes_array = [0u8; 32];
-        bytes_array.copy_from_slice(&auditor_elgamal_pubkey_bytes);
-        PodElGamalPubkey::from(bytes_array)
-    } else {
-        println!(
-            "Invalid ElGamal public key length: {}",
-            auditor_elgamal_pubkey_bytes.len()
-        );
-        return Err(AppError::SerializationError);
-    };
-
-    println!("Successfully decoded auditor ElGamal public key");
-
-    let update_mint_instruction = update_mint(
-        &spl_token_2022::id(),
-        &mint_address,
-        &authority_pubkey,
-        &[],  // No additional signers
-        true, // Auto-approve new accounts
-        Some(pod_elgamal_pubkey),
-    )
-    .map_err(|e| {
-        println!("Failed to create update_mint instruction: {:?}", e);
-        AppError::InstructionCreationError
-    })?;
-
-    let blockhash = match &request.recent_blockhash {
-        Some(blockhash_str) => Hash::from_str(blockhash_str).map_err(|_| {
-            println!("Invalid blockhash format");
-            AppError::InvalidBlockhash
-        })?,
-        None => {
-            println!("Using default blockhash");
-            Hash::default()
-        }
-    };
-
-    let message = v0::Message::try_compile(
-        &authority_pubkey,
-        &[update_mint_instruction],
-        &[],
-        blockhash,
-    )
-    .map_err(|e| {
-        println!("Failed to compile transaction message: {:?}", e);
-        AppError::CompileError(e)
-    })?;
-
-    let versioned_message = VersionedMessage::V0(message);
-    let versioned_transaction = VersionedTransaction {
-        // Placeholder signature, sign on a frontend
-        signatures: vec![Signature::default()],
-        message: versioned_message,
-    };
-
-    let serialized_transaction = match bincode::serialize(&versioned_transaction) {
-        Ok(bytes) => BASE64_STANDARD.encode(bytes),
-        Err(e) => {
-            println!("Failed to serialize transaction: {:?}", e);
-            return Err(AppError::BincodeError(e));
-        }
-    };
-
-    println!("✅ Successfully created auditor registration transaction");
-    Ok(Json(RegisterAuditorResponse {
-        transaction: serialized_transaction,
-        message: "Transaction for registering the auditor created successfully".to_string(),
-    }))
-}
-
 pub async fn audit_transaction(
     Json(request): Json<AuditTransactionRequest>,
 ) -> Result<Json<AuditTransactionResponse>, AppError> {
@@ -1536,19 +1439,6 @@ pub async fn audit_transaction(
     })?;
 
     println!("Successfully created auditor's ElGamal keypair");
-
-    // TODO: Debug purpose only
-
-    let auditor_pubkey = auditor_elgamal_keypair.pubkey();
-    let pubkey_bytes =
-        bincode::serialize(&auditor_pubkey).map_err(|_| AppError::SerializationError)?;
-    let pubkey_base64 = BASE64_STANDARD.encode(&pubkey_bytes);
-
-    println!("🔑 Auditor ElGamal pubkey (base64): {}", pubkey_base64);
-    println!(
-        "🔑 Auditor ElGamal pubkey first 8 bytes: {:?}",
-        &pubkey_bytes[..8.min(pubkey_bytes.len())]
-    );
 
     // Extract confidential transfer data
     let (transfer_amount_auditor_ciphertext, sender, recipient, mint) =
