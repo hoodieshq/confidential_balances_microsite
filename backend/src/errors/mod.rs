@@ -2,6 +2,7 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
+use base64::write;
 use solana_program::program_error::ProgramError;
 use solana_sdk::signature::SignerError;
 use solana_zk_sdk::errors::ElGamalError;
@@ -23,6 +24,14 @@ pub enum AppError {
     InvalidPrivateKey,
     InvalidBlockhash,
     InstructionCreationError,
+    // 401/403 - Access errors
+    InvalidAuditorSignature,
+    AuditorAccessDenied,
+    // 404 - Not Found
+    NoConfidentialTransferFound,
+    // 422 - Unprocessable Entity
+    AmountDecodeError,
+    InvalidInstructionData,
     // Add variants for underlying errors
     TokenError(spl_token_2022::error::TokenError),
     BincodeError(bincode::Error),
@@ -39,6 +48,15 @@ pub enum AppError {
 impl fmt::Display for AppError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            // 401/403 - Auditor access errors
+            Self::InvalidAuditorSignature => write!(f, "Invalid auditor signature"),
+            Self::AuditorAccessDenied => write!(f, "Auditor access denied"),
+            // 404 - Not Found
+            Self::NoConfidentialTransferFound => write!(f, "No confidential transfer found"),
+            // 422 - Unprocessable Entity
+            Self::AmountDecodeError => write!(f, "Failed to decode amount"),
+            Self::InvalidInstructionData => write!(f, "Invalid instruction data provided"),
+            // Other errors
             Self::InvalidAddress => write!(f, "Invalid Solana account address"),
             Self::InvalidAmount => write!(f, "Invalid amount format"),
             Self::SerializationError => write!(f, "Failed to serialize transaction"),
@@ -72,6 +90,8 @@ impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let status = match &self {
             AppError::InvalidAddress
+            | AppError::Base64Error(_)
+            | AppError::SerializationError
             | AppError::InvalidAmount
             | AppError::MintMismatch
             | AppError::InvalidTransactionHash
@@ -81,6 +101,16 @@ impl IntoResponse for AppError {
             AppError::TransactionFetchError | AppError::TransactionDataNotFound => {
                 StatusCode::NOT_FOUND
             }
+            // 422 -  Unprocessable Entity
+            AppError::AmountDecodeError | AppError::InvalidInstructionData => {
+                StatusCode::UNPROCESSABLE_ENTITY
+            }
+            // 401 - Unauthorized
+            AppError::InvalidAuditorSignature => StatusCode::UNAUTHORIZED,
+            // 403 - Forbidden
+            AppError::AuditorAccessDenied => StatusCode::FORBIDDEN,
+            // 404 - Not Found
+            AppError::NoConfidentialTransferFound => StatusCode::NOT_FOUND,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
 

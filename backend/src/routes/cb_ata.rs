@@ -1420,17 +1420,17 @@ pub async fn audit_transaction(
         BASE64_STANDARD
             .decode(&request.elgamal_signature)
             .map_err(|_| {
-                println!("Failed to decode ElGamal signature from base64");
-                AppError::SerializationError
+                println!("Invalid auditor signature format");
+                AppError::InvalidAuditorSignature
             })?;
 
     let auditor_elgamal_keypair = ElGamalKeypair::new_from_signature(
         &Signature::try_from(elgamal_signature_bytes.as_slice())
-            .map_err(|_| AppError::SerializationError)?,
+            .map_err(|_| AppError::InvalidAuditorSignature)?,
     )
     .map_err(|e| {
-        println!("Failed to create ElGamal keypair from signature: {:?}", e);
-        AppError::SerializationError
+        println!("Failed to create ElGamal keypair: {:?}", e);
+        AppError::AuditorAccessDenied
     })?;
 
     println!("Successfully created auditor's ElGamal keypair");
@@ -1446,7 +1446,7 @@ pub async fn audit_transaction(
         Some(v) => v as u64,
         None => {
             println!("⚠️ Can't decode lo bits");
-            return Err(AppError::DecryptionError);
+            return Err(AppError::AmountDecodeError);
         }
     };
 
@@ -1454,7 +1454,7 @@ pub async fn audit_transaction(
         Some(v) => v as u64,
         None => {
             println!("⚠️ Can't decode hi bits");
-            return Err(AppError::DecryptionError);
+            return Err(AppError::AmountDecodeError);
         }
     };
 
@@ -1463,7 +1463,7 @@ pub async fn audit_transaction(
         .and_then(|hi_shifted| hi_shifted.checked_add(lo_value))
         .ok_or_else(|| {
             println!("⚠️ Full amount overflow");
-            AppError::DecryptionError
+            AppError::AmountDecodeError
         })?;
 
     println!("✅ Successfully extracted confidential transfer data");
@@ -1536,7 +1536,7 @@ fn extract_confidential_transfer(
         })
         .ok_or_else(|| {
             println!("❌ No confidential transfer instruction found");
-            AppError::SerializationError
+            AppError::NoConfidentialTransferFound
         })?;
 
     println!(
@@ -1554,7 +1554,7 @@ fn extract_confidential_transfer(
     if data.len() < 129 {
         // Need at least 1 + 64 + 64 bytes for discriminator + 2 ciphertexts
         println!("⚠️ Instruction data too short for confidential transfer");
-        return Err(AppError::SerializationError);
+        return Err(AppError::InvalidInstructionData);
     }
 
     let input = &data[1..];
