@@ -23,7 +23,7 @@ Environment variables are used directly where needed in the code.
 
 <details>
 
-<summary>## Powered by `create-solana-dapp`</summary>
+<summary>Powered by `create-solana-dapp`</summary>
 
 ### Usage
 
