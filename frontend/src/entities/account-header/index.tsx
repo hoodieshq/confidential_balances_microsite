@@ -1,5 +1,6 @@
 import { ComponentProps, FC } from 'react'
 import { Address } from '@solana-foundation/ms-tools-ui/components/address'
+import { useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
 import {
   useGetTokenBalance,
@@ -12,7 +13,6 @@ import { cn } from '@/shared/utils'
 import { ExplorerLink } from '../cluster/cluster'
 
 type AccountHeaderParams = {
-  address: PublicKey
   balance?: {
     amount: string
     decimals: number
@@ -25,17 +25,32 @@ type AccountHeaderParams = {
   secondaryLabel?: string
 }
 
+type AccountOrMintHeaderParams = AccountHeaderParams &
+  ({ account: PublicKey } | { mint: PublicKey; wallet: string })
+
 export function WalletAccountHeader({
-  address,
   className,
   label,
   secondaryLabel,
-}: AccountHeaderParams & ComponentProps<'div'>) {
-  const { balance, loading } = useNativeAndTokenBalance(address)
+  ...params
+}: AccountOrMintHeaderParams & ComponentProps<'div'>) {
+  const { publicKey } = useWallet()
+
+  let mint
+  let wallet
+  if ('mint' in params) {
+    mint = params.mint
+    wallet = new PublicKey(params.wallet)
+  } else {
+    throw new Error(`mint is absent`)
+  }
+
+  const { balance, loading } = useNativeAndTokenBalance(mint)
+  const isCurrentWallet = publicKey?.equals(wallet)
 
   return (
     <AccountHeaderView
-      address={address}
+      address={mint}
       className={className}
       label={label}
       balance={balance}
@@ -43,21 +58,30 @@ export function WalletAccountHeader({
       secondaryLabel={secondaryLabel}
       symbol="SOL"
       isWallet
+      hasVisibleBalance={isCurrentWallet}
+      walletAddress={wallet}
     />
   )
 }
 
 export function TokenAccountHeader({
-  address,
   className,
   label,
   secondaryLabel,
-}: AccountHeaderParams & ComponentProps<'div'>) {
-  const { data: balance, isLoading } = useGetTokenBalance({ tokenAccountPubkey: address })
+  ...params
+}: AccountOrMintHeaderParams & ComponentProps<'div'>) {
+  let account
+  if ('account' in params) {
+    account = params.account
+  } else {
+    throw new Error(`mint is absent`)
+  }
+
+  const { data: balance, isLoading } = useGetTokenBalance({ tokenAccountPubkey: account })
 
   return (
     <AccountHeaderView
-      address={address}
+      address={account}
       className={className}
       label={label}
       balance={{
@@ -69,13 +93,31 @@ export function TokenAccountHeader({
       symbol="Token"
       loading={isLoading}
       secondaryLabel={secondaryLabel}
+      hasVisibleBalance
     />
   )
 }
 
-export const AccountHeaderView: FC<
-  AccountHeaderParams & { isWallet?: boolean; symbol: string } & ComponentProps<'div'>
-> = ({ address, className, label, balance, loading, secondaryLabel, symbol, isWallet = false }) => {
+type AccountHeaderViewParams = AccountHeaderParams & {
+  address: PublicKey
+  isWallet?: boolean
+  hasVisibleBalance?: boolean
+  walletAddress?: PublicKey
+  symbol: string
+}
+
+export const AccountHeaderView: FC<AccountHeaderViewParams & ComponentProps<'div'>> = ({
+  address,
+  className,
+  label,
+  balance,
+  loading,
+  secondaryLabel,
+  symbol,
+  isWallet = false,
+  hasVisibleBalance = false,
+  walletAddress,
+}) => {
   return (
     <div className={cn(className, 'mb-5')}>
       <div className="flex flex-col items-baseline justify-between gap-4 sm:!flex-row sm:items-center">
@@ -84,7 +126,7 @@ export const AccountHeaderView: FC<
             {label ?? 'Wallet'}
           </Text>
           {isWallet ? (
-            <WalletTitle />
+            <WalletTitle address={walletAddress} />
           ) : (
             <div className="flex flex-col">
               <span className="text-xs">
@@ -100,12 +142,14 @@ export const AccountHeaderView: FC<
             </div>
           )}
         </div>
-        <CardBalance
-          className="min-w-40"
-          title={secondaryLabel ?? 'Wallet balance'}
-          balance={loading ? '...' : balance?.uiAmount}
-          symbol={loading ? '' : symbol}
-        />
+        {hasVisibleBalance ? (
+          <CardBalance
+            className="min-w-40"
+            title={secondaryLabel ?? 'Wallet balance'}
+            balance={loading ? '...' : balance?.uiAmount}
+            symbol={loading ? '' : symbol}
+          />
+        ) : undefined}
       </div>
     </div>
   )

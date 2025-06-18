@@ -119,13 +119,6 @@ pub struct CreateTestTokenTransactionRequest {
     pub auditor_elgamal_pubkey: Option<String>, // Optional ElGamal key for auditor
 }
 
-// Response model for registering an auditor
-#[derive(Serialize)]
-pub struct RegisterAuditorResponse {
-    pub transaction: String,
-    pub message: String,
-}
-
 // Request model for auditing a transaction
 #[derive(Deserialize)]
 pub struct AuditTransactionRequest {

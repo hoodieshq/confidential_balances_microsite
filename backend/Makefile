@@ -1,3 +1,5 @@
+SHELL := /bin/sh
+
 .PHONY: fmt fmt-check
 
 fmt:

@@ -19,7 +19,7 @@ import { ModalMintToken } from './modal-mint-token'
 
 type DataTableAction = NonNullable<ComponentProps<typeof DataTable>['actions']>[0]
 
-export function TokenAccounts() {
+export function TokenAccounts({ address }: { address?: string }) {
   const { connected, publicKey } = useWallet()
 
   return (
@@ -27,7 +27,7 @@ export function TokenAccounts() {
       {!connected || !publicKey ? (
         <DisconnectedWalletTokenAccounts />
       ) : (
-        <ConnectedWalletTokenAccounts address={publicKey} />
+        <ConnectedWalletTokenAccounts address={address ? new PublicKey(address) : publicKey} />
       )}
     </>
   )
