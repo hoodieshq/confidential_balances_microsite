@@ -39,7 +39,7 @@ export const BaseLayout: FC<LayoutProps> = ({ children, links }) => {
               <Suspense
                 fallback={
                   <div className="my-32 text-center">
-                    <Skeleton className="m-auto h-6 w-[250px] text-(color:--surface)">
+                    <Skeleton className="m-auto h-6 w-[250px] px-4 text-(color:--surface)">
                       Loading..
                     </Skeleton>
                   </div>

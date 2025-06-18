@@ -32,7 +32,7 @@ function PageView({ address }: { address: string }) {
     return <AccountDetails address={address} account={tokenAccount.address.toBase58()} />
   }
 
-  // handle accounts like wallet
+  // handle accounts like a wallet-accounts
   if (isOtherAccount) {
     return <WalletDetails address={address} />
   }
