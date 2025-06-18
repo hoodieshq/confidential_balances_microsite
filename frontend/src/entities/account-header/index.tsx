@@ -1,5 +1,6 @@
 import { ComponentProps, FC } from 'react'
 import { Address } from '@solana-foundation/ms-tools-ui/components/address'
+import { useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
 import {
   useGetTokenBalance,
@@ -33,6 +34,8 @@ export function WalletAccountHeader({
   secondaryLabel,
   ...params
 }: AccountOrMintHeaderParams & ComponentProps<'div'>) {
+  const { publicKey } = useWallet()
+
   let mint
   let wallet
   if ('mint' in params) {
@@ -43,6 +46,7 @@ export function WalletAccountHeader({
   }
 
   const { balance, loading } = useNativeAndTokenBalance(mint)
+  const isCurrentWallet = publicKey?.equals(wallet)
 
   return (
     <AccountHeaderView
@@ -54,6 +58,7 @@ export function WalletAccountHeader({
       secondaryLabel={secondaryLabel}
       symbol="SOL"
       isWallet
+      hasVisibleBalance={isCurrentWallet}
       walletAddress={wallet}
     />
   )
@@ -88,6 +93,7 @@ export function TokenAccountHeader({
       symbol="Token"
       loading={isLoading}
       secondaryLabel={secondaryLabel}
+      hasVisibleBalance
     />
   )
 }
@@ -95,6 +101,7 @@ export function TokenAccountHeader({
 type AccountHeaderViewParams = AccountHeaderParams & {
   address: PublicKey
   isWallet?: boolean
+  hasVisibleBalance?: boolean
   walletAddress?: PublicKey
   symbol: string
 }
@@ -108,6 +115,7 @@ export const AccountHeaderView: FC<AccountHeaderViewParams & ComponentProps<'div
   secondaryLabel,
   symbol,
   isWallet = false,
+  hasVisibleBalance = false,
   walletAddress,
 }) => {
   return (
@@ -134,14 +142,14 @@ export const AccountHeaderView: FC<AccountHeaderViewParams & ComponentProps<'div
             </div>
           )}
         </div>
-        {isWallet ? undefined : (
+        {hasVisibleBalance ? (
           <CardBalance
             className="min-w-40"
             title={secondaryLabel ?? 'Wallet balance'}
             balance={loading ? '...' : balance?.uiAmount}
             symbol={loading ? '' : symbol}
           />
-        )}
+        ) : undefined}
       </div>
     </div>
   )
