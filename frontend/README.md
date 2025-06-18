@@ -1,4 +1,29 @@
-# legacy-frontend
+# confidential-balances-app
+
+## Start application in dev mode
+
+```sh
+pnpm dev
+```
+
+## Environment Variables
+
+The application uses environment variables for configuration. Copy the `.env.example` file to create your own `.env` file:
+
+```sh
+cp .env.example .env
+```
+
+Available environment variables:
+
+- `BACKEND_API_ENDPOINT`: The URL for the backend API
+
+Environment variables are used directly where needed in the code.
+
+
+<details>
+
+<summary>Powered By</summary>
 
 ### Usage
 
@@ -70,3 +95,4 @@ Available environment variables:
 - `BACKEND_API_ENDPOINT`: The URL for the backend API
 
 Environment variables are used directly where needed in the code.
+</details>
