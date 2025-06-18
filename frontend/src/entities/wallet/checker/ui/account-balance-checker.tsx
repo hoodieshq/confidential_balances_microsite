@@ -5,7 +5,7 @@ import {
   AlertTitle,
 } from '@solana-foundation/ms-tools-ui/components/alert'
 import { PublicKey } from '@solana/web3.js'
-import * as Icons from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { useGetBalance } from '@/entities/account/account/model/use-get-balance'
 import { useCluster } from '@/shared/solana'
 import { ModalRequestAirdrop } from './modal-request-airdrop'
@@ -36,7 +36,7 @@ export const AccountBalanceChecker: FC<AccountBalanceCheckerProps> = ({ children
           </AlertTitle>
           <AlertDescription className="flex flex-nowrap items-center gap-2">
             Request airdrop
-            <Icons.ChevronRight className="size-4" />
+            <ChevronRight className="size-4" />
           </AlertDescription>
         </Alert>
 

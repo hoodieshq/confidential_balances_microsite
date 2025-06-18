@@ -4,7 +4,7 @@ import { AccountLayout, getAssociatedTokenAddress, TOKEN_2022_PROGRAM_ID } from 
 import { useConnection } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
 import { useAtomValue } from 'jotai'
-import * as Icons from 'lucide-react'
+import { Check, Coins, Send, Wallet } from 'lucide-react'
 import pluralize from 'pluralize'
 import { useForm } from 'react-hook-form'
 import { useCurrentBalance, useMint } from '@/entities/account/account'
@@ -146,14 +146,21 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
   }
 
   const recipientAddress = form.watch('recipientAddress')
+  const addressType = form.watch('addressType')
+
   useEffect(() => setResolvedTokenAccount(null), [recipientAddress])
+
+  // Clear recipient field error when switching address type
+  useEffect(() => {
+    form.clearErrors('recipientAddress')
+  }, [addressType, form])
 
   return (
     <Modal
       hide={hide}
       show={show}
       title="Transfer Confidential Balance"
-      icon={<Icons.Send />}
+      icon={<Send />}
       submitDisabled={!isValid || isSubmitting || isLoading}
       submitLabel={isSubmitting ? 'Processing...' : 'Confirm Transfer'}
       submit={form.handleSubmit(handleSubmit)}
@@ -177,11 +184,11 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
                 render={({ field }) => (
                   <Selector value={field.value} onValueChange={(value) => field.onChange(value)}>
                     <SelectorItem value="system">
-                      <Icons.Wallet />
+                      <Wallet />
                       Wallet
                     </SelectorItem>
                     <SelectorItem value="token">
-                      <Icons.Coins />
+                      <Coins />
                       Token Account
                     </SelectorItem>
                   </Selector>
@@ -206,10 +213,16 @@ export const ModalTransfer: FC<ModalTransferProps> = ({ show, hide, tokenAccount
                   disabled={isSubmitting}
                   description={
                     !!resolvedTokenAccount ? (
-                      <p className="flex flex-row flex-nowrap items-center gap-2 text-[var(--accent)]">
-                        <Icons.Check className="size-4" />
-                        <span>Valid wallet with initialized confidential balance</span>
-                      </p>
+                      <span className="flex flex-row flex-nowrap items-center gap-2 text-[var(--accent)]">
+                        <Check className="size-4" />
+                        <span>
+                          {form.watch('addressType') === 'system' ? (
+                            <>Valid wallet with initialized confidential balance</>
+                          ) : (
+                            <>Valid token account with initialized confidential balance</>
+                          )}
+                        </span>
+                      </span>
                     ) : undefined
                   }
                   {...field}

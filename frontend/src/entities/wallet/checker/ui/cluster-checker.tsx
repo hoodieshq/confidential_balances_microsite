@@ -6,7 +6,7 @@ import {
 } from '@solana-foundation/ms-tools-ui/components/alert'
 import { useConnection } from '@solana/wallet-adapter-react'
 import { useQuery } from '@tanstack/react-query'
-import * as Icons from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { useCluster } from '@/shared/solana'
 
 type ClusterCheckerProps = PropsWithChildren<{}>
@@ -30,7 +30,7 @@ export const ClusterChecker: FC<ClusterCheckerProps> = ({ children }) => {
       </AlertTitle>
       <AlertDescription className="flex flex-nowrap items-center">
         Reconnect
-        <Icons.ChevronRight className="size-4" />
+        <ChevronRight className="size-4" />
       </AlertDescription>
     </Alert>
   ) : (

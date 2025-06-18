@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import { NATIVE_MINT } from '@solana/spl-token'
 import { WalletAccountHeader } from '@/entities/account-header'
-import { TokenAccounts } from '@/features/token-account/token-accounts'
+import { TokenAccounts } from '@/features/token-account'
 import { CardStep } from '@/shared/ui/card-step'
 import { Text } from '@/shared/ui/text'
 

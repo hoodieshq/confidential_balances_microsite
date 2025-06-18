@@ -1,3 +1,4 @@
+// TODO: change file name to match the enpoint name
 use axum::extract::Json;
 use base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _};
 use bincode;
@@ -8,6 +9,7 @@ use solana_sdk::{
     system_instruction,
     transaction::VersionedTransaction,
 };
+use solana_zk_sdk::encryption::pod::elgamal::PodElGamalPubkey;
 use spl_token_2022::{
     extension::{
         confidential_transfer::instruction::initialize_mint as initialize_confidential_transfer_mint,
@@ -16,6 +18,7 @@ use spl_token_2022::{
     instruction::{initialize_mint, initialize_mint_close_authority},
     state::Mint,
 };
+use std::str::FromStr;
 
 use crate::errors::AppError;
 use crate::models::{CreateTestTokenTransactionRequest, TransactionResponse};
@@ -34,7 +37,7 @@ fn parse_base58_pubkey(address: &str) -> Result<Pubkey, AppError> {
     }
 }
 
-// Handler for creating a test token mint with confidential transfers and close mint support
+/// Handler for creating a test token mint with confidential transfers and close mint support
 pub async fn create_test_token(
     Json(request): Json<CreateTestTokenTransactionRequest>,
 ) -> Result<Json<TransactionResponse>, AppError> {
@@ -96,13 +99,40 @@ pub async fn create_test_token(
         &spl_token_2022::id(), // Owner program (Token-2022)
     );
 
+    let auditor_elgamal_pk = match request.auditor_elgamal_pubkey {
+        Some(elgamal_string) => {
+            println!(
+                "🔍 Attempting to parse base64 elGamal encoded signature: {}",
+                elgamal_string
+            );
+            let decoded_elgamal_signature = BASE64_STANDARD
+                .decode(&elgamal_string)
+                .map_err(|_| AppError::SerializationError)?;
+
+            println!(
+                "✅ Base64 decoding successful, got {} bytes",
+                decoded_elgamal_signature.len()
+            );
+
+            let elgamal_pubkey = PodElGamalPubkey::from_str(&elgamal_string)
+                .map_err(|_| AppError::SerializationError)?;
+
+            println!(
+                "✅ ElGamal pubkey recovered from string successfully: pubkey={}",
+                elgamal_pubkey.to_string()
+            );
+            Some(elgamal_pubkey)
+        }
+        None => None,
+    };
+
     // Initialize ConfidentialTransferMint extension
     let initialize_confidential_transfer_mint_instruction = initialize_confidential_transfer_mint(
         &spl_token_2022::id(),  // Program ID
         &mint_address,          // Mint account
         Some(authority_pubkey), // Authority that can modify confidential transfer settings
         true,                   // Auto approve new accounts
-        None,                   // No auditor ElGamal pubkey
+        auditor_elgamal_pk,     // Optional auditor elGamal key
     )
     .map_err(|_| AppError::SerializationError)?;
 

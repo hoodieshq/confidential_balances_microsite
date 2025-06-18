@@ -40,7 +40,7 @@ export const DevModePanel: FC = () => {
         step={2}
         title="Create a Confidential ATA"
         description='Click the "Create & Initialize Confidential Balance ATA\" button to initialize a new token account that supports confidential balances.'
-        command="spl-token create-account --program-2022 <MINT_PUBKEY> && spl-token configure-confidential-transfer-account <MINT_PUBKEY>"
+        command="spl-token create-account --program-2022 $MINT_PUBKEY && spl-token configure-confidential-transfer-account $MINT_PUBKEY"
         item={steps.get(2)}
         ref={step2Ref}
       />
@@ -49,7 +49,7 @@ export const DevModePanel: FC = () => {
         step={3}
         title="Receive tokens"
         description='Receive tokens to your newly created Associated Token Account (ATA). These will appear as your "Public Balance".'
-        command="spl-token --program-2022 mint <MINT_PUBKEY> 1000"
+        command="spl-token --program-2022 mint $MINT_PUBKEY $MINT_AMOUNT"
         item={steps.get(3)}
         ref={step3Ref}
       />
@@ -58,7 +58,7 @@ export const DevModePanel: FC = () => {
         step={4}
         title="Deposit to confidential balance"
         description='Click the "Deposit" button and specify how many tokens you want to move from public to confidential balance.'
-        command="spl-token deposit-confidential-tokens <MINT_PUBKEY> 1"
+        command="spl-token deposit-confidential-tokens $MINT_PUBKEY $DEPOSIT_AMOUNT"
         item={steps.get(4)}
         ref={step4Ref}
       />
@@ -67,7 +67,7 @@ export const DevModePanel: FC = () => {
         step={5}
         title="Apply pending balances"
         description='Click the "Apply" button to confirm and finalize the deposit operation, moving your tokens from pending to available confidential balance.'
-        command="spl-token apply-pending-balance <MINT_PUBKEY>"
+        command="spl-token apply-pending-balance $MINT_PUBKEY"
         item={steps.get(5)}
         ref={step5Ref}
       />
@@ -76,7 +76,7 @@ export const DevModePanel: FC = () => {
         step={6}
         title="Decrypt your balance"
         description='Use the "Decrypt Available Balance" button to view your confidential balance. This decrypts the balance locally for your viewing only.'
-        command="spl-token --program-2022 balance <MINT_PUBKEY>"
+        command="spl-token --program-2022 balance $MINT_PUBKEY"
         item={steps.get(6)}
         ref={step6Ref}
       />
@@ -85,7 +85,7 @@ export const DevModePanel: FC = () => {
         step={7}
         title="Send confidential tokens"
         description="To transfer tokens confidentially, enter the recipient's address (which must also have a confidential ATA) and the amount to send from your available confidential balance."
-        command="spl-token --program-2022 transfer <MINT_PUBKEY> 1 <RECIPIENT_WALLET> --confidential"
+        command="spl-token --program-2022 transfer $MINT_PUBKEY 1 $RECIPIENT_WALLET --confidential"
         item={steps.get(7)}
         ref={step7Ref}
       />

@@ -4,10 +4,10 @@ import { Form, FormField } from '@solana-foundation/ms-tools-ui/components/form'
 import { PublicKey } from '@solana/web3.js'
 import { useAtomValue } from 'jotai'
 import { useForm } from 'react-hook-form'
+import { latestMintAddressAtom } from '@/entities/account/account/model/latest-mint-address'
 import { FormItemInput, FormItemTextarea } from '@/shared/ui/form'
 import { Modal } from '@/shared/ui/modal'
 import { useToast } from '@/shared/ui/toast'
-import { latestMintAddressAtom } from '../model/latest-mint-address'
 
 type ModalMintTokenProps = {
   show: boolean
@@ -85,7 +85,7 @@ export const ModalMintToken: FC<ModalMintTokenProps> = ({
       return
     }
 
-    // NOTE: consider moving toast interactions out of modal component to make it less "dirty"
+    // NOTE: consider moving toast interactions out of modal component to make them less "dirty"
     try {
       initializeAccount({
         mintAddress: formValues.mintAddress,
@@ -93,7 +93,7 @@ export const ModalMintToken: FC<ModalMintTokenProps> = ({
       })
       hide()
       form.reset()
-      toast.success('Mint token transaction submitted')
+      toast.info('Mint token transaction submitted')
       onSuccess?.()
     } catch (error) {
       console.error('Mint token failed:', error)
@@ -116,12 +116,12 @@ export const ModalMintToken: FC<ModalMintTokenProps> = ({
               form.trigger('mintAddress')
             }}
           >
-            Use latest mint address
+            Use last created mint
           </Button>
         ) : undefined
       }
       submitDisabled={!isValid || isInitializing}
-      submitLabel={isInitializing ? 'Processing...' : (label ?? 'Mint token')}
+      submitLabel={isInitializing ? 'Processing...' : (label ?? 'Mint Token')}
       submit={handleSubmit}
     >
       <Form {...form}>

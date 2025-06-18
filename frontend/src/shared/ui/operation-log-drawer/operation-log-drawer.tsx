@@ -2,7 +2,7 @@
 
 import { FC, useEffect, useState } from 'react'
 import { Button } from '@solana-foundation/ms-tools-ui/components/button'
-import * as Icons from 'lucide-react'
+import { ArrowDownToLine, Eraser, X } from 'lucide-react'
 import { Drawer } from 'vaul'
 import { LogItem, LogItemResult } from '@/shared/ui/log'
 import { cn } from '@/shared/utils'
@@ -73,18 +73,18 @@ export const OperationLogDrawer: FC<OperationLogDrawerProps> = ({
               <div className="flex flex-nowrap gap-2">
                 {!isFollowing && (
                   <Button variant="outline" size="sm" onClick={() => setIsFollowing(true)}>
-                    <Icons.ArrowDownToLine />
+                    <ArrowDownToLine />
                     Follow
                   </Button>
                 )}
                 <Button variant="outline" size="sm" onClick={onClear}>
-                  <Icons.Eraser />
+                  <Eraser />
                   Clear log
                 </Button>
               </div>
               <Drawer.Close asChild>
                 <button className="shrink-0 cursor-pointer">
-                  <Icons.X className="size-6 fill-[var(--foreground)]" />
+                  <X className="size-6 fill-[var(--foreground)]" />
                 </button>
               </Drawer.Close>
             </div>

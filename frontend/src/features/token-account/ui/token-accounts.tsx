@@ -12,9 +12,10 @@ import {
 } from '@/entities/account/account/model/use-create-test-token-cb'
 import { useGetTokenAccounts } from '@/entities/account/account/model/use-get-token-accounts'
 import { ModalInitATA } from '@/entities/account/account/ui/modal-init-ata'
-import { ModalMintToken } from '@/entities/account/account/ui/modal-mint-token'
 import { ExplorerLink } from '@/entities/cluster/cluster'
 import { DataTable } from '@/shared/ui/data-table'
+import { ModalCreateMint } from './modal-create-mint'
+import { ModalMintToken } from './modal-mint-token'
 
 type DataTableAction = NonNullable<ComponentProps<typeof DataTable>['actions']>[0]
 
@@ -52,11 +53,14 @@ function ConnectedWalletTokenAccounts({
   }, [query.data, showAll, limit])
 
   const [showInitializeModal, setShowInitializeModal] = useState(false)
+  const [showCreateMintModal, setShowCreateMintModal] = useState(false)
   const [showMintModal, setShowMintModal] = useState(false)
   const { mutate: initializeAccount, isPending: isInitializing } =
     useCreateAssociatedTokenAccountCB({ walletAddressPubkey: address })
 
-  const { mutate: createTestToken } = useCreateTestTokenCB({ walletAddressPubkey: address })
+  const { mutate: createTestToken, isPending: isCreatingMint } = useCreateTestTokenCB({
+    walletAddressPubkey: address,
+  })
   const { mutate: mintTestToken, isPending: isMinting } = useMintTestTokenCB({
     walletAddressPubkey: address,
   })
@@ -70,8 +74,8 @@ function ConnectedWalletTokenAccounts({
   }, [setShowMintModal])
 
   const onCreateTestToken = useCallback(() => {
-    createTestToken()
-  }, [createTestToken])
+    setShowCreateMintModal(true)
+  }, [setShowCreateMintModal])
 
   const emptyLabel = useMemo(() => {
     const noRecords = 'No token accounts found. Create new account to proceed'
@@ -84,7 +88,6 @@ function ConnectedWalletTokenAccounts({
   }, [query])
 
   const actions = useMemo(() => {
-    // NOTE: preserve original functionality by invalidating data
     const onInvalidateBalance = async () => {
       await query.refetch()
       await client.invalidateQueries({
@@ -139,6 +142,17 @@ function ConnectedWalletTokenAccounts({
         hide={() => setShowInitializeModal(false)}
         initializeAccount={initializeAccount}
         isInitializing={isInitializing}
+      />
+      <ModalCreateMint
+        key="createMint"
+        show={showCreateMintModal}
+        hide={() => setShowCreateMintModal(false)}
+        submitCallback={({ auditorAddress }) => {
+          createTestToken({
+            auditorElGamalPubkey: auditorAddress,
+          })
+        }}
+        isProcessing={isCreatingMint}
       />
       <ModalMintToken
         key="mintTestToken"

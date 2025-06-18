@@ -114,6 +114,44 @@ pub struct DecryptCbResponse {
 pub struct CreateTestTokenTransactionRequest {
     pub account: String,
     pub mint: String,
-    pub latest_blockhash: String, // The latest blockhash
-    pub mint_rent: Option<u64>,   // Optional rent amount for mint account
+    pub latest_blockhash: String,               // The latest blockhash
+    pub mint_rent: Option<u64>,                 // Optional rent amount for mint account
+    pub auditor_elgamal_pubkey: Option<String>, // Optional ElGamal key for auditor
+}
+
+// Response model for registering an auditor
+#[derive(Serialize)]
+pub struct RegisterAuditorResponse {
+    pub transaction: String,
+    pub message: String,
+}
+
+// Request model for auditing a transaction
+#[derive(Deserialize)]
+pub struct AuditTransactionRequest {
+    pub transaction_signature: String, // BASE64 encoded signature
+    pub transaction_data: String,      // BASE64 encoded data for transaction
+    pub elgamal_signature: String,     // BASE64 encoded ElGamal signature
+}
+
+// Response model for auditing a transaction
+#[derive(Serialize)]
+pub struct AuditTransactionResponse {
+    pub amount: String,   // Full amount of the Transfer
+    pub sender: String,   // Transfer's sender
+    pub receiver: String, // Transfer's receiver
+    pub message: String,
+}
+
+// Request model for revealing ElGamal public key
+#[derive(Deserialize)]
+pub struct RevealElGamalPubkeyRequest {
+    pub elgamal_signature: String, // BASE64 encoded ElGamal signature
+}
+
+// Response model for revealing ElGamal public key
+#[derive(Serialize)]
+pub struct RevealElGamalPubkeyResponse {
+    pub pubkey: String, // ElGamal public key as string
+    pub message: String,
 }
