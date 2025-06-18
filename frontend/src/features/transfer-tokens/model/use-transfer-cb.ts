@@ -10,7 +10,7 @@ import {
 } from '@/entities/account/account'
 import { queryKey as confidentialVisibilityQK } from '@/entities/account/account/model/use-confidential-visibility'
 import { queryKey as getBalanceQK } from '@/entities/account/account/model/use-get-balance'
-import { queryKey as getSignaturesQK } from '@/entities/account/account/model/use-get-signatures'
+import { queryKey as getSignaturesWithTxQK } from '@/entities/account/account/model/use-get-signatures-with-tx-data'
 import { queryKey as getTokenAccountsQK } from '@/entities/account/account/model/use-get-token-accounts'
 import { useDevMode } from '@/entities/dev-mode'
 import { useOperationLog } from '@/entities/operation-log'
@@ -207,7 +207,8 @@ export const useTransferCB = ({
           queryKey: getBalanceQK(connection.rpcEndpoint, senderTokenAccountPubkey),
         }),
         client.invalidateQueries({
-          queryKey: getSignaturesQK(connection.rpcEndpoint, senderTokenAccountPubkey),
+          // cast type for publicKey as it won't be undefiend on success
+          queryKey: getSignaturesWithTxQK(connection.rpcEndpoint, wallet.publicKey as PublicKey),
         }),
         client.invalidateQueries({
           queryKey: getTokenAccountsQK(connection.rpcEndpoint, senderTokenAccountPubkey),
