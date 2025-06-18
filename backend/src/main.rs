@@ -17,7 +17,7 @@ mod routes;
 
 // Use our route handlers
 use routes::{
-    apply_cb, audit_transaction, create_cb_ata, create_memo_transaction, create_test_token,
+    apply_cb, audit_transaction_cb, create_cb_ata, create_memo_transaction, create_test_token,
     decrypt_cb, deposit_cb, health_check, hello_world, reveal_elgamal_pubkey, transfer_cb,
     transfer_cb_space, withdraw_cb, withdraw_cb_space,
 };
@@ -61,7 +61,7 @@ async fn main() {
         .route("/withdraw-cb", get(withdraw_cb_space))
         .route("/decrypt-cb", post(decrypt_cb))
         .route("/create-test-token", post(create_test_token))
-        .route("/audit-transaction", post(audit_transaction))
+        .route("/audit-transaction", post(audit_transaction_cb))
         .route("/reveal-elgamal-pubkey", post(reveal_elgamal_pubkey))
         .layer(cors)
         .layer(TraceLayer::new_for_http());
