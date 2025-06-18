@@ -19,7 +19,7 @@ pub use create_cb_ata::create_cb_ata;
 pub use create_test_token::create_test_token_cb;
 pub use decrypt::decrypt_cb;
 pub use deposit::deposit_cb;
-pub use health::{health_check, hello_world};
+pub use health::{health_check, version_check};
 pub use memo_transaction::create_memo_transaction;
 pub use reveal_elgamal_pubkey::reveal_elgamal_pubkey_cb;
 pub use transfer::transfer_cb;
