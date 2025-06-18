@@ -1,6 +1,10 @@
-use base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _};
-use solana_sdk::pubkey::Pubkey;
-use {crate::errors::AppError, solana_sdk::hash::Hash, std::str::FromStr};
+use {
+    crate::errors::AppError,
+    base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _},
+    bs58,
+    solana_sdk::{hash::Hash, pubkey::Pubkey},
+    std::str::FromStr,
+};
 
 // Helper function to parse blockhash bypassed from client
 pub fn parse_latest_blockhash(latest_blockhash: &String) -> Result<Hash, AppError> {

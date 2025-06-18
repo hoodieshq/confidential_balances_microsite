@@ -1,14 +1,16 @@
-use crate::{
-    errors::AppError,
-    models::{RevealElGamalPubkeyRequest, RevealElGamalPubkeyResponse},
+use {
+    crate::{
+        errors::AppError,
+        models::{RevealElGamalPubkeyRequest, RevealElGamalPubkeyResponse},
+    },
+    axum::extract::Json,
+    base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _},
+    solana_sdk::signature::Signature,
+    spl_token_2022::solana_zk_sdk::encryption::elgamal::ElGamalKeypair,
 };
-use axum::extract::Json;
-use base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _};
-use solana_sdk::signature::Signature;
-use spl_token_2022::solana_zk_sdk::encryption::elgamal::ElGamalKeypair;
 
 /// Handler for revealing ElGamal public key from signature
-pub async fn reveal_elgamal_pubkey(
+pub async fn reveal_elgamal_pubkey_cb(
     Json(request): Json<RevealElGamalPubkeyRequest>,
 ) -> Result<Json<RevealElGamalPubkeyResponse>, AppError> {
     println!("🚀 Starting reveal_elgamal_pubkey handler");

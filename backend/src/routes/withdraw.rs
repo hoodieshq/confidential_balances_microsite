@@ -1,19 +1,13 @@
-use crate::models::{AuditTransactionRequest, AuditTransactionResponse};
-use bincode::Options;
 use {
     crate::{
         errors::AppError,
-        models::{
-            ApplyCbRequest, CreateCbAtaRequest, DecryptCbRequest, DecryptCbResponse,
-            DepositCbRequest, MultiTransactionResponse, TransactionResponse, TransferCbRequest,
-            TransferCbSpaceResponse, WithdrawCbRequest, WithdrawCbSpaceResponse,
-        },
+        models::{MultiTransactionResponse, WithdrawCbRequest},
+        routes::util::parse_latest_blockhash,
     },
     axum::extract::Json,
     base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _},
-    bincode, bs58,
+    bincode,
     solana_sdk::{
-        hash::Hash,
         message::{v0, VersionedMessage},
         pubkey::Pubkey,
         signature::{Keypair, NullSigner, Signature},
@@ -21,39 +15,25 @@ use {
         system_instruction,
         transaction::VersionedTransaction,
     },
-    solana_zk_sdk::{
-        encryption::auth_encryption::AeCiphertext,
-        encryption::elgamal::ElGamalCiphertext,
-        zk_elgamal_proof_program::{
-            self,
-            instruction::{close_context_state, ContextStateInfo},
-        },
+    solana_zk_sdk::zk_elgamal_proof_program::{
+        instruction::{close_context_state, ContextStateInfo},
+        proof_data::ZkProofData,
+        state::ProofContextState,
     },
-    spl_associated_token_account::{
-        get_associated_token_address_with_program_id, instruction::create_associated_token_account,
-    },
+    spl_associated_token_account::get_associated_token_address_with_program_id,
     spl_token_2022::{
         error::TokenError,
         extension::{
             confidential_transfer::{
-                account_info::{
-                    ApplyPendingBalanceAccountInfo, TransferAccountInfo, WithdrawAccountInfo,
-                },
-                instruction::{
-                    apply_pending_balance, configure_account, deposit, transfer, withdraw,
-                    PubkeyValidityProofData, TransferInstructionData,
-                },
+                account_info::WithdrawAccountInfo, instruction::withdraw,
                 ConfidentialTransferAccount,
             },
-            BaseStateWithExtensions, ExtensionType, StateWithExtensionsOwned,
+            BaseStateWithExtensions, StateWithExtensionsOwned,
         },
-        instruction::{decode_instruction_data, reallocate, TokenInstruction},
         solana_zk_sdk::encryption::{auth_encryption::AeKey, elgamal::ElGamalKeypair},
     },
-    spl_token_confidential_transfer_proof_extraction::instruction::{ProofData, ProofLocation},
-    spl_token_confidential_transfer_proof_generation::{
-        transfer::TransferProofData, withdraw::WithdrawProofData, TRANSFER_AMOUNT_LO_BITS,
-    },
+    spl_token_confidential_transfer_proof_extraction::instruction::ProofLocation,
+    spl_token_confidential_transfer_proof_generation::withdraw::WithdrawProofData,
     std::str::FromStr,
 };
 
@@ -317,7 +297,7 @@ pub async fn withdraw_cb(
 /// Instead of sending transactions internally or calculating rent via RPC, this function now accepts
 /// the rent value from the caller and returns the instructions to be used externally.
 fn get_zk_proof_context_state_account_creation_instructions<
-    ZK: bytemuck::Pod + zk_elgamal_proof_program::proof_data::ZkProofData<U>,
+    ZK: bytemuck::Pod + ZkProofData<U>,
     U: bytemuck::Pod,
 >(
     fee_payer_pubkey: &Pubkey,
@@ -335,7 +315,7 @@ fn get_zk_proof_context_state_account_creation_instructions<
     use spl_token_confidential_transfer_proof_extraction::instruction::zk_proof_type_to_instruction;
     use std::mem::size_of;
 
-    let space = size_of::<zk_elgamal_proof_program::state::ProofContextState<U>>();
+    let space = size_of::<ProofContextState<U>>();
     println!("📊 Context state account space required: {} bytes", space);
     println!(
         "💰 Using provided rent for context state account: {} lamports",
@@ -356,7 +336,7 @@ fn get_zk_proof_context_state_account_creation_instructions<
         context_state_account_pubkey,
         rent,
         space as u64,
-        &zk_elgamal_proof_program::id(),
+        &solana_zk_sdk::zk_elgamal_proof_program::id(),
     );
 
     let verify_proof_ix =

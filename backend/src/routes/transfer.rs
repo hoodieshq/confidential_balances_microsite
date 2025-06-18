@@ -1,19 +1,14 @@
-use crate::models::{AuditTransactionRequest, AuditTransactionResponse};
-use bincode::Options;
 use {
     crate::{
         errors::AppError,
-        models::{
-            ApplyCbRequest, CreateCbAtaRequest, DecryptCbRequest, DecryptCbResponse,
-            DepositCbRequest, MultiTransactionResponse, TransactionResponse, TransferCbRequest,
-            TransferCbSpaceResponse, WithdrawCbRequest, WithdrawCbSpaceResponse,
-        },
+        models::{MultiTransactionResponse, TransferCbRequest},
+        routes::util::parse_latest_blockhash,
     },
     axum::extract::Json,
     base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _},
-    bincode, bs58,
+    bincode,
     solana_sdk::{
-        hash::Hash,
+        instruction::Instruction,
         message::{v0, VersionedMessage},
         pubkey::Pubkey,
         signature::{Keypair, NullSigner, Signature},
@@ -21,40 +16,28 @@ use {
         system_instruction,
         transaction::VersionedTransaction,
     },
-    solana_zk_sdk::{
-        encryption::auth_encryption::AeCiphertext,
-        encryption::elgamal::ElGamalCiphertext,
-        zk_elgamal_proof_program::{
-            self,
-            instruction::{close_context_state, ContextStateInfo},
-        },
+    solana_zk_sdk::zk_elgamal_proof_program::{
+        instruction::{close_context_state, ContextStateInfo},
+        proof_data::ZkProofData,
+        state::ProofContextState,
     },
-    spl_associated_token_account::{
-        get_associated_token_address_with_program_id, instruction::create_associated_token_account,
-    },
+    spl_associated_token_account::get_associated_token_address_with_program_id,
     spl_token_2022::{
         error::TokenError,
         extension::{
             confidential_transfer::{
-                account_info::{
-                    ApplyPendingBalanceAccountInfo, TransferAccountInfo, WithdrawAccountInfo,
-                },
-                instruction::{
-                    apply_pending_balance, configure_account, deposit, transfer, withdraw,
-                    PubkeyValidityProofData, TransferInstructionData,
-                },
+                account_info::TransferAccountInfo, instruction::transfer,
                 ConfidentialTransferAccount,
             },
-            BaseStateWithExtensions, ExtensionType, StateWithExtensionsOwned,
+            BaseStateWithExtensions, StateWithExtensionsOwned,
         },
-        instruction::{decode_instruction_data, reallocate, TokenInstruction},
         solana_zk_sdk::encryption::{auth_encryption::AeKey, elgamal::ElGamalKeypair},
     },
-    spl_token_confidential_transfer_proof_extraction::instruction::{ProofData, ProofLocation},
-    spl_token_confidential_transfer_proof_generation::{
-        transfer::TransferProofData, withdraw::WithdrawProofData, TRANSFER_AMOUNT_LO_BITS,
+    spl_token_confidential_transfer_proof_extraction::instruction::{
+        zk_proof_type_to_instruction, ProofLocation,
     },
-    std::str::FromStr,
+    spl_token_confidential_transfer_proof_generation::transfer::TransferProofData,
+    std::mem::size_of,
 };
 
 /// Handler for the transfer-cb endpoint
@@ -495,4 +478,48 @@ pub async fn transfer_cb(
     };
 
     Ok(Json(response))
+}
+
+/// Refactored version of spl_token_client::token::Token::confidential_transfer_create_context_state_account().
+/// Instead of sending transactions internally or calculating rent via RPC, this function now accepts
+/// the rent value from the caller and returns the instructions to be used externally.
+fn get_zk_proof_context_state_account_creation_instructions<
+    ZK: bytemuck::Pod + ZkProofData<U>,
+    U: bytemuck::Pod,
+>(
+    fee_payer_pubkey: &Pubkey,
+    context_state_account_pubkey: &Pubkey,
+    context_state_authority_pubkey: &Pubkey,
+    proof_data: &ZK,
+    rent: u64,
+) -> Result<(Instruction, Instruction), AppError> {
+    let space = size_of::<ProofContextState<U>>();
+    println!("📊 Context state account space required: {} bytes", space);
+    println!(
+        "💰 Using provided rent for context state account: {} lamports",
+        rent
+    );
+
+    let context_state_info = ContextStateInfo {
+        context_state_account: context_state_account_pubkey,
+        context_state_authority: context_state_authority_pubkey,
+    };
+
+    let instruction_type = zk_proof_type_to_instruction(ZK::PROOF_TYPE)?;
+
+    println!("🔧 Creating context state account with inputs: fee_payer={}, context_state_account={}, rent={}, space={}",
+        fee_payer_pubkey, context_state_account_pubkey, rent, space);
+    let create_account_ix = system_instruction::create_account(
+        fee_payer_pubkey,
+        context_state_account_pubkey,
+        rent,
+        space as u64,
+        &solana_zk_sdk::zk_elgamal_proof_program::id(),
+    );
+
+    let verify_proof_ix =
+        instruction_type.encode_verify_proof(Some(context_state_info), proof_data);
+
+    // Return a tuple containing the create account instruction and verify proof instruction.
+    Ok((create_account_ix, verify_proof_ix))
 }

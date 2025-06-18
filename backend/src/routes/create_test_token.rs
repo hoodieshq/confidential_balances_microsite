@@ -1,28 +1,29 @@
-// TODO: change file name to match the enpoint name
-use axum::extract::Json;
-use base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _};
-use bincode;
-use bs58;
-use solana_sdk::{
-    message::{v0, VersionedMessage},
-    pubkey::Pubkey,
-    system_instruction,
-    transaction::VersionedTransaction,
-};
-use solana_zk_sdk::encryption::pod::elgamal::PodElGamalPubkey;
-use spl_token_2022::{
-    extension::{
-        confidential_transfer::instruction::initialize_mint as initialize_confidential_transfer_mint,
-        ExtensionType,
+use {
+    crate::{
+        errors::AppError,
+        models::{CreateTestTokenTransactionRequest, TransactionResponse},
+        routes::util::parse_latest_blockhash,
     },
-    instruction::{initialize_mint, initialize_mint_close_authority},
-    state::Mint,
+    axum::extract::Json,
+    base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _},
+    bincode, bs58,
+    solana_sdk::{
+        message::{v0, VersionedMessage},
+        pubkey::Pubkey,
+        system_instruction,
+        transaction::VersionedTransaction,
+    },
+    solana_zk_sdk::encryption::pod::elgamal::PodElGamalPubkey,
+    spl_token_2022::{
+        extension::{
+            confidential_transfer::instruction::initialize_mint as initialize_confidential_transfer_mint,
+            ExtensionType,
+        },
+        instruction::{initialize_mint, initialize_mint_close_authority},
+        state::Mint,
+    },
+    std::str::FromStr,
 };
-use std::str::FromStr;
-
-use crate::errors::AppError;
-use crate::models::{CreateTestTokenTransactionRequest, TransactionResponse};
-use crate::routes::util::parse_latest_blockhash;
 
 // Helper function to parse a base58 address string into a Pubkey
 fn parse_base58_pubkey(address: &str) -> Result<Pubkey, AppError> {
@@ -38,7 +39,7 @@ fn parse_base58_pubkey(address: &str) -> Result<Pubkey, AppError> {
 }
 
 /// Handler for creating a test token mint with confidential transfers and close mint support
-pub async fn create_test_token(
+pub async fn create_test_token_cb(
     Json(request): Json<CreateTestTokenTransactionRequest>,
 ) -> Result<Json<TransactionResponse>, AppError> {
     // Parse the account address from base58 to use as mint authority and freeze authority

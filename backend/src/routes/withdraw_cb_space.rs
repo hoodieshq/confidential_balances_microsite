@@ -1,60 +1,8 @@
-use crate::models::{AuditTransactionRequest, AuditTransactionResponse};
-use bincode::Options;
 use {
-    crate::{
-        errors::AppError,
-        models::{
-            ApplyCbRequest, CreateCbAtaRequest, DecryptCbRequest, DecryptCbResponse,
-            DepositCbRequest, MultiTransactionResponse, TransactionResponse, TransferCbRequest,
-            TransferCbSpaceResponse, WithdrawCbRequest, WithdrawCbSpaceResponse,
-        },
-    },
+    crate::{errors::AppError, models::WithdrawCbSpaceResponse},
     axum::extract::Json,
-    base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _},
-    bincode, bs58,
-    solana_sdk::{
-        hash::Hash,
-        message::{v0, VersionedMessage},
-        pubkey::Pubkey,
-        signature::{Keypair, NullSigner, Signature},
-        signer::Signer,
-        system_instruction,
-        transaction::VersionedTransaction,
-    },
-    solana_zk_sdk::{
-        encryption::auth_encryption::AeCiphertext,
-        encryption::elgamal::ElGamalCiphertext,
-        zk_elgamal_proof_program::{
-            self,
-            instruction::{close_context_state, ContextStateInfo},
-        },
-    },
-    spl_associated_token_account::{
-        get_associated_token_address_with_program_id, instruction::create_associated_token_account,
-    },
-    spl_token_2022::{
-        error::TokenError,
-        extension::{
-            confidential_transfer::{
-                account_info::{
-                    ApplyPendingBalanceAccountInfo, TransferAccountInfo, WithdrawAccountInfo,
-                },
-                instruction::{
-                    apply_pending_balance, configure_account, deposit, transfer, withdraw,
-                    PubkeyValidityProofData, TransferInstructionData,
-                },
-                ConfidentialTransferAccount,
-            },
-            BaseStateWithExtensions, ExtensionType, StateWithExtensionsOwned,
-        },
-        instruction::{decode_instruction_data, reallocate, TokenInstruction},
-        solana_zk_sdk::encryption::{auth_encryption::AeKey, elgamal::ElGamalKeypair},
-    },
-    spl_token_confidential_transfer_proof_extraction::instruction::{ProofData, ProofLocation},
-    spl_token_confidential_transfer_proof_generation::{
-        transfer::TransferProofData, withdraw::WithdrawProofData, TRANSFER_AMOUNT_LO_BITS,
-    },
-    std::str::FromStr,
+    solana_zk_sdk::zk_elgamal_proof_program,
+    std::mem::size_of,
 };
 
 /// GET handler to provide space requirements for withdraw-cb operation

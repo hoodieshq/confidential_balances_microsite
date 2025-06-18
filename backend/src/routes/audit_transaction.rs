@@ -1,113 +1,22 @@
-use crate::models::{AuditTransactionRequest, AuditTransactionResponse};
-use bincode::Options;
 use {
     crate::{
         errors::AppError,
-        models::{
-            ApplyCbRequest, CreateCbAtaRequest, DecryptCbRequest, DecryptCbResponse,
-            DepositCbRequest, MultiTransactionResponse, TransactionResponse, TransferCbRequest,
-            TransferCbSpaceResponse, WithdrawCbRequest, WithdrawCbSpaceResponse,
-        },
+        models::{AuditTransactionRequest, AuditTransactionResponse},
     },
     axum::extract::Json,
     base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _},
-    bincode, bs58,
+    bincode::{self, Options},
     solana_sdk::{
-        hash::Hash,
-        message::{v0, VersionedMessage},
-        pubkey::Pubkey,
-        signature::{Keypair, NullSigner, Signature},
-        signer::Signer,
-        system_instruction,
-        transaction::VersionedTransaction,
+        message::VersionedMessage, signature::Signature, transaction::VersionedTransaction,
     },
-    solana_zk_sdk::{
-        encryption::auth_encryption::AeCiphertext,
-        encryption::elgamal::ElGamalCiphertext,
-        zk_elgamal_proof_program::{
-            self,
-            instruction::{close_context_state, ContextStateInfo},
-        },
-    },
-    spl_associated_token_account::{
-        get_associated_token_address_with_program_id, instruction::create_associated_token_account,
-    },
+    solana_zk_sdk::encryption::elgamal::ElGamalCiphertext,
     spl_token_2022::{
-        error::TokenError,
-        extension::{
-            confidential_transfer::{
-                account_info::{
-                    ApplyPendingBalanceAccountInfo, TransferAccountInfo, WithdrawAccountInfo,
-                },
-                instruction::{
-                    apply_pending_balance, configure_account, deposit, transfer, withdraw,
-                    PubkeyValidityProofData, TransferInstructionData,
-                },
-                ConfidentialTransferAccount,
-            },
-            BaseStateWithExtensions, ExtensionType, StateWithExtensionsOwned,
-        },
-        instruction::{decode_instruction_data, reallocate, TokenInstruction},
-        solana_zk_sdk::encryption::{auth_encryption::AeKey, elgamal::ElGamalKeypair},
+        extension::confidential_transfer::instruction::TransferInstructionData,
+        instruction::{decode_instruction_data, TokenInstruction},
+        solana_zk_sdk::encryption::elgamal::ElGamalKeypair,
     },
-    spl_token_confidential_transfer_proof_extraction::instruction::{ProofData, ProofLocation},
-    spl_token_confidential_transfer_proof_generation::{
-        transfer::TransferProofData, withdraw::WithdrawProofData, TRANSFER_AMOUNT_LO_BITS,
-    },
-    std::str::FromStr,
+    spl_token_confidential_transfer_proof_generation::TRANSFER_AMOUNT_LO_BITS,
 };
-
-// Helper function to parse a base64-encoded base58 address into a Pubkey
-fn parse_base64_base58_pubkey(encoded_address: &str) -> Result<Pubkey, AppError> {
-    println!(
-        "🔍 Attempting to parse base64-base58 pubkey: {}",
-        encoded_address
-    );
-
-    // First, try to decode from base64
-    let decoded_base64 = BASE64_STANDARD.decode(encoded_address)?;
-    println!(
-        "✅ Base64 decoding successful, got {} bytes",
-        decoded_base64.len()
-    );
-
-    // Then, decode the resulting string as base58
-    let decoded_string = String::from_utf8(decoded_base64)?;
-    println!("✅ UTF-8 decoding successful: {}", decoded_string);
-
-    // Finally, decode the base58 string to bytes
-    let bytes = bs58::decode(&decoded_string).into_vec()?;
-    println!("✅ Base58 decoding successful, got {} bytes", bytes.len());
-
-    if bytes.len() != 32 {
-        println!(
-            "⛔️ Invalid pubkey length: expected 32 bytes, got {}",
-            bytes.len()
-        );
-        return Err(AppError::InvalidAddress);
-    }
-
-    // Convert to fixed-size array and create Pubkey
-    let bytes_array: [u8; 32] = bytes.try_into().unwrap();
-    let pubkey = Pubkey::new_from_array(bytes_array);
-    println!("✅ Successfully created Pubkey: {}", pubkey.to_string());
-
-    Ok(pubkey)
-}
-
-// Helper function to parse blockhash bypassed from client
-fn parse_latest_blockhash(latest_blockhash: &String) -> Result<Hash, AppError> {
-    // Parse the provided blockhash from the request
-    println!("🔑 Parsing blockhash from request: {}", latest_blockhash);
-
-    let client_blockhash = Hash::from_str(latest_blockhash).map_err(|e| {
-        println!("⛔️ Failed to parse blockhash: {}", e);
-        AppError::SerializationError
-    })?;
-    println!("✅ Successfully parsed blockhash: {}", client_blockhash);
-
-    Ok(client_blockhash)
-}
 
 /// Handler for auditing Confidential Balance inside the Transfer
 pub async fn audit_transaction_cb(
