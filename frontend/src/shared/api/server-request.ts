@@ -31,7 +31,10 @@ export async function serverRequest<TRequest = any, TResponse = any>(
   const response = await fetch(route, fetchOptions)
 
   if (!response.ok) {
-    throw new Error(`😵 HTTP error! Status: ${response.status}`)
+    const maybeErrorMessage = await response.text()
+    throw new Error(
+      `😵 HTTP error! ${Boolean(maybeErrorMessage) ? maybeErrorMessage : `Status: {response.status}`}`
+    )
   }
 
   const data = await response.json()

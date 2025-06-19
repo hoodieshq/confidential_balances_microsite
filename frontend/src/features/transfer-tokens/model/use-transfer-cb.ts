@@ -193,7 +193,7 @@ export const useTransferCB = ({
       ])
     },
     onError: (error) => {
-      toast.error(`Transfer failed! ${error}`)
+      toast.error(`Transfer failed! ${error.message}`)
       log.push({
         title: 'Transfer Operation - FAILED',
         content: `Transfer transaction failed\n  Token account: ${senderTokenAccountPubkey}\n  Error: ${error instanceof Error ? error.message : 'Unknown error'}`,

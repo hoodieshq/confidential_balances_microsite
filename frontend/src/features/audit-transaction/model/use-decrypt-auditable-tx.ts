@@ -1,13 +1,24 @@
 'use client'
 
 import { useState } from 'react'
+import { getMint, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { VersionedTransaction } from '@solana/web3.js'
+import { Connection, PublicKey, VersionedTransaction } from '@solana/web3.js'
 import bs58 from 'bs58'
 import { ELGAMAL_SEED_MESSAGE, generateSeedSignature } from '@/entities/account/account'
 import { useOperationLog } from '@/entities/operation-log'
 import { serverRequest } from '@/shared/api'
 import { useToast } from '@/shared/ui/toast'
+
+// Types for mint information
+interface MintInfo {
+  address: PublicKey
+  decimals: number
+  supply: bigint
+  mintAuthority: PublicKey | null
+  freezeAuthority: PublicKey | null
+  isInitialized: boolean
+}
 
 export const useDecryptAuditableTx = () => {
   const { connection } = useConnection()
@@ -59,8 +70,23 @@ export const useDecryptAuditableTx = () => {
         elgamal_signature: elGamalSignatureBase64,
       }
 
-      const data = await serverRequest('/audit-transaction', requestBody)
-      setAuditResult(data)
+      const { amount, mint } = await serverRequest<
+        typeof requestBody,
+        { amount: string; mint: string }
+      >('/audit-transaction', requestBody)
+
+      const mintInfo = await extractMintInfoByAddress(connection, mint)
+
+      // Calculate UI amount from lamports using mint decimals
+      const uiAmount = calculateUiAmount(amount, mintInfo.decimals)
+
+      const auditResult = {
+        mint,
+        amount,
+        uiAmount,
+      }
+
+      setAuditResult(auditResult)
 
       log.push({
         title: 'Audit Operation - COMPLETE',
@@ -68,7 +94,7 @@ export const useDecryptAuditableTx = () => {
         variant: 'success',
       })
 
-      return data
+      return auditResult
     } catch (error) {
       console.error('Audit failed:', error)
       log.push({
@@ -97,5 +123,83 @@ export const useDecryptAuditableTx = () => {
       setAuditResult(null)
       setError(null)
     },
+  }
+}
+
+// Helper function to calculate UI amount from lamports using mint decimals
+function calculateUiAmount(amountString: string, decimals: number): string {
+  try {
+    // Parse the amount as a BigInt to handle large numbers safely
+    const amountBigInt = BigInt(amountString)
+
+    if (!Number.isInteger(decimals)) {
+      throw new Error(`Invalid decimals: ${decimals}`)
+    }
+
+    // Calculate the divisor using 10^decimals (keeping BigInt for precision)
+    const divisor = BigInt(Math.pow(10, decimals))
+
+    // Perform integer division to get the whole part
+    const wholePart = amountBigInt / divisor
+
+    // Calculate the remainder for the fractional part
+    const remainder = amountBigInt % divisor
+
+    // If there's no fractional part, return just the whole number
+    if (remainder === BigInt(0)) {
+      return wholePart.toString()
+    }
+
+    // Convert remainder to string and pad with leading zeros to match decimal places
+    const remainderStr = remainder.toString().padStart(decimals, '0')
+
+    // Remove trailing zeros from the fractional part for cleaner display
+    const trimmedRemainder = remainderStr.replace(/0+$/, '')
+
+    // If all fractional digits were zeros, return just the whole part
+    if (trimmedRemainder === '') {
+      return wholePart.toString()
+    }
+
+    // Combine whole and fractional parts
+    return `${wholePart.toString()}.${trimmedRemainder}`
+  } catch (error) {
+    console.error('Error calculating UI amount:', error)
+
+    // Fallback
+    try {
+      const amount = parseFloat(amountString)
+      return (amount / Math.pow(10, decimals)).toString()
+    } catch (fallbackError) {
+      console.error('Fallback calculation also failed:', fallbackError)
+      return '-'
+    }
+  }
+}
+
+async function extractMintInfoByAddress(
+  connection: Connection,
+  mintAddress: string
+): Promise<MintInfo> {
+  try {
+    // Convert string address to PublicKey
+    const mintPublicKey = new PublicKey(mintAddress)
+
+    // Fetch as Token-2022 mint since we're dealing with confidential transfers
+    const mintInfo = await getMint(connection, mintPublicKey, 'confirmed', TOKEN_2022_PROGRAM_ID)
+
+    return {
+      address: mintPublicKey,
+      decimals: mintInfo.decimals,
+      supply: mintInfo.supply,
+      mintAuthority: mintInfo.mintAuthority,
+      freezeAuthority: mintInfo.freezeAuthority,
+      isInitialized: mintInfo.isInitialized,
+    }
+  } catch (error) {
+    console.error('Failed to fetch mint info:', error)
+    throw new Error(
+      `Failed to fetch mint information for address ${mintAddress}: ${error instanceof Error ? error.message : 'Unknown error'}`
+    )
   }
 }
