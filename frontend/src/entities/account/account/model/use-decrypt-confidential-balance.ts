@@ -7,6 +7,7 @@ import { PublicKey } from '@solana/web3.js'
 import { useDevMode } from '@/entities/dev-mode'
 import { useOperationLog } from '@/entities/operation-log'
 import { serverRequest } from '@/shared/api'
+import { calculateUiAmount } from '@/shared/solana'
 import { AES_SEED_MESSAGE } from './aes-seed-message'
 import { generateSeedSignature } from './generate-seed-signature'
 
@@ -65,10 +66,7 @@ export const useDecryptConfidentialBalance = () => {
       )
 
       // Convert lamports to UI amount using mint decimals
-      // HACK: Use uiAmount from spl-token instead.
-      const rawAmount = data.amount
-      const decimals = mintAccountData.decimals
-      const decryptedBalance = (parseInt(rawAmount) / Math.pow(10, decimals)).toString()
+      const decryptedBalance = calculateUiAmount(data.amount, mintAccountData.decimals)
 
       setConfidentialBalance(decryptedBalance)
 

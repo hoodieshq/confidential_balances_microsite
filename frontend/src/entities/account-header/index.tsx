@@ -1,24 +1,17 @@
 import { ComponentProps, FC } from 'react'
 import { Address } from '@solana-foundation/ms-tools-ui/components/address'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { PublicKey } from '@solana/web3.js'
-import {
-  useGetTokenBalance,
-  useNativeAndTokenBalance,
-  WalletTitle,
-} from '@/entities/account/account'
+import { PublicKey, TokenAmount } from '@solana/web3.js'
+import { useGetTokenBalance, WalletTitle } from '@/entities/account/account'
 import { CardBalance } from '@/shared/ui/card-balance'
 import { Text } from '@/shared/ui/text'
 import { cn } from '@/shared/utils'
+import { emptyNativeBalance, nativeToUiAmount } from '../account/account/model/native-to-ui-amount'
+import { useGetBalance } from '../account/account/model/use-get-balance'
 import { ExplorerLink } from '../cluster/cluster'
 
 type AccountHeaderParams = {
-  balance?: {
-    amount: string
-    decimals: number
-    uiAmount: number
-    uiAmountString: string
-  }
+  balance?: TokenAmount
   label?: string
   loading?: boolean
   isWallet?: boolean
@@ -48,11 +41,13 @@ export function WalletAccountHeader({
     wallet = new PublicKey(params.wallet)
   }
 
-  const { balance, loading } = useNativeAndTokenBalance(mint)
   let isCurrentWallet = false
   if (wallet) {
     isCurrentWallet = publicKey?.equals(wallet) ?? false
   }
+
+  const { isLoading: loading, data } = useGetBalance({ address: publicKey })
+  const balance = data ? nativeToUiAmount(data) : emptyNativeBalance()
 
   return (
     <AccountHeaderView
@@ -125,8 +120,8 @@ export const AccountHeaderView: FC<AccountHeaderViewParams & ComponentProps<'div
   walletAddress,
 }) => {
   return (
-    <div className={cn(className, 'mb-5')}>
-      <div className="flex flex-col items-baseline justify-between gap-4 sm:!flex-row sm:items-center">
+    <div className={cn(className, 'flex')}>
+      <div className="flex w-full flex-col items-baseline justify-between gap-4 sm:!flex-row sm:items-center">
         <div className="flex flex-col items-baseline gap-4 sm:flex-row">
           <Text variant="header1" as="p">
             {label ?? 'Wallet'}
@@ -152,7 +147,7 @@ export const AccountHeaderView: FC<AccountHeaderViewParams & ComponentProps<'div
           <CardBalance
             className="min-w-40"
             title={secondaryLabel ?? 'Wallet balance'}
-            balance={loading ? '...' : balance?.uiAmount}
+            balance={loading ? null : (balance?.uiAmount ?? emptyNativeBalance().uiAmount)}
             symbol={loading ? '' : symbol}
           />
         ) : undefined}

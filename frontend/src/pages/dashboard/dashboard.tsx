@@ -56,7 +56,7 @@ export const Dashboard: FC = () => {
       <WalletAccountHeader
         wallet={publicKey?.toString()}
         mint={NATIVE_MINT}
-        className="mt-12 mb-5"
+        className="mt-12 flex h-[62px]"
       />
       <TokenAccounts />
     </section>
