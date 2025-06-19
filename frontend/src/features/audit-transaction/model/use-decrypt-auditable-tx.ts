@@ -6,6 +6,7 @@ import { VersionedTransaction } from '@solana/web3.js'
 import bs58 from 'bs58'
 import { ELGAMAL_SEED_MESSAGE, generateSeedSignature } from '@/entities/account/account'
 import { useOperationLog } from '@/entities/operation-log'
+import { serverRequest } from '@/shared/api'
 import { useToast } from '@/shared/ui/toast'
 
 export const useDecryptAuditableTx = () => {
@@ -58,22 +59,7 @@ export const useDecryptAuditableTx = () => {
         elgamal_signature: elGamalSignatureBase64,
       }
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/audit-transaction`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestBody),
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}: ${await response.text()}`)
-      }
-
-      const data = await response.json()
+      const data = await serverRequest('/audit-transaction', requestBody)
       setAuditResult(data)
 
       log.push({
