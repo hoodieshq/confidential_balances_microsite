@@ -35,7 +35,7 @@ export const useWithdrawCB = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publ
   const log = useOperationLog()
 
   return useMutation({
-    mutationKey: queryKey(connection.rpcEndpoint, tokenAccountPubkey), //['withdraw-cb', { endpoint: connection.rpcEndpoint, tokenAccountPubkey }],
+    mutationKey: queryKey(connection.rpcEndpoint, tokenAccountPubkey),
     mutationFn: async ({ amount }: { amount: number }) => {
       try {
         if (!wallet.publicKey) {
@@ -99,9 +99,6 @@ export const useWithdrawCB = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publ
         console.log('Rent requirements:')
         console.log('- Equality proof rent:', equalityProofRent, 'lamports')
         console.log('- Range proof rent:', rangeProofRent, 'lamports')
-
-        // Add logging to debug
-        console.log('Submitting withdraw request with amount:', amount)
 
         // Step 3: Call the withdraw-cb endpoint with rent information
         console.log('Submitting withdraw request...')

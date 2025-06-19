@@ -120,7 +120,6 @@ export const useDepositCb = ({ tokenAccountPubkey }: { tokenAccountPubkey: Publi
         })
       }
 
-      // Log that we're going to invalidate the has-pending-balance query
       console.log('Invalidating has-pending-balance query after successful deposit')
 
       // Invalidate relevant queries to refresh data

@@ -39,9 +39,6 @@ export const useHasPendingBalance = ({ tokenAccountPubkey }: { tokenAccountPubke
             // Check if pendingBalanceCreditCounter is greater than 0
             const pendingCounter = ctExtension.state.pendingBalanceCreditCounter
 
-            // Log the pending counter value for debugging
-            console.log('Pending balance credit counter:', pendingCounter)
-
             if (typeof pendingCounter === 'number' && pendingCounter > 0) {
               console.log('Detected pending balance for account:', tokenAccountPubkey.toString())
               return true
