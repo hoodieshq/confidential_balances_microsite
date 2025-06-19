@@ -26,7 +26,7 @@ type AccountHeaderParams = {
 }
 
 type AccountOrMintHeaderParams = AccountHeaderParams &
-  ({ account: PublicKey } | { mint: PublicKey; wallet: string })
+  ({ account: PublicKey } | { mint: PublicKey; wallet?: string })
 
 export function WalletAccountHeader({
   className,
@@ -37,16 +37,22 @@ export function WalletAccountHeader({
   const { publicKey } = useWallet()
 
   let mint
-  let wallet
   if ('mint' in params) {
     mint = params.mint
-    wallet = new PublicKey(params.wallet)
   } else {
     throw new Error(`mint is absent`)
   }
 
+  let wallet
+  if ('wallet' in params && params.wallet) {
+    wallet = new PublicKey(params.wallet)
+  }
+
   const { balance, loading } = useNativeAndTokenBalance(mint)
-  const isCurrentWallet = publicKey?.equals(wallet)
+  let isCurrentWallet = false
+  if (wallet) {
+    isCurrentWallet = publicKey?.equals(wallet) ?? false
+  }
 
   return (
     <AccountHeaderView
